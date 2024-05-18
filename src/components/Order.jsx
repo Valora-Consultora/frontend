@@ -243,15 +243,15 @@ function Order() {
                 className="flex flex-col items-center justify-center w-full space-y-4"
             >
                 <div className="flex space-x-4 w-full justify-center ">
-                    <div className="p-4 bg-white shadow-md rounded-md w-full max-w-3xl">
-                        <h4 className="text-2xl font-bold mb-3 text-center">
+                    <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4   p-4  w-full max-w-3xl">
+                        <h4 className="text-center text-2xl font-bold mb-6 text-black">
                             Orden de Tasación
                         </h4>
                         <div className="">
                             <div className="mb-2 flex items-center">
                                 <label
                                     htmlFor="fechaCreacion"
-                                    className="block text-gray-700 w-2/12 font-bold"
+                                    className="text-sm mb-2   block text-gray-700 w-2/12 font-bold"
                                 >
                                     Fecha :
                                 </label>
@@ -260,11 +260,12 @@ function Order() {
                                     id="fechaCreacion"
                                     name="fechaCreacion"
                                     onChange={handleInputChange}
-                                    className="w-4/12 px-2 py-1 mr-1 border rounded-md text-gray-700 focus:outline-none focus:shadow-outline"
+                                    className=" shadow appearance-none rounded  py-2 px-3  leading-tight focus:shadow-outline
+                                    w-4/12  mr-1 border  text-gray-700 focus:outline-none focus:shadow-outline"
                                 />
                                 <label
                                     htmlFor="banco"
-                                    className="ml-4 block text-gray-700 w-2/12 font-bold"
+                                    className="ml-4 text-sm mb-2   block text-gray-700 w-2/12 font-bold"
                                 >
                                     Banco :
                                 </label>
@@ -273,7 +274,11 @@ function Order() {
                                     name="banco"
                                     value={selectedBancoId}
                                     onChange={handleInputChange}
-                                    className="w-6/12 px-2 py-1 border rounded-md text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    className="
+                                    shadow appearance-none rounded  py-2 px-3  focus:shadow-outline
+                                    mr-1   focus:shadow-outline
+                                    
+                                    w-6/12 border  text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 >
                                     <option value="">Seleccione un banco</option>
                                     {bancos.map((banco) => (
