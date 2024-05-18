@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import "../css/OrderModule.css";
 import OrderService from "../api/OrderService";
 
 function Order() {
@@ -547,8 +546,8 @@ function Order() {
                     </div>
                 </div>
 
-                <div className="p-4 bg-white shadow-md rounded-md w-full max-w-4xl">
-                    <div className="flex space-x-4">
+                <div className="p-4 bg-white shadow-md rounded-md w-full max-w-screen-xl">
+                    <div className="flex space-x-28">
                         <div className="flex flex-col items-start">
                             <h4 className="text-center text-black text-2xl mb-7 font-medium">
                                 Tipo de Trabajo
@@ -557,13 +556,13 @@ function Order() {
                                 <div className="flex items-center justify-between">
                                     <label
                                         htmlFor="tasacion"
-                                        className="text-gray-800 text-lg font-medium"
+                                        className="block text-gray-700 font-bold"
                                     >
                                         Tasación
                                     </label>
                                     <input
                                         type="checkbox"
-                                        className="form-checkbox"
+                                        className="form-checkbox h-3 w-5 text-indigo-600"
                                         id="tasacion"
                                         name="tasacion"
                                         onChange={handleInputChange}
@@ -572,13 +571,13 @@ function Order() {
                                 <div className="flex items-center justify-between">
                                     <label
                                         htmlFor="retasacion"
-                                        className="text-gray-800 text-lg font-medium"
+                                        className="block text-gray-700 font-bold"
                                     >
                                         Retasación
                                     </label>
                                     <input
                                         type="checkbox"
-                                        className="form-checkbox"
+                                        className="form-checkbox h-3 w-5 text-indigo-600"
                                         id="retasacion"
                                         name="retasacion"
                                         onChange={handleInputChange}
@@ -595,39 +594,148 @@ function Order() {
                                 <div className="flex items-center justify-between">
                                     <label
                                         htmlFor="enInspeccion"
-                                        className="text-gray-800 text-lg font-medium"
+                                        className="block text-gray-700 font-bold"
                                     >
                                         En Inspección
                                     </label>
                                     <input
                                         type="checkbox"
-                                        className="form-checkbox"
-                                        id="enInspeccion" 
+                                        className="form-checkbox h-3 w-5 text-indigo-600"
+                                        id="enInspeccion"
                                         name="enInspeccion"
                                         onChange={handleInputChange}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <label
-                                        htmlFor="estudio"
-                                        className="text-gray-800 text-lg font-medium"
+                                        htmlFor="enEstudio"
+                                        className="block text-gray-700 font-bold"
                                     >
                                         En Estudio
                                     </label>
                                     <input
                                         type="checkbox"
-                                        className="form-checkbox"
-                                        id="enEstudio" 
+                                        className="form-checkbox h-3 w-5 text-indigo-600"
+                                        id="enEstudio"
                                         name="enEstudio"
                                         onChange={handleInputChange}
                                     />
                                 </div>
                             </div>
                         </div>
+
+                        <div className="flex flex-col items-start">
+                            <h4 className="text-center text-black text-2xl mb-7 font-medium">
+                                Antecedentes
+                            </h4>
+                            <div className="flex flex-col space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="fechaAntecedente"
+                                        className="block text-gray-700 w-3/12 font-bold"
+                                    >
+                                        Fecha
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        id="fechaAntecedente"
+                                        name="fechaAntecedente"
+                                        onChange={handleInputChange}
+                                        className="w-8/12 px-2 py-1 mr-1 border rounded-md text-gray-700 focus:outline-none focus:shadow-outline"
+                                    />
+
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="tasadorAntecedenteId"
+                                        className="block text-gray-700 w-4/12 font-bold"
+                                    >
+                                        Tasador
+                                    </label>
+                                    <select
+                                        className="w-8/12 px-2 py-1 mr-1 border rounded-md text-gray-700 focus:outline-none focus:shadow-outline"
+                                        id="tasadorAntecedenteId"
+                                        name="tasadorAntecedenteId"
+                                        value={selectedTasadorAntecedenteId}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="">Tasador</option>
+                                        {tasadorAntecedentes.map((tasador) => (
+                                            <option key={tasador.id} value={tasador.id}>
+                                                {tasador.nombre}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div className="flex flex-col items-start">
+                            <h4 className="text-center text-black text-2xl mb-7 font-medium">
+                                Sucursal - Oficial
+                            </h4>
+                            <div className="flex flex-col space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="oficialBanco"
+                                        className="block text-gray-700 w-4/6 font-bold"
+                                    >
+                                        Oficial del Banco
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-5/6 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:shadow-outline" id="oficialBanco"
+                                        name="oficialBanco"
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="sucursal"
+                                        className="block text-gray-700 w-4/6 font-bold"
+                                    >
+                                        Sucursal
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="sucursal"
+                                        name="sucursal"
+                                        onChange={handleInputChange}
+                                        className="w-5/6 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:shadow-outline"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
 
+                <div className="p-4 bg-white shadow-md rounded-md w-full max-w-screen-xl">
+                    <div className="flex flex-col space-y-4">
+                        <h4 className="text-center text-black text-2xl mb-7 font-medium">
+                            Observaciones
+                        </h4>
+                        <textarea
+                            className="w-full h-48 p-4 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 resize-none"
+                            placeholder="Escriba sus observaciones aquí..."
+                            id="observacion"
+                            name="observacion"
+                            onChange={handleInputChange}
+                        ></textarea>
+                    </div>
+                </div>
 
+                <div className="flex items-center justify-center">
+                    <button
+                        type="button"
+                        className=" bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    >
+                        Crear Orden
+                    </button>
+                </div>
             </form>
         </div>
 
