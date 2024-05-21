@@ -11,35 +11,36 @@ import Prueba from './components/prueba.jsx';
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-
 const WithHeader = ({ children }) => (
   <>
     <Header />
-    {children}
+    <div className="content">
+      {children}
+    </div>
   </>
 );
 
 const WithHeaderLogin = ({ children }) => (
   <>
     <HeaderLogin />
-    {children}
+    <div className="content">
+      {children}
+    </div>
   </>
 );
 
 function App() {
   return (
     <Router>
-      <div>
+      <div className="app-container">
         <Routes>
-          {/* La ruta de Login está envuelta con el componente WithHeaderLogin */}
           <Route path="/" element={<WithHeaderLogin><Login /></WithHeaderLogin>} />
-          {/* La ruta de SignUp está envuelta con el componente WithHeader */}
           <Route path="/RegistroUsuarios" element={<WithHeader><SignUp /></WithHeader>} />
           <Route path="/Orden" element={<WithHeader><Order /></WithHeader>} />
           <Route path="/Inspeccion" element={<WithHeader><Inspeccion /></WithHeader>} />
           <Route path="/Prueba" element={<WithHeader><Prueba /></WithHeader>} />
         </Routes>
-        <Footer />
+        <Footer className="text-center bg-gray-200 py-4"/>
       </div>
     </Router>
   );
