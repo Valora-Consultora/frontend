@@ -7,9 +7,9 @@ import Footer from "./components/fragments/footer/Footer.jsx";
 import HeaderLogin from "./components/fragments/header/HeaderLogin.jsx";
 import Order from "./components/Order.jsx";
 import Inspeccion from "./components/Inspeccion.jsx";
-
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from './components/Home.jsx';
+
 
 const WithHeader = ({ children }) => (
   <>

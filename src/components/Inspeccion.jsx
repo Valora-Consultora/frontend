@@ -4,7 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 
-
 function Inspeccion() {
 
 
@@ -247,8 +246,155 @@ function Inspeccion() {
                                         onChange={handleInputChange}
                                         className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                     />
+                                    <label
+                                        htmlFor="calle"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Calle:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="calle"
+                                        name="calle"
+                                        onChange={handleInputChange}
+                                        className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+                                    <label
+                                        htmlFor="nro"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Nro:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="nro"
+                                        name="nro"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="unidad"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Unidad:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="unidad"
+                                        name="unidad"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="piso"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Piso:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="piso"
+                                        name="piso"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="piso"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Piso:
+                                    </label>
+                                    <input
+                                        type="checkbox"
+                                        id="piso"
+                                        name="piso"
+                                        onChange={handleInputChange}
+                                        className="form-checkbox h-4 w-4 text-green-900 col-span-1 mt-1"
+                                    />
+
+                                    <label
+                                        htmlFor="entreCalles"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Entre calles:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="entreCalles"
+                                        name="entreCalles"
+                                        onChange={handleInputChange}
+                                        className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="esquina"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Esquina:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="esquina"
+                                        name="esquina"
+                                        onChange={handleInputChange}
+                                        className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
                                 </div>
                             </div>
+
+                            <div className="col-span-12 border p-3 rounded space-y-4">
+                                <h4 className="text-xl text-green-900">Zona</h4>
+                                <div className="grid grid-cols-10 md:grid-cols-10 gap-4">
+                                    <div className="col-span-2 bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Clasificación</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="urbanoZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                            Urbano:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="urbanoZona"
+                                                name="urbanoZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="suburbanoZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                            Suburbano:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="suburbanoZona"
+                                                name="suburbanoZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    
+
+                                    
+
+                                    
+                                </div>
+                                
+                                
+                                
+                            </div>
+
+
                         </div>
                     </div>
                 </form>
@@ -258,70 +404,7 @@ function Inspeccion() {
 
             ,{/* 
 
-            
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="padron" style={{ width: '60px' }}>Padron :</label>
-                                            <input type="number" className="form-control" style={{ width: '60px' }} />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="calle" style={{ width: '130px' }}>Calle :</label>
-                                            <input type="text" className="form-control" style={{ width: '350px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="nro" style={{ width: '80px' }}>Nro :</label>
-                                            <input type="number" className="form-control" style={{ width: '80px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="unidad" style={{ width: '80px' }}>Unidad :</label>
-                                            <input type="number" className="form-control" style={{ width: '80px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="piso" style={{ width: '80px' }}>Piso :</label>
-                                            <input type="number" className="form-control" style={{ width: '80px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col d-flex justify-content-center">
-                                        <div className="form-check p-1 d-flex align-items-center">
-                                            <label htmlFor="garage" className="form-check-label" style={{ width: '90px' }}>Garage :</label>
-                                            <input type="checkbox" className="form-check-input" id="garage" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-6">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="entreCalles" style={{ width: '130px' }}>Entre las Calle :</label>
-                                            <input type="text" className="form-control" style={{ width: '450px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col-6">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="esquina" style={{ width: '130px' }}>Esquina :</label>
-                                            <input type="text" className="form-control" style={{ width: '450px' }} />
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
+        
             <div className="row justify-content-end mt-3">
                 <div className="col" >
                     <h4 className="text-center mb-2">Zona</h4>
