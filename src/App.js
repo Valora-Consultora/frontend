@@ -10,6 +10,7 @@ import Inspeccion from './components/Inspeccion.jsx';
 import Prueba from './components/prueba.jsx';
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from './components/Home.jsx';
 
 const WithHeader = ({ children }) => (
   <>
@@ -35,6 +36,7 @@ function App() {
       <div className="app-container">
         <Routes>
           <Route path="/" element={<WithHeaderLogin><Login /></WithHeaderLogin>} />
+          <Route path="/Home" element={<WithHeader><Home /></WithHeader>} />
           <Route path="/RegistroUsuarios" element={<WithHeader><SignUp /></WithHeader>} />
           <Route path="/Orden" element={<WithHeader><Order /></WithHeader>} />
           <Route path="/Inspeccion" element={<WithHeader><Inspeccion /></WithHeader>} />
