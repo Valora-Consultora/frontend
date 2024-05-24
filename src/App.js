@@ -1,15 +1,14 @@
-import logo from "./logo.svg";
-import "./App.css";
-import Login from "./components/Login";
-import SignUp from "./components/SignUp.jsx";
-import Header from "./components/fragments/header/Header.jsx";
-import Footer from "./components/fragments/footer/Footer.jsx";
-import HeaderLogin from "./components/fragments/header/HeaderLogin.jsx";
-import Order from "./components/Order.jsx";
-import Inspeccion from "./components/Inspeccion.jsx";
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Home from './components/Home.jsx';
-
+import { ThemeProvider } from "@material-tailwind/react";
+import Login from "./components/Login";
+import SignUp from "./components/SignUp";
+import Header from "./components/fragments/header/Header";
+import Footer from "./components/fragments/footer/Footer";
+import HeaderLogin from "./components/fragments/header/HeaderLogin";
+import Order from "./components/Order";
+import Inspeccion from "./components/Inspeccion";
+import Home from './components/Home';
 
 const WithHeader = ({ children }) => (
   <>
@@ -27,9 +26,9 @@ const WithHeaderLogin = ({ children }) => (
 
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <Router>
-        <div className="">
+        <div className="bg-gray-100">
           <Routes>
             <Route
               path="/"
@@ -51,7 +50,7 @@ function App() {
               path="/Home" 
               element={
                 <WithHeader>
-                <Home />
+                  <Home />
                 </WithHeader>
               } 
             />
@@ -71,12 +70,11 @@ function App() {
                 </WithHeader>
               }
             />
-            
           </Routes>
         </div>
+        <Footer className="text-center bg-gray-200" />
       </Router>
-      <Footer className="text-center bg-gray-200" />
-    </>
+    </ThemeProvider>
   );
 }
 

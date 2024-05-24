@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../css/InspeccionModule.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Checkbox } from "@material-tailwind/react";
 
 
 
@@ -116,6 +117,7 @@ function Inspeccion() {
     return (
 
         <>
+
 
             <div className="bg-gray-100">
                 <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10">
@@ -356,7 +358,7 @@ function Inspeccion() {
                                                 htmlFor="urbanoZona"
                                                 className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                            Urbano:
+                                                Urbano:
                                             </label>
                                             <input
                                                 type="checkbox"
@@ -371,7 +373,7 @@ function Inspeccion() {
                                                 htmlFor="suburbanoZona"
                                                 className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                            Suburbano:
+                                                Suburbano:
                                             </label>
                                             <input
                                                 type="checkbox"
@@ -380,18 +382,21 @@ function Inspeccion() {
                                                 onChange={handleInputChange}
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                             />
+
+                                           
                                         </div>
+
                                     </div>
 
-                                    
 
-                                    
 
-                                    
+
+
+
                                 </div>
-                                
-                                
-                                
+
+
+
                             </div>
 
 
