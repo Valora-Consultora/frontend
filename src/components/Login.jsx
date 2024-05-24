@@ -18,8 +18,10 @@ function Login() {
 
       if (response) {
         localStorage.setItem("username", response.username);
+        localStorage.setItem("nombre", response.nombre);
+        localStorage.setItem("tipo", response.tipoUsuario);
         localStorage.setItem("id", response.id);
-        window.location.href = "/Inspeccion";
+        window.location.href = "/Home";
       }
     } catch (error) {
       console.error("Error al crear usuario:", error);
@@ -32,7 +34,7 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
       <div className="w-full max-w-md">
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <h2 className="text-center text-2xl font-bold mb-6 text-black">
+          <h2 className="text-center text-2xl font-semibold mb-6 text-green-900">
             Iniciar Sesión
           </h2>
           <form onSubmit={submitHandler}>
@@ -46,7 +48,7 @@ function Login() {
               <input
                 type="text"
                 id="username"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 value={info.username}
                 onChange={(e) => setInfo({ ...info, username: e.target.value })}
               />
@@ -61,7 +63,7 @@ function Login() {
               <input
                 type="password"
                 id="password"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                className="appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
                 value={info.password}
                 onChange={(e) => setInfo({ ...info, password: e.target.value })}
               />
@@ -69,7 +71,7 @@ function Login() {
             <div className="flex items-center justify-center">
               <button
                 type="submit"
-                className="w-1/3 bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="w-full bg-green-900 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Login
               </button>
