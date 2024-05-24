@@ -246,7 +246,7 @@ function Order() {
         <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
           <div className="grid grid-cols-12 gap-4">
             {/* Orden de Tasación - 7 columns */}
-            <div className="col-span-7 space-y-4 border p-3 rounded">
+            <div className="col-span-8 space-y-4 border p-3 rounded">
               <h4 className="text-xl text-green-900">Orden de Tasación</h4>
               <div className="grid grid-cols-12 gap-4 items-center">
                 <label
@@ -356,12 +356,12 @@ function Order() {
               </div>
             </div>
             {/* Inspección - 5 columns */}
-            <div className="col-span-5 border p-3 rounded">
+            <div className="col-span-4 border p-3 rounded">
               <h4 className="mb-3 text-xl text-green-900">Inspección</h4>
               <div className="grid grid-cols-12 gap-4 items-center">
                 <label
                   htmlFor="tasadorInspeccion"
-                  className="col-span-3 text-sm text-gray-700 font-bold"
+                  className="col-span-2 text-sm text-gray-700 font-bold"
                 >
                   Tasador:
                 </label>
@@ -380,33 +380,37 @@ function Order() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-6 gap-4 items-center mt-4">
-                <label
-                  htmlFor="fechaInspeccion"
-                  className="col-span-3 text-sm text-gray-700 font-bold"
-                >
-                  Fecha:
-                </label>
-                <input
-                  type="date"
-                  className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900  text-center"
-                  id="fechaInspeccion"
-                  name="fechaInspeccion"
-                  onChange={handleInputChange}
-                />
-                <label
-                  htmlFor="horaInspeccion"
-                  className="col-span-3 text-sm text-gray-700 font-bold"
-                >
-                  Hora:
-                </label>
-                <input
-                  type="time"
-                  className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
-                  id="horaInspeccion"
-                  name="horaInspeccion"
-                  onChange={handleInputChange}
-                />
+              <div className="grid grid-cols-1 gap-4 items-center mt-4">
+                <div className="grid grid-cols-6 gap-4 items-center">
+                  <label
+                    htmlFor="fechaInspeccion"
+                    className="col-span-1 text-sm text-gray-700 font-bold"
+                  >
+                    Fecha:
+                  </label>
+                  <input
+                    type="date"
+                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
+                    id="fechaInspeccion"
+                    name="fechaInspeccion"
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="grid grid-cols-6 gap-4 items-center">
+                  <label
+                    htmlFor="horaInspeccion"
+                    className="col-span-1 text-sm text-gray-700 font-bold"
+                  >
+                    Hora:
+                  </label>
+                  <input
+                    type="time"
+                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
+                    id="horaInspeccion"
+                    name="horaInspeccion"
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -722,10 +726,10 @@ function Order() {
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-4 flex justify-center">
             <button
               type="submit"
-              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-full"
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
             >
               Crear Orden
             </button>

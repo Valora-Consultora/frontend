@@ -116,79 +116,149 @@ function Inspeccion() {
 
     return (
 
-        <div className="container-fluid fondoInspeccion">
-            <h2 className="text-center mb-4 tw-text-green-800">Inspección</h2>
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="card fondoIntroInspeccion">
-                        <div className="card-body">
-                            <form onSubmit={submitHandler}>
-                                <div className="row">
-                                    <div className="col">
-                                        <div className="d-flex flex-column">
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="avalador" style={{ width: '80px' }}>Avaluador:</label>
-                                                <input type="text" className="form-control" placeholder="" style={{ width: '250px' }} />
-                                            </div>
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="banco" style={{ width: '80px' }}>Banco:</label>
-                                                <select className="form-control" id="banco" name="banco" style={{ width: '250px' }}>
-                                                    <option value="">Seleccione un banco</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="d-flex flex-column">
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="fechaAvalador" style={{ width: '80px' }}>Fecha:</label>
-                                                <input type="date" className="form-control" style={{ width: '250px' }} />
-                                            </div>
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="solicitante" style={{ width: '80px' }}>Solicitante:</label>
-                                                <input type="text" className="form-control" style={{ width: '250px' }} />
-                                            </div>
-                                        </div>
-                                    </div>
+        <>
+
+            <div className="bg-gray-100">
+                <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10">
+                    CREAR INSPECCIÓN
+                </h2>
+                <form onSubmit={submitHandler} className="space-y-6">
+                    <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
+                        <div className="grid grid-cols-12 gap-4">
+                            <div className="col-span-12 space-y-4 border p-3 rounded">
+                                <div className="grid grid-cols-12 gap-4 items-center">
+                                    <label
+                                        htmlFor="avalador"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Avaluador:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="avaluador"
+                                        name="avaluador"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+                                    <label
+                                        htmlFor="fechaAvalador"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Fecha:
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="fechaAvalador"
+                                        name="fechaAvalador"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
+                                    />
+                                    <label
+                                        htmlFor="banco"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Banco:
+                                    </label>
+                                    <select
+                                        id="banco"
+                                        name="banco"
+                                        //value={selectedBancoId}
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                    >
+                                        <option value="">Banco</option>
+                                    </select>
+
+                                    <label
+                                        htmlFor="solicitante"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Solicitante:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="solicitante"
+                                        name="solicitante"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
                                 </div>
-                            </form>
+
+                            </div>
+                            <div className="col-span-12 space-y-4 border p-3 rounded">
+                                <h4 className="text-xl text-green-900">Ubicación</h4>
+                                <div className="grid grid-cols-12 gap-4 items-center">
+
+                                    <label
+                                        htmlFor="departamento"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Depto:
+                                    </label>
+                                    <select
+                                        id="departamento"
+                                        name="departamento"
+                                        //value={selectedBancoId}
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                    >
+                                        <option value="">Departamento</option>
+                                    </select>
+
+                                    <label
+                                        htmlFor="localidad"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Localidad:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="localidad"
+                                        name="localidad"
+                                        onChange={handleInputChange}
+                                        className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="secJudicial"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Sec. Jud.:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="secJudicial"
+                                        name="secJudicial"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="padron"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Padron:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="padron"
+                                        name="padron"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
 
-            <div className="row justify-content-end mt-3">
-                <div className="col" >
-                    <h4 className="text-center mb-2">Ubicación</h4>
-                </div>
-            </div>
 
-            <div className="row justify-content-center">
-                <div className="col-md-11">
-                    <div className="card fondoIntroInspeccion">
-                        <div className="card-body">
-                            <form onSubmit={submitHandler}>
-                                <div className="row">
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="departamento" style={{ width: '130px' }}>Departamento :</label>
-                                            <select className="form-control" id="departamento" name="departamento" style={{ width: '350px' }}>
-                                                <option value="">Seleccione un departamento</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="localidad" style={{ width: '80px' }}>Localidad :</label>
-                                            <input type="text" className="form-control" style={{ width: '350px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="secJudicial" style={{ width: '80px' }}>Sec. Jud. :</label>
-                                            <input type="text" className="form-control" style={{ width: '110px' }} />
-                                        </div>
-                                    </div>
+
+            ,{/* 
+
+            
                                     <div className="col">
                                         <div className="form-group p-1 d-flex align-items-center">
                                             <label htmlFor="padron" style={{ width: '60px' }}>Padron :</label>
@@ -1084,10 +1154,10 @@ function Inspeccion() {
 
 
 
-        </div>
+        </div> */}
 
 
-
+        </>
     );
 }
 

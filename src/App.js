@@ -7,7 +7,6 @@ import Footer from "./components/fragments/footer/Footer.jsx";
 import HeaderLogin from "./components/fragments/header/HeaderLogin.jsx";
 import Order from "./components/Order.jsx";
 import Inspeccion from "./components/Inspeccion.jsx";
-import Prueba from "./components/prueba.jsx";
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from './components/Home.jsx';
@@ -72,14 +71,7 @@ function App() {
                 </WithHeader>
               }
             />
-            <Route
-              path="/Prueba"
-              element={
-                <WithHeader>
-                  <Prueba />
-                </WithHeader>
-              }
-            />
+            
           </Routes>
         </div>
       </Router>
