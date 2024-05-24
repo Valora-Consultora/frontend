@@ -2,8 +2,12 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white text-center py-2 fixed bottom-0 w-screen">
-      Valora Consultora App
+    <footer className="bg-green-900 w-screen h-12">
+      <div className="flex flex-row justify-left items-center h-full">
+        <span>
+        <p className="text-white text-sm ml-3 mt-2">© 2024 Valora Consultora</p>
+        </span>
+      </div>
     </footer>
   );
 };
