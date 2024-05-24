@@ -383,7 +383,7 @@ function Inspeccion() {
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                             />
 
-                                           
+
                                         </div>
 
                                     </div>
@@ -403,6 +403,7 @@ function Inspeccion() {
                         </div>
                     </div>
                 </form>
+
             </div>
 
 
