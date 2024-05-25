@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import "../css/InspeccionModule.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Checkbox } from "@material-tailwind/react";
 
@@ -971,75 +970,75 @@ function Inspeccion() {
                                         <h6 className="text-lg text-green-900">Carpinteria</h6>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
-                                                htmlFor="modestaCerramientos"
-                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                                htmlFor="comunCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                                Modesta:
+                                                Común:
                                             </label>
                                             <input
                                                 type="checkbox"
-                                                id="modestaCerramientos"
-                                                name="modestaCerramientos"
+                                                id="comunCerramientos"
+                                                name="comunCerramientos"
                                                 onChange={handleInputChange}
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                             />
                                         </div>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
-                                                htmlFor="economicaCerramientos"
-                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                                htmlFor="aluminioCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                                Economica:
+                                                Aluminio :
                                             </label>
                                             <input
                                                 type="checkbox"
-                                                id="economicaCerramientos"
-                                                name="economicaCerramientos"
+                                                id="aluminioCerramientos"
+                                                name="aluminioCerramientos"
                                                 onChange={handleInputChange}
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                             />
                                         </div>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
-                                                htmlFor="buenaCerramientos"
-                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                                htmlFor="pvcCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                                Buena:
+                                                P.V.C.:
                                             </label>
                                             <input
                                                 type="checkbox"
-                                                id="buenaCerramientos"
-                                                name="buenaCerramientos"
+                                                id="pvcCerramientos"
+                                                name="pvcCerramientos"
                                                 onChange={handleInputChange}
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                             />
                                         </div>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
-                                                htmlFor="confortableCerramientos"
-                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                                htmlFor="maderaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                                Confortable:
+                                                Madera:
                                             </label>
                                             <input
                                                 type="checkbox"
-                                                id="confortableCerramientos"
-                                                name="confortableCerramientos"
+                                                id="maderaCerramientos"
+                                                name="maderaCerramientos"
                                                 onChange={handleInputChange}
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                             />
                                         </div>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
-                                                htmlFor="muyConfortableCerramientos"
-                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                                htmlFor="otrosCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                             >
-                                                Muy Confortable:
+                                                Otros:
                                             </label>
                                             <input
                                                 type="checkbox"
-                                                id="muyConfortableCerramientos"
-                                                name="muyConfortableCerramientos"
+                                                id="otrosCerramientos"
+                                                name="otrosCerramientos"
                                                 onChange={handleInputChange}
                                                 className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                             />
@@ -1384,6 +1383,379 @@ function Inspeccion() {
                                 </div>
                             </div>
 
+                            <div className="col-span-12 border p-3 rounded space-y-4">
+                                <h4 className="text-xl text-green-900">Consideraciones Generales</h4>
+                                <div className="columns-5 gap-4">
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Categoria</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="modestaConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Modesta:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="modestaConsideraciones"
+                                                name="modestaConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="economicaConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Económica:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="economicaConsideraciones"
+                                                name="economicaConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="buenaConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Buena:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="buenaConsideraciones"
+                                                name="buenaConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="confortableConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Confortable:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="confortableConsideraciones"
+                                                name="confortableConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="muyConfortableConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Muy Confortable:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="muyConfortableConsideraciones"
+                                                name="muyConfortableConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Conservacion</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="maloConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Malo:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="maloConsideraciones"
+                                                name="maloConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="regularConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Regular:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="regularConsideraciones"
+                                                name="regularConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="buenoConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Bueno:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="buenoConsideraciones"
+                                                name="buenoConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="muybuenoConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Muy Bueno:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="muybuenoConsideraciones"
+                                                name="muybuenoConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="nuevoConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Nuevo:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="nuevoConsideraciones"
+                                                name="nuevoConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Ocupación Actual</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="propietarioConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Propietario:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="propietarioConsideraciones"
+                                                name="propietarioConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="alquiladaConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Alquilada:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="alquiladaConsideraciones"
+                                                name="alquiladaConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="desocupadaConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Desocupada:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="desocupadaConsideraciones"
+                                                name="desocupadaConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="edadConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-12"
+                                            >
+                                                Edad:
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="edadConsideraciones"
+                                                name="edadConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
+                                            />
+                                        </div>
+
+
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Tipo</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="casaConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Casa:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="casaConsideraciones"
+                                                name="casaConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="casaPhConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Casa  PH:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="casaPhConsideraciones"
+                                                name="casaPhConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="apartamentoConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Apartamento:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="apartamentoConsideraciones"
+                                                name="apartamentoConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="localComercialConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Local Comercial:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="localComercialConsideraciones"
+                                                name="localComercialConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="otrosConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Otros:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="otrosConsideraciones"
+                                                name="otrosConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Edificio</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="cantIdadPisosConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                CantIdad Pisos:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="cantIdadPisosConsideraciones"
+                                                name="cantIdadPisosConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="aptosPisoConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Aptos/Piso:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="aptosPisoConsideraciones"
+                                                name="aptosPisoConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="ascensoresConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Ascensores:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="ascensoresConsideraciones"
+                                                name="ascensoresConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="portElectConsideraciones"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-28"
+                                            >
+                                                Port. Eléct.:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="portElectConsideraciones"
+                                                name="portElectConsideraciones"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
 
                         </div>
                     </div>
