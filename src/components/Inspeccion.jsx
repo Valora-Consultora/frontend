@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "../css/InspeccionModule.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import { Checkbox } from "@material-tailwind/react";
 
 
 
@@ -116,176 +116,864 @@ function Inspeccion() {
 
     return (
 
-        <div className="container-fluid fondoInspeccion">
-            <h2 className="text-center mb-4 tw-text-green-800">Inspección</h2>
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="card fondoIntroInspeccion">
-                        <div className="card-body">
-                            <form onSubmit={submitHandler}>
-                                <div className="row">
-                                    <div className="col">
-                                        <div className="d-flex flex-column">
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="avalador" style={{ width: '80px' }}>Avaluador:</label>
-                                                <input type="text" className="form-control" placeholder="" style={{ width: '250px' }} />
-                                            </div>
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="banco" style={{ width: '80px' }}>Banco:</label>
-                                                <select className="form-control" id="banco" name="banco" style={{ width: '250px' }}>
-                                                    <option value="">Seleccione un banco</option>
-                                                </select>
-                                            </div>
+        <>
+
+
+            <div className="bg-gray-100">
+                <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10">
+                    CREAR INSPECCIÓN
+                </h2>
+                <form onSubmit={submitHandler} className="space-y-6">
+                    <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
+                        <div className="grid grid-cols-12 gap-4">
+                            <div className="col-span-12 space-y-4 border p-3 rounded">
+                                <div className="grid grid-cols-12 gap-4 items-center">
+                                    <label
+                                        htmlFor="avalador"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Avaluador:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="avaluador"
+                                        name="avaluador"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+                                    <label
+                                        htmlFor="fechaAvalador"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Fecha:
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="fechaAvalador"
+                                        name="fechaAvalador"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
+                                    />
+                                    <label
+                                        htmlFor="banco"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Banco:
+                                    </label>
+                                    <select
+                                        id="banco"
+                                        name="banco"
+                                        //value={selectedBancoId}
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                    >
+                                        <option value="">Banco</option>
+                                    </select>
+
+                                    <label
+                                        htmlFor="solicitante"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Solicitante:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="solicitante"
+                                        name="solicitante"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                </div>
+
+                            </div>
+                            <div className="col-span-12 space-y-4 border p-3 rounded">
+                                <h4 className="text-xl text-green-900">Ubicación</h4>
+                                <div className="grid grid-cols-12 gap-4 items-center">
+
+                                    <label
+                                        htmlFor="departamento"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Depto:
+                                    </label>
+                                    <select
+                                        id="departamento"
+                                        name="departamento"
+                                        //value={selectedBancoId}
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                    >
+                                        <option value="">Departamento</option>
+                                    </select>
+
+                                    <label
+                                        htmlFor="localidad"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Localidad:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="localidad"
+                                        name="localidad"
+                                        onChange={handleInputChange}
+                                        className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="secJudicial"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Sec. Jud.:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="secJudicial"
+                                        name="secJudicial"
+                                        onChange={handleInputChange}
+                                        className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="padron"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Padron:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="padron"
+                                        name="padron"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+                                    <label
+                                        htmlFor="calle"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Calle:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="calle"
+                                        name="calle"
+                                        onChange={handleInputChange}
+                                        className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+                                    <label
+                                        htmlFor="nro"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Nro:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="nro"
+                                        name="nro"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="unidad"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Unidad:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="unidad"
+                                        name="unidad"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="piso"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Piso:
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="piso"
+                                        name="piso"
+                                        onChange={handleInputChange}
+                                        className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="piso"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Piso:
+                                    </label>
+                                    <input
+                                        type="checkbox"
+                                        id="piso"
+                                        name="piso"
+                                        onChange={handleInputChange}
+                                        className="form-checkbox h-4 w-4 text-green-900 col-span-1 mt-1"
+                                    />
+
+                                    <label
+                                        htmlFor="entreCalles"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Entre calles:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="entreCalles"
+                                        name="entreCalles"
+                                        onChange={handleInputChange}
+                                        className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                    <label
+                                        htmlFor="esquina"
+                                        className="col-span-1 text-sm text-gray-700 font-bold"
+                                    >
+                                        Esquina:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="esquina"
+                                        name="esquina"
+                                        onChange={handleInputChange}
+                                        className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    />
+
+                                </div>
+                            </div>
+
+                            <div className="col-span-12 border p-3 rounded space-y-4">
+                                <h4 className="text-xl text-green-900">Zona</h4>
+                                <div className="columns-6 gap-4">
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Clasificación</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="urbanoZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Urbano:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="urbanoZona"
+                                                name="urbanoZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="suburbanoZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Suburbano:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="suburbanoZona"
+                                                name="suburbanoZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="ruralZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Rural:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="ruralZona"
+                                                name="ruralZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="balnearioZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Balneario:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="balnearioZona"
+                                                name="balnearioZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
                                         </div>
                                     </div>
-                                    <div className="col">
-                                        <div className="d-flex flex-column">
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="fechaAvalador" style={{ width: '80px' }}>Fecha:</label>
-                                                <input type="date" className="form-control" style={{ width: '250px' }} />
-                                            </div>
-                                            <div className="form-group p-1 d-flex align-items-center">
-                                                <label htmlFor="solicitante" style={{ width: '80px' }}>Solicitante:</label>
-                                                <input type="text" className="form-control" style={{ width: '250px' }} />
-                                            </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Caracteristicas</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="residencialZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Residencial:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="residencialZona"
+                                                name="residencialZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="comercialZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Comercial:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="comercialZona"
+                                                name="comercialZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="industrialZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Industrial:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="industrialZona"
+                                                name="industrialZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="otrosZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Otros:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="otrosZona"
+                                                name="otrosZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Edificación</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="suntuosaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Suntuosa:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="suntuosaZona"
+                                                name="suntuosaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="muyBuenaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Muy Buena:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="muyBuenaZona"
+                                                name="muyBuenaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="buenaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Buena:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="buenaZona"
+                                                name="buenaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="economicaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Económica:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="economicaZona"
+                                                name="economicaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="modestaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Modesta:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="modestaZona"
+                                                name="modestaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Densidad</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="compactaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Compacta:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="compactaZona"
+                                                name="compactaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="mediaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Media:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="mediaZona"
+                                                name="mediaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="pocoDensaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Poco Densa:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="pocoDensaZona"
+                                                name="pocoDensaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="ralaZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Rala:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="ralaZona"
+                                                name="ralaZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Pavimento</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="hormBituZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Horm./Bitu.:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="hormBituZona"
+                                                name="hormBituZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="balastroZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Balastro:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="balastroZona"
+                                                name="balastroZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Servicios</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="oseZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                OSE:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="oseZona"
+                                                name="oseZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="pozoZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Pozo:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="pozoZona"
+                                                name="pozoZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="colectorZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Colector:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="colectorZona"
+                                                name="colectorZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="uteZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                UTE:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="uteZona"
+                                                name="uteZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="antelZona"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Antel:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="antelZona"
+                                                name="antelZona"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
                                         </div>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
+
+                            <div className="col-span-12 border p-3 rounded space-y-4">
+                                <h4 className="text-xl text-green-900">Predio</h4>
+                                <div className="columns-6 gap-4">
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Topografia</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="altoPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Alto:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="altoPredio"
+                                                name="altoPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="aNivelPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                A Nivel:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="aNivelPredio"
+                                                name="aNivelPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="bajoPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Bajo:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="bajoPredio"
+                                                name="bajoPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Forma</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="irregularPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Irregular:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="irregularPredio"
+                                                name="irregularPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="regularPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Regular:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="regularPredio"
+                                                name="regularPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Ensanche</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="siPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Si:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="siPredio"
+                                                name="siPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="noPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                No:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="noPredio"
+                                                name="noPredio"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Retiro</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="siPredioRetiro"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Si:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="siPredioRetiro"
+                                                name="siPredioRetiro"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="noPredioRetiro"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                No:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="noPredioRetiro"
+                                                name="noPredioRetiro"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Orientación</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <input
+                                                type="text"
+                                                id="orientacionPredio"
+                                                name="orientacionPredio"
+                                                onChange={handleInputChange}
+                                                className="text-center rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-24"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Desline</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="frentePredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Frente:
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="frentePredio"
+                                                name="frentePredio"
+                                                onChange={handleInputChange}
+                                                className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
+                                            />
+                                              <span className="ml-2 text-gray-700">m</span>
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="fondoPredio"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Fondo:
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="fondoPredio"
+                                                name="fondoPredio"
+                                                onChange={handleInputChange}
+                                                className="text-center text-sm mt-2 rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
+                                            />
+                                              <span className="ml-2 text-gray-700">m</span>
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="supTotalPredio"
+                                                className="text-sm text-gray-700 font-bold mr-3 md:w-20"
+                                            >
+                                                S.Total:
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="supTotalPredio"
+                                                name="supTotalPredio"
+                                                onChange={handleInputChange}
+                                                className="text-center text-sm mt-2 rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
+                                            />
+                                              <span className="ml-2 text-gray-700">m<sup>2</sup></span>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                </div>
-            </div>
+                </form>
 
-            <div className="row justify-content-end mt-3">
-                <div className="col" >
-                    <h4 className="text-center mb-2">Ubicación</h4>
-                </div>
-            </div>
-
-            <div className="row justify-content-center">
-                <div className="col-md-11">
-                    <div className="card fondoIntroInspeccion">
-                        <div className="card-body">
-                            <form onSubmit={submitHandler}>
-                                <div className="row">
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="departamento" style={{ width: '130px' }}>Departamento :</label>
-                                            <select className="form-control" id="departamento" name="departamento" style={{ width: '350px' }}>
-                                                <option value="">Seleccione un departamento</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="localidad" style={{ width: '80px' }}>Localidad :</label>
-                                            <input type="text" className="form-control" style={{ width: '350px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="secJudicial" style={{ width: '80px' }}>Sec. Jud. :</label>
-                                            <input type="text" className="form-control" style={{ width: '110px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="padron" style={{ width: '60px' }}>Padron :</label>
-                                            <input type="number" className="form-control" style={{ width: '60px' }} />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="calle" style={{ width: '130px' }}>Calle :</label>
-                                            <input type="text" className="form-control" style={{ width: '350px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="nro" style={{ width: '80px' }}>Nro :</label>
-                                            <input type="number" className="form-control" style={{ width: '80px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="unidad" style={{ width: '80px' }}>Unidad :</label>
-                                            <input type="number" className="form-control" style={{ width: '80px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="piso" style={{ width: '80px' }}>Piso :</label>
-                                            <input type="number" className="form-control" style={{ width: '80px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col d-flex justify-content-center">
-                                        <div className="form-check p-1 d-flex align-items-center">
-                                            <label htmlFor="garage" className="form-check-label" style={{ width: '90px' }}>Garage :</label>
-                                            <input type="checkbox" className="form-check-input" id="garage" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-6">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="entreCalles" style={{ width: '130px' }}>Entre las Calle :</label>
-                                            <input type="text" className="form-control" style={{ width: '450px' }} />
-                                        </div>
-                                    </div>
-                                    <div className="col-6">
-                                        <div className="form-group p-1 d-flex align-items-center">
-                                            <label htmlFor="esquina" style={{ width: '130px' }}>Esquina :</label>
-                                            <input type="text" className="form-control" style={{ width: '450px' }} />
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
 
 
-            <div className="row justify-content-end mt-3">
-                <div className="col" >
-                    <h4 className="text-center mb-2">Zona</h4>
-                </div>
-            </div>
 
-            <div className="row justify-content-center mt-3">
-                <div className="col-md-11">
-                    <div className="card fondoIntroInspeccion">
-                        <div className="card-body">
-                            <form onSubmit={submitHandler}>
-                                <div className="row">
-                                    <div className="col-2">
-                                        <div className="col-12">
-                                            <h6 className="text-center mb-4">Clasificación</h6>
-                                        </div>
-                                        <div className="col d-flex justify-content-center">
-                                            <div className="form-check p-1 d-flex align-items-center">
-                                                <label htmlFor="urbano" className="form-check-label" style={{ width: '110px' }}>Urbano :</label>
-                                                <input type="checkbox" className="form-check-input" id="garage" />
-                                            </div>
-                                        </div>
-                                        <div className="col d-flex justify-content-center">
-                                            <div className="form-check p-1 d-flex align-items-center">
-                                                <label htmlFor="suburbano" className="form-check-label" style={{ width: '110px' }}>Suburbano :</label>
-                                                <input type="checkbox" className="form-check-input" id="garage" />
-                                            </div>
-                                        </div>
-                                        <div className="col d-flex justify-content-center">
-                                            <div className="form-check p-1 d-flex align-items-center">
-                                                <label htmlFor="suburbano" className="form-check-label" style={{ width: '110px' }}>Suburbano :</label>
-                                                <input type="checkbox" className="form-check-input" id="garage" />
-                                            </div>
-                                        </div>
+            ,{/* 
+
+                                    
                                         <div className="col d-flex justify-content-center">
                                             <div className="form-check p-1 d-flex align-items-center">
                                                 <label htmlFor="rural" className="form-check-label" style={{ width: '110px' }}>Rural :</label>
@@ -1084,10 +1772,10 @@ function Inspeccion() {
 
 
 
-        </div>
+        </div> */}
 
 
-
+        </>
     );
 }
 
