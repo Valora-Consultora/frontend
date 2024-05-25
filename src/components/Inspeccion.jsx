@@ -923,7 +923,7 @@ function Inspeccion() {
                                                 onChange={handleInputChange}
                                                 className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
-                                              <span className="ml-2 text-gray-700">m</span>
+                                            <span className="ml-2 text-gray-700">m</span>
                                         </div>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
@@ -939,7 +939,7 @@ function Inspeccion() {
                                                 onChange={handleInputChange}
                                                 className="text-center text-sm mt-2 rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
-                                              <span className="ml-2 text-gray-700">m</span>
+                                            <span className="ml-2 text-gray-700">m</span>
                                         </div>
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
@@ -955,13 +955,435 @@ function Inspeccion() {
                                                 onChange={handleInputChange}
                                                 className="text-center text-sm mt-2 rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
-                                              <span className="ml-2 text-gray-700">m<sup>2</sup></span>
+                                            <span className="ml-2 text-gray-700">m<sup>2</sup></span>
                                         </div>
                                     </div>
 
 
                                 </div>
                             </div>
+
+
+                            <div className="col-span-12 border p-3 rounded space-y-4">
+                                <h4 className="text-xl text-green-900">Cerramientos Instalaciones</h4>
+                                <div className="columns-6 gap-4">
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Carpinteria</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="modestaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Modesta:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="modestaCerramientos"
+                                                name="modestaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="economicaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Economica:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="economicaCerramientos"
+                                                name="economicaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="buenaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Buena:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="buenaCerramientos"
+                                                name="buenaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="confortableCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Confortable:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="confortableCerramientos"
+                                                name="confortableCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="muyConfortableCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Muy Confortable:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="muyConfortableCerramientos"
+                                                name="muyConfortableCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Cerramientos</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="cortinasCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Cortinas:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="cortinasCerramientos"
+                                                name="cortinasCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="postigosCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Postigos:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="postigosCerramientos"
+                                                name="postigosCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="celosíasCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Celosías:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="celosíasCerramientos"
+                                                name="celosíasCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="rejasCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Rejas:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="rejasCerramientos"
+                                                name="rejasCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="otrosCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Otros:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="otrosCerramientos"
+                                                name="otrosCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900">Inst. Agua</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="banoCalienteCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Baño Caliente:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="banoCalienteCerramientos"
+                                                name="banoCalienteCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="banoFriaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Baño Fria:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="banoFriaCerramientos"
+                                                name="banoFriaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="cocinaCalienteCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Cocina Caliente:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="cocinaCalienteCerramientos"
+                                                name="cocinaCalienteCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="cocinaFriaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-32"
+                                            >
+                                                Cocina Fría:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="cocinaFriaCerramientos"
+                                                name="cocinaFriaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900 ">Inst. Electricas</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="embutidaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Embutida:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="embutidaCerramientos"
+                                                name="embutidaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="exteriorCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Exterior:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="exteriorCerramientos"
+                                                name="exteriorCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="mixtaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Mixta:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="mixtaCerramientos"
+                                                name="mixtaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="instGasCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Inst. Gas.:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="instGasCerramientos"
+                                                name="instGasCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900 ">Inst. Sanit.</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="colectorCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-24"
+                                            >
+                                                Colector:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="colectorCerramientos"
+                                                name="colectorCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="camSepticaCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-24"
+                                            >
+                                                Cám.Séptica:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="camSepticaCerramientos"
+                                                name="camSepticaCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="pozoNegroCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-24"
+                                            >
+                                                Pozo Negro:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="pozoNegroCerramientos"
+                                                name="pozoNegroCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="break-inside-avoid bg-white p-1 rounded-md">
+                                        <h6 className="text-lg text-green-900 ">Inst. Term.</h6>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="losaRadianteCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Losa Rad.:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="losaRadianteCerramientos"
+                                                name="losaRadianteCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="radiadoresCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Radiadores:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="radiadoresCerramientos"
+                                                name="radiadoresCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="panelElectCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Panel Eléct.:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="panelElectCerramientos"
+                                                name="panelElectCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="aireAcondCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Aire acond.:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="aireAcondCerramientos"
+                                                name="aireAcondCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col md:flex-row md:items-center">
+                                            <label
+                                                htmlFor="otrosCerramientos"
+                                                className="text-sm text-gray-700 font-bold mr-2 md:w-20"
+                                            >
+                                                Otros:
+                                            </label>
+                                            <input
+                                                type="checkbox"
+                                                id="otrosCerramientos"
+                                                name="otrosCerramientos"
+                                                onChange={handleInputChange}
+                                                className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
 
                         </div>
                     </div>
