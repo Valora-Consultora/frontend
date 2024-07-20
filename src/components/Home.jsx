@@ -1,8 +1,39 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import InspeccionService from "../api/InspeccionService";
+import { useNavigate } from 'react-router-dom';
+import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
 
 const Home = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const nombre = localStorage.getItem("nombre");
   const tipo = localStorage.getItem("tipo");
+
+  const [inspeccion, setInspeccion] = useState({
+    avaluador: '',
+  });
+
+  const handleClick = async () => {
+    try {
+      console.log('ingresa en el create del home')
+      console.log('inspeccion ' + inspeccion.data)
+
+      const response = await InspeccionService.createInspeccion(inspeccion);
+      console.log('response ' + response)
+
+      if (response && response.id) {
+        const provisionalId = response.id;
+        dispatch(setProvisionalInspectionId(provisionalId));
+        navigate('/Inspeccion', { state: { provisionalId: provisionalId } });
+      } else {
+        throw new Error('Respuesta de creación de inspección inválida');
+      }
+    } catch (error) {
+      console.error('Error al crear la inspección:', error);
+    }
+  };
+
 
   return (
     <div>
@@ -38,7 +69,7 @@ const Home = () => {
                       Crear una nueva Orden en el sistema
                     </p>
                   </div>
-                  <a className="text-green-900 hover:underline" href="/Orden">
+                  <a className="text-green-900 no-underline hover:underline" href="/Orden">
                     Ir a Orden
                   </a>
                 </div>
@@ -72,12 +103,12 @@ const Home = () => {
                       Crea una nueva Inspección en el sistema
                     </p>
                   </div>
-                  <a
+                  <button
                     className="text-green-900 hover:underline"
-                    href="/Inspeccion"
+                    onClick={handleClick}
                   >
                     Ir a Inspección
-                  </a>
+                  </button>
                 </div>
               </div>
               <div className="bg-white rounded-lg shadow-md">
@@ -104,7 +135,7 @@ const Home = () => {
                       Genera reportes de inmuebles y otros
                     </p>
                   </div>
-                  <a className="text-green-900 hover:underline" href="/Home">
+                  <a className="text-green-900 no-underline hover:underline" href="/Home">
                     Ir a Reporte
                   </a>
                 </div>
@@ -129,11 +160,9 @@ const Home = () => {
                   </div>
                   <div className="text-center">
                     <h3 className="text-lg font-semibold">Descubrir</h3>
-                    <p className="text-gray-500">
-                      Explora alguna cosa que ni idea
-                    </p>
+                    <p className="text-gray-500">Explora alguna cosa que ni idea</p>
                   </div>
-                  <a className="text-green-900 hover:underline" href="/Home">
+                  <a className="text-green-900 no-underline hover:underline mt-4" href="/Home">
                     Ir a Descubrir
                   </a>
                 </div>
