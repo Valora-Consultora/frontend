@@ -39,6 +39,7 @@ const OrderService = {
   getBancoById: async (id) => {
     try {
       const response = await axios.get(`${API_URL}/api/banco/${parseInt(id)}`);
+      console.log('ingresa en getBancoById con el id ' + id )
       return response.data;
     } catch (error) {
       console.error('Error al obtener bancos:', error);

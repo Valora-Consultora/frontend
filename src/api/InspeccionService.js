@@ -25,6 +25,11 @@ const InspeccionService = {
 
     updateInspeccion: async (id, inspeccionData) => {
         try {
+
+            console.log('ingresa en el update de inspeccionService');
+            console.log('inspeccionData', inspeccionData);
+
+            
             const response = await axios.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
                 headers: {
                     'Content-Type': 'application/json'

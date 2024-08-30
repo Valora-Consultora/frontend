@@ -9,165 +9,55 @@ import 'react-toastify/dist/ReactToastify.css';
 import InspeccionService from "../api/InspeccionService";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
+import OrderService from '../api/OrderService';
 
 function Inspeccion() {
 
-    const [inspeccion, setInspeccion] = useState({
-        avaluador: '',
-        fechaAvalador: '',
-        banco: '',
-        solicitante: '',
-        departamento: '',
-        localidad: '',
-        secJudicial: '',
-        padron: '',
-        calle: '',
-        nro: '',
-        unidad: '',
-        piso: '',
-        entreCalles: '',
-        esquina: '',
-        urbanoZona: false,
-        suburbanoZona: false,
-        ruralZona: false,
-        balnearioZona: false,
-        residencialZona: false,
-        comercialZona: false,
-        industrialZona: false,
-        otrosZona: false,
-        suntuosaZona: false,
-        muyBuenaZona: false,
-        buenaZona: false,
-        economicaZona: false,
-        modestaZona: false,
-        compactaZona: false,
-        mediaZona: false,
-        pocoDensaZona: false,
-        ralaZona: false,
-        hormBituZona: false,
-        balastroZona: false,
-        oseZona: false,
-        pozoZona: false,
-        colectorZona: false,
-        uteZona: false,
-        antelZona: false,
-        altoPredio: false,
-        aNivelPredio: false,
-        bajoPredio: false,
-        irregularPredio: false,
-        regularPredio: false,
-        siPredio: false,
-        noPredio: false,
-        siPredioRetiro: false,
-        noPredioRetiro: false,
-        orientacionPredio: '',
-        frentePredio: '',
-        fondoPredio: '',
-        supTotalPredio: '',
-        estructuraHarmado: false,
-        estructuraMuroPort: false,
-        estructuraMixta: false,
-        estructuraMetalicos: false,
-        estructuraOtros: false,
-        estructuraAno: '',
-        cubiertaHarmado: false,
-        cubiertaLiviana: false,
-        cubiertaCcielorraso: false,
-        cubiertaBovedilla: false,
-        cubiertaTejas: false,
-        cubiertaPorteria: false,
-        cubiertaIsopanel: false,
-        ceramicosMuros: false,
-        bloquesMuros: false,
-        maderaMuros: false,
-        piedraMuros: false,
-        chapaMuros: false,
-        yesoMuros: false,
-        isopanelMuros: false,
-        pisosParquet: false,
-        pisosTabla: false,
-        pisosMonolitico: false,
-        pisosCalcareas: false,
-        pisosCeramico: false,
-        pisosPortland: false,
-        pisosMoquette: false,
-        revestimientosAzulBcoB: false,
-        revestimientosAzulBcoC: false,
-        revestimientosAzulColorB: false,
-        revestimientosAzulColorC: false,
-        revestimientosCeramicaB: false,
-        revestimientosCeramicaC: false,
-        revestimientosPorcelanatoB: false,
-        revestimientosPorcelanatoC: false,
-        revestimientosEstucoB: false,
-        revestimientosEstucoC: false,
-        revestimientosOtrosB: false,
-        revestimientosOtrosC: false,
-        revoqueTerminacion: false,
-        enduidoTerminacion: false,
-        calTerminacion: false,
-        pintAguaTerminacion: false,
-        pintAceiteTerminacion: false,
-        empapeladoTerminacion: false,
-        lambrizTerminacion: false,
-        comunCerramientos: false,
-        aluminioCerramientos: false,
-        pvcCerramientos: false,
-        maderaCerramientos: false,
-        otrosCerramientos: false,
-        cortinasCerramientos: false,
-        postigosCerramientos: false,
-        celosiasCerramientos: false,
-        rejasCerramientos: false,
-        aguaBanoCaliente: false,
-        aguaBanoFria: false,
-        aguaCocinaFria: false,
-        aguaCocinaCaliente: false,
-        electricidadEmbutida: false,
-        electricidadExterior: false,
-        electricidadMixta: false,
-        electricidadInstGas: false,
-        sanitariaColector: false,
-        sanitariaCamSeptica: false,
-        sanitariaPozoNegro: false,
-        termicasLosaRad: false,
-        termicasRadiadores: false,
-        termicasPanelElect: false,
-        termicasAireAcond: false,
-        termicasOtros: false,
-        superficieCubierta: '',
-        superficieSemiCubierta: '',
-        bienesPropios: '',
-        bienesComunes: '',
-        observaciones: '',
-        casaConsideraciones: false,
-        casaPhConsideraciones: false,
-        apartamentoConsideraciones: false,
-        localComercialConsideraciones: false,
-        otrosConsideraciones: false,
-        cantIdadPisosConsideraciones: false,
-        aptosPisoConsideraciones: false,
-        ascensoresConsideraciones: false,
-        portElectConsideraciones: false,
-    });
 
-
-
+    // State Management
+    const [inspeccion, setInspeccion] = useState(initialInspeccionState());
     const [locales, setLocales] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    //const [dataLoaded, setDataLoaded] = useState(false);
     const [currentLocal, setCurrentLocal] = useState(null);
-    const [currentLote, setCurrentLote] = useState({});
     const [localesLoaded, setLocalesLoaded] = useState(false);
-    const fetchCalled = useRef(false); // Referencia para asegurar que solo se llame una vez
+    const fetchCalled = useRef(false);
+    const [bancos, setBancos] = useState([]);
+    const [departamentos, setDepartamentos] = useState([]);
 
+
+    // Hooks
+    const [isVisible, setIsVisible] = useState(true);
     const dispatch = useDispatch();
     const location = useLocation();
     const navigate = useNavigate();
     const provisionalInspectionId = useSelector(state => state.inspection.provisionalInspectionId);
     const { provisionalId } = location.state || {};
-    const [isVisible, setIsVisible] = useState(true);
+    const selectedBancoId = inspeccion.banco ? inspeccion.banco.id : "";
+    const selectedDepartamentoId = inspeccion.departamento ? inspeccion.departamento.id : "";
 
+
+    useEffect(() => {
+        const fetchBancos = async () => {
+            try {
+                const data = await OrderService.getBancos();
+                setBancos(data);
+            } catch (error) {
+            }
+        };
+
+        fetchBancos();
+
+        const fetchDepartamentos = async () => {
+            try {
+              const data = await OrderService.getDepartamentos();
+              setDepartamentos(data);
+            } catch (error) {
+              // Manejar errores
+            }
+          };
+      
+          fetchDepartamentos();
+    }, []);
 
     const handleOpenModal = (e, local = null) => {
         e.stopPropagation();
@@ -177,7 +67,7 @@ function Inspeccion() {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        fetchLocalesByInspeccionId(provisionalInspectionId); // Actualiza la lista de locales
+        fetchLocalesByInspeccionId(provisionalInspectionId);
     };
 
 
@@ -222,7 +112,7 @@ function Inspeccion() {
 
     const handleInputChange = (e, id) => {
         const { name, value, type, checked } = e.target;
-    
+
         if (id) {
             setLocales((prevLocales) =>
                 prevLocales.map((local) =>
@@ -236,6 +126,48 @@ function Inspeccion() {
                 ...prevState,
                 [name]: type === 'checkbox' ? checked : value
             }));
+
+            if (name === "fechaAvalador") {
+                const fechaFormateada = new Date(value + "T00:00:00");
+                setInspeccion((prevState) => ({
+                    ...prevState,
+                    fechaAvalador: fechaFormateada.toISOString(),
+                }));
+            }
+
+            if (name === "banco") {
+                const fetchBanco = async () => {
+                    try {
+                        const selectedBanco = await OrderService.getBancoById(value);
+                        console.log("selectedBancoId", selectedBanco.id);
+                        console.log("selectedBanco", selectedBanco);
+                        setInspeccion(prevState => ({
+                            ...prevState,
+                            banco: selectedBanco,
+                        }));
+                    } catch (error) {
+                        console.error('Error al obtener el banco:', error);
+                    }
+                };
+                fetchBanco();
+            }
+
+            if (name === "departamento") {
+                const fetchDepartamento = async () => {
+                    try {
+                        const selectedDepartamento = await OrderService.getDepartamentoById(value);
+                        console.log("selectedDepartamentoId", selectedDepartamento.id);
+                        console.log("selectedDepartamento", selectedDepartamento);
+                        setInspeccion(prevState => ({
+                            ...prevState,
+                            departamento: selectedDepartamento,
+                        }));
+                    } catch (error) {
+                        console.error('Error al obtener el banco:', error);
+                    }
+                };
+                fetchDepartamento();
+            }
         }
     };
 
@@ -281,7 +213,7 @@ function Inspeccion() {
             }
 
             let response;
-            
+
             if (provisionalInspectionId) {
                 response = await InspeccionService.updateInspeccion(provisionalInspectionId, inspeccion);
                 toast.success('Inspección creada correctamente');
@@ -357,11 +289,16 @@ function Inspeccion() {
                                 <select
                                     id="banco"
                                     name="banco"
-                                    //value={selectedBancoId}
+                                    value={selectedBancoId}
                                     onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                                 >
-                                    <option value=""></option>
+                                    <option value="">Banco</option>
+                                    {bancos.map((banco) => (
+                                        <option key={banco.id} value={banco.id}>
+                                            {banco.nombre}
+                                        </option>
+                                    ))}
                                 </select>
 
                                 <label
@@ -394,11 +331,16 @@ function Inspeccion() {
                                 <select
                                     id="departamento"
                                     name="departamento"
-                                    //value={selectedBancoId}
+                                    value={selectedDepartamentoId}
                                     onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                                 >
                                     <option value=""></option>
+                                    {departamentos.map((departamento) => (
+                                        <option key={departamento.id} value={departamento.id}>
+                                            {departamento.nombre}
+                                        </option>
+                                    ))}
                                 </select>
 
                                 <label
@@ -2841,3 +2783,145 @@ function Inspeccion() {
 
 
 export default Inspeccion;
+
+
+function initialInspeccionState() {
+    return {
+        avaluador: '',
+        fechaAvalador: '',
+        banco: '',
+        solicitante: '',
+        departamento: '',
+        localidad: '',
+        secJudicial: '',
+        padron: '',
+        calle: '',
+        nro: '',
+        unidad: '',
+        piso: '',
+        entreCalles: '',
+        esquina: '',
+        urbanoZona: false,
+        suburbanoZona: false,
+        ruralZona: false,
+        balnearioZona: false,
+        residencialZona: false,
+        comercialZona: false,
+        industrialZona: false,
+        otrosZona: false,
+        suntuosaZona: false,
+        muyBuenaZona: false,
+        buenaZona: false,
+        economicaZona: false,
+        modestaZona: false,
+        compactaZona: false,
+        mediaZona: false,
+        pocoDensaZona: false,
+        ralaZona: false,
+        hormBituZona: false,
+        balastroZona: false,
+        oseZona: false,
+        pozoZona: false,
+        colectorZona: false,
+        uteZona: false,
+        antelZona: false,
+        altoPredio: false,
+        aNivelPredio: false,
+        bajoPredio: false,
+        irregularPredio: false,
+        regularPredio: false,
+        siPredio: false,
+        noPredio: false,
+        siPredioRetiro: false,
+        noPredioRetiro: false,
+        orientacionPredio: '',
+        frentePredio: '',
+        fondoPredio: '',
+        supTotalPredio: '',
+        estructuraHarmado: false,
+        estructuraMuroPort: false,
+        estructuraMixta: false,
+        estructuraMetalicos: false,
+        estructuraOtros: false,
+        estructuraAno: '',
+        cubiertaHarmado: false,
+        cubiertaLiviana: false,
+        cubiertaCcielorraso: false,
+        cubiertaBovedilla: false,
+        cubiertaTejas: false,
+        cubiertaPorteria: false,
+        cubiertaIsopanel: false,
+        ceramicosMuros: false,
+        bloquesMuros: false,
+        maderaMuros: false,
+        piedraMuros: false,
+        chapaMuros: false,
+        yesoMuros: false,
+        isopanelMuros: false,
+        pisosParquet: false,
+        pisosTabla: false,
+        pisosMonolitico: false,
+        pisosCalcareas: false,
+        pisosCeramico: false,
+        pisosPortland: false,
+        pisosMoquette: false,
+        revestimientosAzulBcoB: false,
+        revestimientosAzulBcoC: false,
+        revestimientosAzulColorB: false,
+        revestimientosAzulColorC: false,
+        revestimientosCeramicaB: false,
+        revestimientosCeramicaC: false,
+        revestimientosPorcelanatoB: false,
+        revestimientosPorcelanatoC: false,
+        revestimientosEstucoB: false,
+        revestimientosEstucoC: false,
+        revestimientosOtrosB: false,
+        revestimientosOtrosC: false,
+        revoqueTerminacion: false,
+        enduidoTerminacion: false,
+        calTerminacion: false,
+        pintAguaTerminacion: false,
+        pintAceiteTerminacion: false,
+        empapeladoTerminacion: false,
+        lambrizTerminacion: false,
+        comunCerramientos: false,
+        aluminioCerramientos: false,
+        pvcCerramientos: false,
+        maderaCerramientos: false,
+        otrosCerramientos: false,
+        cortinasCerramientos: false,
+        postigosCerramientos: false,
+        celosiasCerramientos: false,
+        rejasCerramientos: false,
+        aguaBanoCaliente: false,
+        aguaBanoFria: false,
+        aguaCocinaFria: false,
+        aguaCocinaCaliente: false,
+        electricidadEmbutida: false,
+        electricidadExterior: false,
+        electricidadMixta: false,
+        electricidadInstGas: false,
+        sanitariaColector: false,
+        sanitariaCamSeptica: false,
+        sanitariaPozoNegro: false,
+        termicasLosaRad: false,
+        termicasRadiadores: false,
+        termicasPanelElect: false,
+        termicasAireAcond: false,
+        termicasOtros: false,
+        superficieCubierta: '',
+        superficieSemiCubierta: '',
+        bienesPropios: '',
+        bienesComunes: '',
+        observaciones: '',
+        casaConsideraciones: false,
+        casaPhConsideraciones: false,
+        apartamentoConsideraciones: false,
+        localComercialConsideraciones: false,
+        otrosConsideraciones: false,
+        cantIdadPisosConsideraciones: false,
+        aptosPisoConsideraciones: false,
+        ascensoresConsideraciones: false,
+        portElectConsideraciones: false,
+    };
+}
