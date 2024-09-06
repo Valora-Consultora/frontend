@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import OrderService from "../api/OrderService";
+import { useSelector } from 'react-redux';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 function Order() {
   //#region Variables de estado
@@ -10,7 +14,9 @@ function Order() {
   const [bancos, setBancos] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [ciudades, setCiudades] = useState([]);
+  const [localidades, setlocalidades] = useState([]);
+  const usuario = useSelector(state => state.user);
+  const navigate = useNavigate();
 
   //const [tasadorInspeccion, settasadorInspeccion] = useState();
 
@@ -20,7 +26,7 @@ function Order() {
     nombreContacto: "", // Nombre de la orden de tasación
     fechaInspeccion: "", // Fecha de inspección
     horaInspeccion: "", // Hora de inspección
-
+    //secretaria: null,
     // Sección de orden de tasación
     fechaCreacion: "", // Fecha de la orden
     titular: "", // Titular de la orden
@@ -54,6 +60,18 @@ function Order() {
     : "";
   const selectedBancoId = info.banco ? info.banco.id : "";
   const selectedDepartamentoId = info.departamento ? info.departamento.id : "";
+
+  useEffect(() => {
+    console.log('usuario orden ', usuario);
+    if (usuario && usuario.nombre) {
+      console.log('ingresa en useEffect de usuario ')
+      setInfo((prevInfo) => ({
+        ...prevInfo,
+        secretaria: usuario,
+      }));
+    }
+  }, [usuario]);
+
 
   useEffect(() => {
     const fetchtasadorInspecciones = async () => {
@@ -141,7 +159,6 @@ function Order() {
         try {
           // Obtener el objeto tasador completo por su ID
           const selectedBanco = await OrderService.getBancoById(value);
-          console.log("selectedBancoId", selectedBanco.id);
           // Asignar el objeto tasador completo al estado
           setInfo((prevInfo) => ({
             ...prevInfo,
@@ -195,40 +212,20 @@ function Order() {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      console.log("info", info);
-      // Logs para cada campo de info
-      console.log("nombreContacto:", info.nombreContacto);
-      console.log("tasadorInspeccion:", info.tasadorInspeccion);
-      console.log("fechaInspeccion:", info.fechaInspeccion);
-      console.log("horaInspeccion:", info.horaInspeccion);
-      console.log("fechaCreacion:", info.fechaCreacion);
-      console.log("banco:", info.banco);
-      console.log("titular:", info.titular);
-      console.log("telefonoSolicitante:", info.telefonoSolicitante);
-      console.log("nombreSolicitante:", info.nombreSolicitante);
-      console.log("telefonoContacto:", info.telefonoContacto);
-      console.log("calle:", info.calle);
-      console.log("nroPuerta:", info.nroPuerta);
-      console.log("unidad:", info.unidad);
-      console.log("esquina:", info.esquina);
-      console.log("localidad:", info.localidad);
-      console.log("departamento:", info.departamento);
-      console.log("padron:", info.padron);
-      console.log("tasacion:", info.tasacion);
-      console.log("retasacion:", info.retasacion);
-      console.log("enInspeccion:", info.enInspeccion);
-      console.log("enEstudio:", info.enEstudio);
-      console.log("fechaAntecedente:", info.fechaAntecedente);
-      console.log("tasadorAntecedenteId:", info.tasadorAntecedenteId);
-      console.log("oficialBanco:", info.oficialBanco);
-      console.log("sucursal:", info.sucursal);
-      console.log("observacion:", info.observacion);
-
+      //setLoading(true);
+      
+      console.log('info de la orden ', info);
+      
       const response = await OrderService.createOrden(info);
-      console.log("Orden creada:", response);
+
+      toast.success('Orden creada correctamente');
+      
+      setTimeout(() => {
+        navigate('/home');
+    }, 3000);
       // Aquí podrías agregar lógica adicional, como redirigir al usuario a otra página o mostrar un mensaje de éxito
     } catch (error) {
+      toast.error('Error al crear la orden');
       console.error("Error al crear orden:", error);
       // Aquí podrías manejar los errores y mostrar un mensaje al usuario
     } finally {
@@ -236,9 +233,19 @@ function Order() {
     }
   };
 
-  //#region Renderizado
   return (
     <div className="bg-gray-100">
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10">
         CREAR ORDEN
       </h2>
@@ -537,24 +544,31 @@ function Order() {
                   ))}
                 </select>
                 <label
-                  htmlFor="ciudad"
-                  className="col-span-1 text-sm text-gray-700 font-bold"
+                  htmlFor="localidad"
+                  className="col-span-2 text-sm text-gray-700 font-bold"
                 >
-                  Ciudad:
+                  Localidad:
                 </label>
-                <select
-                  id="ciudad"
-                  name="ciudad"
+                <input
+                  type="text"
+                  className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  id="localidad"
+                  name="localidad"
+                  onChange={handleInputChange}
+                />
+{/*                 <select
+                  id="localidad"
+                  name="localidad"
                   onChange={handleInputChange}
                   className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                 >
-                  <option value="">Seleccione una ciudad</option>
-                  {ciudades.map((ciudad) => (
-                    <option key={ciudad.id} value={ciudad.id}>
-                      {ciudad.nombre}
+                  <option value="">Seleccione una localidad</option>
+                  {localidades.map((localidad) => (
+                    <option key={localidad.id} value={localidad.id}>
+                      {localidad.nombre}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </div>
               <div className="">
                 <div className="flex flex-col space-y-4">

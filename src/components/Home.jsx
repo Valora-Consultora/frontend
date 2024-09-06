@@ -3,24 +3,26 @@ import { useDispatch } from 'react-redux';
 import InspeccionService from "../api/InspeccionService";
 import { useNavigate } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
+import { useSelector } from 'react-redux';
 
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const nombre = localStorage.getItem("nombre");
   const tipo = localStorage.getItem("tipo");
+  const usuario = useSelector(state => state.user);
+
 
   const [inspeccion, setInspeccion] = useState({
     avaluador: '',
   });
 
+  useEffect(() => {
+  }, [usuario]); // El log se ejecutará cada vez que el usuario cambie
+  
   const handleClick = async () => {
     try {
-      console.log('ingresa en el create del home')
-      console.log('inspeccion ' + inspeccion.data)
-
       const response = await InspeccionService.createInspeccion(inspeccion);
-      console.log('response ' + response)
 
       if (response && response.id) {
         const provisionalId = response.id;

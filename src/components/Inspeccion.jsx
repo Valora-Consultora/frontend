@@ -10,12 +10,14 @@ import InspeccionService from "../api/InspeccionService";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
 import OrderService from '../api/OrderService';
+import { setUser } from '../app/slices/userSlice';
 
 function Inspeccion() {
 
 
     // State Management
-    const [inspeccion, setInspeccion] = useState(initialInspeccionState());
+    const [inspeccion, setInspeccion] = useState(() => initialInspeccionState({}));
+
     const [locales, setLocales] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentLocal, setCurrentLocal] = useState(null);
@@ -29,11 +31,24 @@ function Inspeccion() {
     const [isVisible, setIsVisible] = useState(true);
     const dispatch = useDispatch();
     const location = useLocation();
+    const state = useState();
     const navigate = useNavigate();
     const provisionalInspectionId = useSelector(state => state.inspection.provisionalInspectionId);
     const { provisionalId } = location.state || {};
     const selectedBancoId = inspeccion.banco ? inspeccion.banco.id : "";
     const selectedDepartamentoId = inspeccion.departamento ? inspeccion.departamento.id : "";
+    const usuario = useSelector(state => state.user);
+
+
+    useEffect(() => {
+        console.log('usuario inspeccion ', usuario);
+        if (usuario && usuario.nombre) {
+            setInspeccion(prevState => ({
+                ...prevState,
+                tasador: usuario,  
+            }));
+        }
+    }, [usuario]);
 
 
     useEffect(() => {
@@ -49,14 +64,14 @@ function Inspeccion() {
 
         const fetchDepartamentos = async () => {
             try {
-              const data = await OrderService.getDepartamentos();
-              setDepartamentos(data);
+                const data = await OrderService.getDepartamentos();
+                setDepartamentos(data);
             } catch (error) {
-              // Manejar errores
+                // Manejar errores
             }
-          };
-      
-          fetchDepartamentos();
+        };
+
+        fetchDepartamentos();
     }, []);
 
     const handleOpenModal = (e, local = null) => {
@@ -98,6 +113,7 @@ function Inspeccion() {
 
     const createInspeccion = async () => {
         try {
+            console.log('createInspeccion usuario ' , usuario);
             const response = await InspeccionService.createInspeccion(inspeccion);
             if (response && response.id) {
                 dispatch(setProvisionalInspectionId(response.id));
@@ -139,8 +155,6 @@ function Inspeccion() {
                 const fetchBanco = async () => {
                     try {
                         const selectedBanco = await OrderService.getBancoById(value);
-                        console.log("selectedBancoId", selectedBanco.id);
-                        console.log("selectedBanco", selectedBanco);
                         setInspeccion(prevState => ({
                             ...prevState,
                             banco: selectedBanco,
@@ -156,8 +170,6 @@ function Inspeccion() {
                 const fetchDepartamento = async () => {
                     try {
                         const selectedDepartamento = await OrderService.getDepartamentoById(value);
-                        console.log("selectedDepartamentoId", selectedDepartamento.id);
-                        console.log("selectedDepartamento", selectedDepartamento);
                         setInspeccion(prevState => ({
                             ...prevState,
                             departamento: selectedDepartamento,
@@ -1972,15 +1984,15 @@ function Inspeccion() {
                                     </div>
                                     <div className="flex flex-col md:flex-row md:items-center">
                                         <label
-                                            htmlFor="celosíasCerramientos"
+                                            htmlFor="celosiasCerramientos"
                                             className="text-sm text-gray-700 font-bold mr-2 md:w-20"
                                         >
                                             Celosías:
                                         </label>
                                         <input
                                             type="checkbox"
-                                            id="celosíasCerramientos"
-                                            name="celosíasCerramientos"
+                                            id="celosiasCerramientos"
+                                            name="celosiasCerramientos"
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2659,15 +2671,15 @@ function Inspeccion() {
                                     <div className="flex flex-col space-y-2 ">
                                         <div className="flex flex-col md:flex-row md:items-center">
                                             <label
-                                                htmlFor="SuperficieCubierta"
+                                                htmlFor="superficieCubierta"
                                                 className="text-sm text-gray-700 font-bold mr-2 w-44"
                                             >
                                                 Superficie Cubierta:
                                             </label>
                                             <input
                                                 type="number"
-                                                id="SuperficieCubierta"
-                                                name="SuperficieCubierta"
+                                                id="superficieCubierta"
+                                                name="superficieCubierta"
                                                 onChange={handleInputChange}
                                                 className="text-start text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
@@ -2677,15 +2689,15 @@ function Inspeccion() {
                                         <div className="flex flex-col md:flex-row md:items-center">
 
                                             <label
-                                                htmlFor="SuperficieSemiCubierta"
+                                                htmlFor="superficieSemiCubierta"
                                                 className="text-sm text-gray-700 font-bold mr-2 w-44"
                                             >
                                                 Superficie Semi Cubierta:
                                             </label>
                                             <input
                                                 type="number"
-                                                id="SuperficieSemiCubierta"
-                                                name="SuperficieSemiCubierta"
+                                                id="superficieSemiCubierta"
+                                                name="superficieSemiCubierta"
                                                 onChange={handleInputChange}
                                                 className="text-start text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
@@ -2785,10 +2797,14 @@ function Inspeccion() {
 export default Inspeccion;
 
 
-function initialInspeccionState() {
+function initialInspeccionState(usuario) {
+
+    console.log('initialInspeccionState usuario ' , usuario);
+
     return {
         avaluador: '',
         fechaAvalador: '',
+        tasador: usuario || null,
         banco: '',
         solicitante: '',
         departamento: '',

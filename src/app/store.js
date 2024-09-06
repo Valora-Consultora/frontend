@@ -1,11 +1,23 @@
+// store.js
 import { configureStore } from '@reduxjs/toolkit';
+import userReducer from './slices/userSlice';
 import inspectionReducer from './slices/inspectionSlice';
+import storage from 'redux-persist/lib/storage';
+import { persistReducer, persistStore } from 'redux-persist';
 
-const store = configureStore({
+const persistConfig = {
+  key: 'user',
+  storage, // Usa localStorage por defecto
+};
+
+// Aplica el persistReducer solo al slice de usuario
+const persistedUserReducer = persistReducer(persistConfig, userReducer);
+
+export const store = configureStore({
   reducer: {
-    inspection: inspectionReducer,
-    // Agrega más reductores aquí si es necesario
+    user: persistedUserReducer, // Persiste el slice de usuario
+    inspection: inspectionReducer, // Slice normal para otras cosas
   },
 });
 
-export default store;
+export const persistor = persistStore(store);

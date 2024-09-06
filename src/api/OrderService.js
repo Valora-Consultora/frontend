@@ -6,8 +6,8 @@ const OrderService = {
 
   createOrden: async (ordenData) => {
     try {
-      console.log('ordenData');
-      console.log(ordenData);
+      console.log('llega al create orden ')
+      console.log('ordenData ', ordenData)
       const response = await axios.post(`${API_URL}/api/create-orden`, ordenData);
       return response.data;
     } catch (error) {
@@ -18,7 +18,6 @@ const OrderService = {
 
   getTasadores: async () => {
     try {
-      console.log('getTasadores');
       const response = await axios.get(`${API_URL}/api/tasadores`);
       return response.data;
     } catch (error) {
@@ -39,7 +38,6 @@ const OrderService = {
   getBancoById: async (id) => {
     try {
       const response = await axios.get(`${API_URL}/api/banco/${parseInt(id)}`);
-      console.log('ingresa en getBancoById con el id ' + id )
       return response.data;
     } catch (error) {
       console.error('Error al obtener bancos:', error);
