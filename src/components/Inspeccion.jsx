@@ -15,9 +15,7 @@ import { setUser } from '../app/slices/userSlice';
 function Inspeccion() {
 
 
-    // State Management
     const [inspeccion, setInspeccion] = useState(() => initialInspeccionState({}));
-
     const [locales, setLocales] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentLocal, setCurrentLocal] = useState(null);
@@ -27,7 +25,6 @@ function Inspeccion() {
     const [departamentos, setDepartamentos] = useState([]);
 
 
-    // Hooks
     const [isVisible, setIsVisible] = useState(true);
     const dispatch = useDispatch();
     const location = useLocation();
@@ -347,7 +344,7 @@ function Inspeccion() {
                                     onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                                 >
-                                    <option value=""></option>
+                                    <option value="">Departamento</option>
                                     {departamentos.map((departamento) => (
                                         <option key={departamento.id} value={departamento.id}>
                                             {departamento.nombre}
