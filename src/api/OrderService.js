@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080'; // Cambia esto a la URL de tu API
+const API_URL = 'http://localhost:8080'; 
 
 const OrderService = {
 
   createOrden: async (ordenData) => {
     try {
-      console.log('ordenData');
-      console.log(ordenData);
+      console.log('llega al create orden ')
+      console.log('ordenData ', ordenData)
       const response = await axios.post(`${API_URL}/api/create-orden`, ordenData);
       return response.data;
     } catch (error) {
@@ -18,7 +18,6 @@ const OrderService = {
 
   getTasadores: async () => {
     try {
-      console.log('getTasadores');
       const response = await axios.get(`${API_URL}/api/tasadores`);
       return response.data;
     } catch (error) {

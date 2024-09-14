@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import LoginService from "../api/LoginService";
+import {setUser} from '../app/slices/userSlice';
+import { useSelector } from "react-redux";
 
 function Login() {
   const [info, setInfo] = useState({
@@ -8,23 +11,38 @@ function Login() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const state = useState();
+  const usuario = useSelector(state => state.user);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
       const response = await LoginService(info);
-      console.log(response);
 
       if (response) {
-        localStorage.setItem("username", response.username);
+        // Guarda el usuario en el estado global
+        dispatch(setUser({
+          username: response.username,
+          nombre: response.nombre,
+          tipoUsuario: response.tipoUsuario,
+          id: response.id,
+        }));
+/*         console.log('usuario en login  ' , usuario)
+ */
+        // También puedes guardarlo en localStorage si lo necesitas
+/*         localStorage.setItem("username", response.username);
         localStorage.setItem("nombre", response.nombre);
-        localStorage.setItem("tipo", response.tipoUsuario);
-        localStorage.setItem("id", response.id);
-        window.location.href = "/Home";
+        localStorage.setItem("tipoUsuario", response.tipoUsuario);
+        localStorage.setItem("id", response.id); */
+
+/*         console.log('usuario en login ', usuario.id)
+ */        window.location.href = "/Home";
       }
+
     } catch (error) {
-      console.error("Error al crear usuario:", error);
+      console.error("Error al iniciar sesión:", error);
     } finally {
       setLoading(false);
     }
