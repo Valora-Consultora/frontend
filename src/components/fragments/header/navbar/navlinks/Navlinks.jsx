@@ -13,7 +13,7 @@ const Navlinks = () => {
         <>
             <ul className="nav_links">
                 <li class="nav-item">
-                    <a class="nav-link" href="/Home">Home</a>
+                    <a class="nav-link" href="/Home">Inicio</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Inspeccion">Inspeccion</a>
@@ -22,8 +22,9 @@ const Navlinks = () => {
                     <a class="nav-link" href="/orden">Orden</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Discover</a>
+                    <a class="nav-link" href="/informe">Informe</a>
                 </li>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <li class="nav-item">
                     <a class="nav-link" href="/">Logout</a>
                 </li>

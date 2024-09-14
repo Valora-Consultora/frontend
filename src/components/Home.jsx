@@ -104,7 +104,7 @@ const Home = () => {
                       Genera reportes de inmuebles y otros
                     </p>
                   </div>
-                  <a className="text-green-900 hover:underline" href="/Home">
+                  <a className="text-green-900 hover:underline" href="/Informe">
                     Ir a Reporte
                   </a>
                 </div>
@@ -290,7 +290,7 @@ const Home = () => {
                       Genera reportes de inmuebles y otros
                     </p>
                   </div>
-                  <a className="text-green-900 hover:underline" href="/Home">
+                  <a className="text-green-900 hover:underline" href="/Informe">
                     Ir a Reporte
                   </a>
                 </div>

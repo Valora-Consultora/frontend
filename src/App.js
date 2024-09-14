@@ -8,7 +8,8 @@ import Footer from "./components/fragments/footer/Footer";
 import HeaderLogin from "./components/fragments/header/HeaderLogin";
 import Order from "./components/Order";
 import Inspeccion from "./components/Inspeccion";
-import Home from './components/Home';
+import Home from "./components/Home";
+import InformeLayout from "./components/informe/InformeLayout";
 
 const WithHeader = ({ children }) => (
   <>
@@ -46,13 +47,13 @@ function App() {
                 </WithHeader>
               }
             />
-            <Route 
-              path="/Home" 
+            <Route
+              path="/Home"
               element={
                 <WithHeader>
                   <Home />
                 </WithHeader>
-              } 
+              }
             />
             <Route
               path="/Orden"
@@ -70,9 +71,17 @@ function App() {
                 </WithHeader>
               }
             />
+            <Route
+              path="/Informe"
+              element={
+                <WithHeader>
+                  <InformeLayout />
+                </WithHeader>
+              }
+            />
           </Routes>
+          <Footer className="text-center" />
         </div>
-        <Footer className="text-center bg-gray-200" />
       </Router>
     </ThemeProvider>
   );

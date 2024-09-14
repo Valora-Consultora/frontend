@@ -560,7 +560,7 @@ function Order() {
                 <div className="flex flex-col space-y-4">
                   <h4 className="text-xl text-green-900 mt-5">Observaciones</h4>
                   <textarea
-                    className="w-full h-40 p-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="w-full min-h-40 p-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     placeholder="Escriba sus observaciones aquí..."
                     id="observacion"
                     name="observacion"
