@@ -41,7 +41,18 @@ const InspeccionService = {
             console.error('Error al actualizar inspeccion:', error);
             throw error;
         }
-    }
+    },
+
+    deleteInspeccion: async (id) => {
+        try {
+            console.log('Llega al deleteInspeccion ')
+          const response = await axios.delete(`${API_URL}/api/inspeccion/${id}`);
+          return response.data;
+        } catch (error) {
+          console.error("Error al eliminar la inspección:", error);
+          return null;
+        }
+    },
 
 
 }
