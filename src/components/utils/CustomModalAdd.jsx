@@ -8,6 +8,8 @@ Modal.setAppElement('#root');
 
 const CustomModal = ({ isOpen, onRequestClose, idInspeccion, initialFormData }) => {
 
+    //Prueba
+    
     const [formData, setFormData] = useState({
         estructuraHarmado: false,
         estructuraMuroPort: false,
