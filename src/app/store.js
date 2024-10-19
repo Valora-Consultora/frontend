@@ -2,6 +2,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
 import inspectionReducer from './slices/inspectionSlice';
+import informeReducer from './slices/informeSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -17,6 +18,7 @@ export const store = configureStore({
   reducer: {
     user: persistedUserReducer, // Persiste el slice de usuario
     inspection: inspectionReducer, // Slice normal para otras cosas
+    informe: informeReducer, // Slice normal para otras cosas
   },
 });
 

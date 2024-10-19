@@ -8,8 +8,13 @@ const OrderService = {
     try {
       console.log('llega al create orden ')
       console.log('ordenData ', ordenData)
-      const response = await axios.post(`${API_URL}/api/create-orden`, ordenData);
-      return response.data;
+      const response = await axios.post(`${API_URL}/api/create-orden`, ordenData, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+/*       const response = await axios.post(`${API_URL}/api/create-orden`, ordenData);
+ */      return response.data;
     } catch (error) {
       console.error('Error al crear orden:', error);
       throw error;
