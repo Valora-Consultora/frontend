@@ -9,6 +9,7 @@ import HeaderLogin from "./components/fragments/header/HeaderLogin";
 import Order from "./components/Order";
 import Inspeccion from "./components/Inspeccion";
 import Home from './components/Home';
+import InformeLayout from "./components/informe/InformeLayout";
 
 const WithHeader = ({ children }) => (
   <>
@@ -67,6 +68,14 @@ function App() {
               element={
                 <WithHeader>
                   <Inspeccion />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/Informe"
+              element={
+                <WithHeader>
+                  <InformeLayout />
                 </WithHeader>
               }
             />

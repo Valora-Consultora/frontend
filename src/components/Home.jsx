@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import InspeccionService from "../api/InspeccionService";
+import InformeService from '../api/InformeService';
 import { useNavigate } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
+import { setProvisionalInformeId } from '../app/slices/informeSlice';
+
 import { useSelector } from 'react-redux';
 
 const Home = () => {
@@ -15,14 +18,18 @@ const Home = () => {
   const opciones = [];
 
   const [inspeccion, setInspeccion] = useState({
-    avaluador: '',
+    tasador: usuario,
+  });
+
+  const [informe, setInforme] = useState({
+    tasador: usuario,
   });
 
   useEffect(() => {
   }, [usuario]);
 
 
-  const handleClick = async () => {
+  const handleClickInspeccion = async () => {
     try {
       const response = await InspeccionService.createInspeccion(inspeccion);
 
@@ -37,6 +44,22 @@ const Home = () => {
       console.error('Error al crear la inspección:', error);
     }
   };
+
+/*     const handleClickInforme = async () => {
+      try {
+        const response = await InformeService.createInforme(informe);
+  
+        if (response && response.id) {
+          const provisionalId = response.id;
+          dispatch(setProvisionalInformeId(provisionalId));
+          navigate('/Informe', { state: { provisionalId: provisionalId } });
+        } else {
+          throw new Error('Respuesta de creación de informe inválida');
+        }
+      } catch (error) {
+        console.error('Error al crear el informe :', error);
+      }
+    }; */
 
 
   if (tipoUsuario === "TASADOR") {
@@ -53,7 +76,7 @@ const Home = () => {
             <h3 className="text-lg font-semibold">Inspección</h3>
             <p className="text-gray-500">Crea una nueva Inspección en el sistema</p>
           </div>
-          <button className="text-green-900 hover:underline" onClick={handleClick}>
+          <button className="text-green-900 hover:underline" onClick={handleClickInspeccion}>
             Ir a Inspección
           </button>
         </div>
@@ -101,6 +124,34 @@ const Home = () => {
           </div>
           <a className="text-green-900 no-underline hover:underline mt-4" href="/Home">
             Ir a Descubrir
+          </a>
+        </div>
+      </div>
+    );
+    opciones.push(
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="flex flex-col items-center justify-center gap-4 p-6">
+          <div className="text-gray-500">
+            <svg
+              className="w-10 h-10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                strokeLinecap="round"
+                strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold">Informe</h3>
+            <p className="text-gray-500">Crea un nuevo Informe en el sistema</p>
+          </div>
+          <a className="text-green-900 no-underline hover:underline" href="/Informe">
+            Ir a Informe
           </a>
         </div>
       </div>
@@ -245,7 +296,7 @@ const Home = () => {
     </div>
   );
 
-  
+
 };
 
 export default Home;

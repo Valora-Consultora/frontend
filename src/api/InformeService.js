@@ -4,31 +4,27 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8080'; 
 
-const InspeccionService = {
+const InformeService = {
 
-    createInspeccion: async (inspeccionData) => {
+    createInforme: async (informeData,bancoSeleccionado) => {
       try {
-          console.log('ingresa en el create de inspeccionService');
-          console.log('inspeccionData', inspeccionData);
-
-          const response = await axios.post(`${API_URL}/api/create-inspeccion`, inspeccionData, {
+          const response = await axios.post(`${API_URL}/api/create-informe-${bancoSeleccionado}`, informeData, {
               headers: {
                   'Content-Type': 'application/json',
               },
           });
           return response.data;
       } catch (error) {
-          console.error('Error al crear inspeccion:', error.data);
+          console.error('Error al crear el informe :', error.data);
           throw error;
       }
   },
 
-    updateInspeccion: async (id, inspeccionData) => {
+   /*  updateInspeccion: async (id, inspeccionData) => {
         try {
 
             console.log('ingresa en el update de inspeccionService');
-            console.log('id ', id);
-            console.log('inspeccionData ', inspeccionData);
+            console.log('inspeccionData', inspeccionData);
 
             
             const response = await axios.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
@@ -53,9 +49,9 @@ const InspeccionService = {
           console.error("Error al eliminar la inspección:", error);
           return null;
         }
-    },
+    }, */
 
 
 }
 
-export default InspeccionService;
+export default InformeService;
