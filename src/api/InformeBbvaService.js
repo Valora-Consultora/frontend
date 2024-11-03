@@ -7,10 +7,6 @@ const API_URL = "http://localhost:8080";
 const InformeBbvaService = {
   updateInformeBbva: async (id, informeBbvaData) => {
     try {
-      console.log("ingresa en el update de informeBbvaService");
-      console.log("id ", id);
-      console.log("informeBbvaData ", informeBbvaData);
-
       const response = await axios.put(
         `${API_URL}/api/informeBbva/${id}`,
         informeBbvaData,
@@ -20,7 +16,7 @@ const InformeBbvaService = {
           },
         }
       );
-      console.log("response " + response);
+      //console.log("response " + response);
       return response.data;
     } catch (error) {
       console.error("Error al actualizar informe:", error);
@@ -49,7 +45,26 @@ const InformeBbvaService = {
       throw error;
     }
   },
-
+  getInformeById: async (idInforme) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/obtenerInformeBbva/${parseInt(idInforme)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener locales:', error);
+      throw error;
+    }
+  },
+/*   getItemsObraCivilByIdInforme: async (idInforme) => {
+    try {
+      console.log('Llega al getItemsObraCivilByIdInforme ')
+      console.log('idInforme ', idInforme)
+      const response = await axios.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener locales:', error);
+      throw error;
+    }
+  }, */
   /* createInformeBbva: async (id,informeBbvaData) => {
     try {
       console.log("ingresa en el create de informeBbvaService");

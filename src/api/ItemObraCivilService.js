@@ -1,0 +1,42 @@
+import apiClient from "./apiClient";
+import axios from "axios";
+
+const API_URL = "http://localhost:8080";
+
+const ItemObraCivilService = {
+  createItemObraCivil: async (item, idInforme) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/itemObraCivil/${idInforme}`, item, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear item de obra civil:", error);
+      throw error;
+    }
+  },
+  getItemsObraCivilByIdInforme: async (idInforme) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener locales:', error);
+      throw error;
+    }
+  },
+  updateItemObraCivil: async (id, updatedFields) => {
+    try {
+      const response = await axios.put(`${API_URL}/api/itemObraCivil/${id}`, updatedFields, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar el item de obra civil:', error);
+      throw error;
+    }
+  },
+};
+
+export default ItemObraCivilService;
