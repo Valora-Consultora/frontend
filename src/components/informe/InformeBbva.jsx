@@ -5,6 +5,10 @@ import { ToastContainer, toast } from 'react-toastify';
 import BbvaLogo from "../../images/logo-bbva.png";
 import { Formik, Form, Field } from 'formik';
 import InformeBbvaService from '../../api/InformeBbvaService';
+import ItemObraCivilModal from '../utils/ItemObraCivilModal';
+import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
+import plusIcon from '../../images/plusIcon.png';
+import ItemObraCivilService from '../../api/ItemObraCivilService';
 
 const InformeBbva = () => {
   const navigate = useNavigate();
@@ -14,6 +18,85 @@ const InformeBbva = () => {
   const [firmaRepresentantePreview, setFirmaRepresentantePreview] = useState(null);
   const [fotoAreaCroquisUbicacionPreview, setFotoAreaCroquisUbicacionPreview] = useState(null);
   const [bothChecked, setBothChecked] = useState(false);
+  const [itemsObraCivil, setItemsObraCivil] = useState([]);
+  const [isVisible, setIsVisible] = useState(true);
+  const [sumaDocumentada, setSumaDocumentada] = useState(0);
+  const [sumaVerificada, setSumaVerificada] = useState(0);
+  const [sumaCubierta, setSumaCubierta] = useState({ documentada: 0, verificada: 0 });
+  const [sumaSemiCubierta, setSumaSemiCubierta] = useState({ documentada: 0, verificada: 0 });
+  const [sumaOtros, setSumaOtros] = useState({ documentada: 0, verificada: 0 });
+
+  //Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+  const [isModalAntiguedadesOpen, setIsModalAntiguedadesOpen] = useState(false);
+
+
+  // Funcion para actualizar las sumas en tiempo real
+  const calcularSumas = (items) => {
+    let totalDoc = 0, totalVer = 0;
+    let cubierta = { documentada: 0, verificada: 0 };
+    let semiCubierta = { documentada: 0, verificada: 0 };
+    let otros = { documentada: 0, verificada: 0 };
+
+    items.forEach((item) => {
+      const { superficieDocumentadaObraCivilSeccionEDescripcionInmueble: doc, superficieVerificadaObraCivilSeccionEDescripcionInmueble: ver, tipoObraCivilSeccionEDescripcionInmueble: tipo } = item;
+      totalDoc += doc || 0;
+      totalVer += ver || 0;
+
+      if (tipo === "Superficie Cubierta") {
+        cubierta.documentada += doc || 0;
+        cubierta.verificada += ver || 0;
+      } else if (tipo === "Superficie Semi Cubierta") {
+        semiCubierta.documentada += doc || 0;
+        semiCubierta.verificada += ver || 0;
+      } else {
+        otros.documentada += doc || 0;
+        otros.verificada += ver || 0;
+      }
+    });
+
+    setSumaDocumentada(totalDoc);
+    setSumaVerificada(totalVer);
+    setSumaCubierta(cubierta);
+    setSumaSemiCubierta(semiCubierta);
+    setSumaOtros(otros);
+  };
+
+
+  const handleSelectChange = (id, value) => {
+    const updatedItems = itemsObraCivil.map((item) =>
+      item.id === id ? { ...item, tipoObraCivilSeccionEDescripcionInmueble: value } : item
+    );
+    setItemsObraCivil(updatedItems);
+    calcularSumas(updatedItems); // Recalcular sumas cuando se cambia el tipo de obra civil
+    updateBackendTipoObraCivil(id, value); // Actualizar en el backend
+  };
+
+  const handleFieldChange = (id, fieldName, value) => {
+    const updatedItems = itemsObraCivil.map((item) => item.id === id ? { ...item, [fieldName]: parseFloat(value) || 0 } : item);
+    setItemsObraCivil(updatedItems);
+    calcularSumas(updatedItems); // Recalcular sumas cuando se actualiza un campo
+  };
+
+  // Función para actualizar los valores en el backend
+  const updateBackend = async (id) => {
+    const itemToUpdate = itemsObraCivil.find((item) => item.id === id);
+    try {
+      await ItemObraCivilService.updateItemObraCivil(id, itemToUpdate);
+    } catch (error) {
+      console.error('Error al actualizar en el backend:', error);
+    }
+  };
+
+  // Función para actualizar el tipo de obra civil en el backend
+  const updateBackendTipoObraCivil = async (id, tipoObraCivil) => {
+    try {
+      await ItemObraCivilService.updateItemObraCivil(id, { tipoObraCivilSeccionEDescripcionInmueble: tipoObraCivil });
+    } catch (error) {
+      console.error(`Error al actualizar el tipo de obra civil para el item ${id}:`, error);
+    }
+  };
 
   const handleFileUpload = async (file, setFieldValue, fieldName, setPreview) => {
     try {
@@ -26,16 +109,22 @@ const InformeBbva = () => {
     }
   };
 
+  const fetchItemsObraCivilByInformeId = async (provisionalInformeId) => {
+    try {
+      const response = await ItemObraCivilService.getItemsObraCivilByIdInforme(provisionalInformeId);
+      setItemsObraCivil(response);
+      calcularSumas(response); // Calcular sumas al cargar los datos
+    } catch (error) {
+      console.error('Error al obtener los items obra civil:', error);
+    }
+  };
+
   const submitHandler = async (values, { setSubmitting }) => {
     setSubmitting(true);
     try {
       let response;
-      console.log('Enviando el formulario con valores: ', values);
-      console.log('provisionalInformeId ', provisionalInformeId);
-
       // Enviar el informe actualizado al backend
       response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
-
       toast.success('Informe creado correctamente');
       setTimeout(() => {
         navigate('/home');
@@ -48,6 +137,40 @@ const InformeBbva = () => {
     }
   };
 
+  const handleOpenModal = (e, local = null) => {
+    e.stopPropagation();
+    setCurrentItem();
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    fetchItemsObraCivilByInformeId(provisionalInformeId); // Refresca los items obra civil
+    calcularSumas(itemsObraCivil);
+  };
+
+  const handleOpenModalAntiguedades = (e, local = null) => {
+    e.stopPropagation();
+    setCurrentItem();
+    setIsModalAntiguedadesOpen(true);
+  };
+
+  const handleCloseModalAntiguedades = () => {
+    setIsModalOpen(false);
+    //fetchItemsObraCivilByInformeId(provisionalInformeId); // Refresca los items obra civil
+    //calcularSumas(itemsObraCivil);
+  };
+
+
+  const handleSaveItem = async (local) => {
+    handleCloseModal();
+  };
+
+  const handleSaveItemActualizacion = async (local) => {
+    handleCloseModalAntiguedades();
+    setIsModalOpen(false);
+
+  };
 
   return (
     <div className="bg-gray-100">
@@ -1955,31 +2078,1056 @@ const InformeBbva = () => {
                       <p className="text-base text-center text-gray-700 font-bold">Abastecimiento de agua</p>
                       <Field
                         type="radio"
-                        name="viasAcceso"
-                        value="bitumenViasAccesoCaracteristicas"
+                        name="abastecimientoAgua"
+                        value="publicoAbastecimientoAguaServiciosInfraestructura"
                         className="form-radio h-4 w-4 "
                         onClick={() => {
-                          setFieldValue('bitumenViasAccesoCaracteristicas', true);
-                          setFieldValue('otrosViasAccesoCaracteristicas', false);
+                          setFieldValue('publicoAbastecimientoAguaServiciosInfraestructura', true);
+                          setFieldValue('privadoAbastecimientoAguaServiciosInfraestructura', false);
+                          setFieldValue('sinConexionAbastecimientoAguaServiciosInfraestructura', false);
                         }}
                       />
-                      <label className="p-2 text-gray-700 font-bold text-sm">Bitumen</label>
+                      <label className="p-2 text-gray-700 font-bold text-sm">Público</label>
                       <Field
                         type="radio"
-                        name="viasAcceso"
-                        value="otrosViasAccesoCaracteristicas"
+                        name="abastecimientoAgua"
+                        value="privadoAbastecimientoAguaServiciosInfraestructura"
                         className="form-radio h-4 w-4 "
                         onClick={() => {
-                          setFieldValue('bitumenViasAccesoCaracteristicas', false);
-                          setFieldValue('otrosViasAccesoCaracteristicas', true);
+                          setFieldValue('publicoAbastecimientoAguaServiciosInfraestructura', false);
+                          setFieldValue('privadoAbastecimientoAguaServiciosInfraestructura', true);
+                          setFieldValue('sinConexionAbastecimientoAguaServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Privado</label>
+                      <Field
+                        type="radio"
+                        name="abastecimientoAgua"
+                        value="sinConexionAbastecimientoAguaServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoAbastecimientoAguaServiciosInfraestructura', false);
+                          setFieldValue('privadoAbastecimientoAguaServiciosInfraestructura', false);
+                          setFieldValue('sinConexionAbastecimientoAguaServiciosInfraestructura', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Sin conexión</label>
+                    </div>
+                    <div className="col-span-4 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Desagües</p>
+                      <Field
+                        type="radio"
+                        name="desagues"
+                        value="publicoDesaguesServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoDesaguesServiciosInfraestructura', true);
+                          setFieldValue('privadoDesaguesServiciosInfraestructura', false);
+                          setFieldValue('sinConexionDesaguesServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Público</label>
+                      <Field
+                        type="radio"
+                        name="desagues"
+                        value="privadoDesaguesServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoDesaguesServiciosInfraestructura', false);
+                          setFieldValue('privadoDesaguesServiciosInfraestructura', true);
+                          setFieldValue('sinConexionDesaguesServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Privado</label>
+                      <Field
+                        type="radio"
+                        name="desagues"
+                        value="sinConexionDesaguesServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoDesaguesServiciosInfraestructura', false);
+                          setFieldValue('privadoDesaguesServiciosInfraestructura', false);
+                          setFieldValue('sinConexionDesaguesServiciosInfraestructura', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Sin conexión</label>
+                    </div>
+                    <div className="col-span-4 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Teléfono</p>
+                      <Field
+                        type="radio"
+                        name="telefono"
+                        value="publicoTelefonoServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoTelefonoServiciosInfraestructura', true);
+                          setFieldValue('sinConexionTelefonoServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Público</label>
+                      <Field
+                        type="radio"
+                        name="telefono"
+                        value="sinConexionTelefonoServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoTelefonoServiciosInfraestructura', false);
+                          setFieldValue('sinConexionTelefonoServiciosInfraestructura', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Sin conexión</label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-4 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Electricidad</p>
+                      <Field
+                        type="radio"
+                        name="electricidad"
+                        value="publicoElectricidadServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoElectricidadServiciosInfraestructura', true);
+                          setFieldValue('privadoElectricidadServiciosInfraestructura', false);
+                          setFieldValue('sinConexionElectricidadServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Público</label>
+                      <Field
+                        type="radio"
+                        name="electricidad"
+                        value="privadoElectricidadServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoElectricidadServiciosInfraestructura', false);
+                          setFieldValue('privadoElectricidadServiciosInfraestructura', true);
+                          setFieldValue('sinConexionElectricidadServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Privado</label>
+                      <Field
+                        type="radio"
+                        name="electricidad"
+                        value="sinConexionElectricidadServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoElectricidadServiciosInfraestructura', false);
+                          setFieldValue('privadoElectricidadServiciosInfraestructura', true);
+                          setFieldValue('sinConexionElectricidadServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Sin conexión</label>
+                    </div>
+
+                    <div className="col-span-4 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Gas</p>
+                      <Field
+                        type="radio"
+                        name="gas"
+                        value="publicoGasServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoGasServiciosInfraestructura', true);
+                          setFieldValue('privadoGasServiciosInfraestructura', false);
+                          setFieldValue('sinConexionGasServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Público</label>
+                      <Field
+                        type="radio"
+                        name="gas"
+                        value="privadoGasServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoGasServiciosInfraestructura', false);
+                          setFieldValue('privadoGasServiciosInfraestructura', true);
+                          setFieldValue('sinConexionGasServiciosInfraestructura', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Privado</label>
+                      <Field
+                        type="radio"
+                        name="gas"
+                        value="sinConexionGasServiciosInfraestructura"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('publicoGasServiciosInfraestructura', false);
+                          setFieldValue('privadoGasServiciosInfraestructura', false);
+                          setFieldValue('sinConexionGasServiciosInfraestructura', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Sin conexión</label>
+                    </div>
+
+                    <div className="col-span-4 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Otros</p>
+                      <Field
+                        component="textarea"
+                        id="otrosServiciosInfraestructura"
+                        name="otrosServiciosInfraestructura"
+                        className="p-2 w-full h-10 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  <h6 className="text-base p-2 text-green-900 text-center">D.3- Observaciones</h6>
+
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Observaciones de la SECCIÓN  para Legales BBVA</p>
+                      <Field
+                        component="textarea"
+                        id="observacionesSeccionLegalesBbvaObservaciones"
+                        name="observacionesSeccionLegalesBbvaObservaciones"
+                        className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      />
+                    </div>
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Otras observaciones de la SECCIÓN</p>
+                      <Field
+                        component="textarea"
+                        id="otrasObservacionesSeccionObservaciones"
+                        name="otrasObservacionesSeccionObservaciones"
+                        className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-span-12 space-y-4 border p-3 rounded">
+                  <h4 className="text-xl text-green-900">SECCIÓN E- Descripción del inmueble</h4>
+                  <h6 className="text-lg p-2 text-green-900 text-center">E.1 Aspectos generales</h6>
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-3 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Destino</p>
+                      <Field
+                        type="radio"
+                        name="destinoDescripcionInmueble"
+                        value="viviendaDestinoDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('viviendaDestinoDescripcionInmueble', true);
+                          setFieldValue('comercioDestinoDescripcionInmueble', false);
+                          setFieldValue('otrosDestinoDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Vivienda</label>
+                      <Field
+                        type="radio"
+                        name="destinoDescripcionInmueble"
+                        value="comercioDestinoDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('viviendaDestinoDescripcionInmueble', false);
+                          setFieldValue('comercioDestinoDescripcionInmueble', true);
+                          setFieldValue('otrosDestinoDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Comercio</label>
+                      <Field
+                        type="radio"
+                        name="destinoDescripcionInmueble"
+                        value="otrosDestinoDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('viviendaDestinoDescripcionInmueble', false);
+                          setFieldValue('comercioDestinoDescripcionInmueble', false);
+                          setFieldValue('otrosDestinoDescripcionInmueble', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
+                    </div>
+                    <div className="col-span-3 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Tipología</p>
+                      <Field
+                        type="radio"
+                        name="tipologiaDescripcionInmueble"
+                        value="casaTipologiaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('casaTipologiaDescripcionInmueble', true);
+                          setFieldValue('apartamentoTipologiaDescripcionInmueble', false);
+                          setFieldValue('otraTipologiaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Casa</label>
+                      <Field
+                        type="radio"
+                        name="tipologiaDescripcionInmueble"
+                        value="apartamentoTipologiaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('casaTipologiaDescripcionInmueble', false);
+                          setFieldValue('apartamentoTipologiaDescripcionInmueble', true);
+                          setFieldValue('otraTipologiaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Apartamento</label>
+                      <Field
+                        type="radio"
+                        name="tipologiaDescripcionInmueble"
+                        value="otraTipologiaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('casaTipologiaDescripcionInmueble', false);
+                          setFieldValue('apartamentoTipologiaDescripcionInmueble', false);
+                          setFieldValue('otraTipologiaDescripcionInmueble', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Otra</label>
+                    </div>
+                    <div className="col-span-3 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Situación construcciones</p>
+                      <Field
+                        type="radio"
+                        name="situacionConstruccionesDescripcionInmueble"
+                        value="terminadasSituacionConstruccionesDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('terminadasSituacionConstruccionesDescripcionInmueble', true);
+                          setFieldValue('inconclusasSituacionConstruccionesDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Terminadas</label>
+                      <Field
+                        type="radio"
+                        name="situacionConstruccionesDescripcionInmueble"
+                        value="inconclusasSituacionConstruccionesDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('terminadasSituacionConstruccionesDescripcionInmueble', false);
+                          setFieldValue('inconclusasSituacionConstruccionesDescripcionInmueble', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Inconclusas</label>
+                    </div>
+                    <div className="col-span-3 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Niveles</p>
+                      <Field
+                        component="textarea"
+                        id="nivelesDescripcionInmueble"
+                        name="nivelesDescripcionInmueble"
+                        className="p-2 w-full h-10 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-6 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Ubicación construcciones</p>
+                      <Field
+                        type="radio"
+                        name="ubicacionConstrucciones"
+                        value="frenteUbicacionConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frenteUbicacionConstrucciones', true);
+                          setFieldValue('contrafrenteUbicacionConstrucciones', false);
+                          setFieldValue('internoUbicacionConstrucciones', false);
+                          setFieldValue('fondoUbicacionConstrucciones', false);
+                          setFieldValue('otrosUbicacionConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Frente</label>
+                      <Field
+                        type="radio"
+                        name="ubicacionConstrucciones"
+                        value="contrafrenteUbicacionConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frenteUbicacionConstrucciones', false);
+                          setFieldValue('contrafrenteUbicacionConstrucciones', true);
+                          setFieldValue('internoUbicacionConstrucciones', false);
+                          setFieldValue('fondoUbicacionConstrucciones', false);
+                          setFieldValue('otrosUbicacionConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Contrafrente</label>
+                      <Field
+                        type="radio"
+                        name="ubicacionConstrucciones"
+                        value="internoUbicacionConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frenteUbicacionConstrucciones', false);
+                          setFieldValue('contrafrenteUbicacionConstrucciones', false);
+                          setFieldValue('internoUbicacionConstrucciones', true);
+                          setFieldValue('fondoUbicacionConstrucciones', false);
+                          setFieldValue('otrosUbicacionConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Interno</label>
+                      <Field
+                        type="radio"
+                        name="ubicacionConstrucciones"
+                        value="fondoUbicacionConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frenteUbicacionConstrucciones', false);
+                          setFieldValue('contrafrenteUbicacionConstrucciones', false);
+                          setFieldValue('internoUbicacionConstrucciones', false);
+                          setFieldValue('fondoUbicacionConstrucciones', true);
+                          setFieldValue('otrosUbicacionConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Fondo</label>
+                      <Field
+                        type="radio"
+                        name="ubicacionConstrucciones"
+                        value="otrosUbicacionConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frenteUbicacionConstrucciones', false);
+                          setFieldValue('contrafrenteUbicacionConstrucciones', false);
+                          setFieldValue('internoUbicacionConstrucciones', false);
+                          setFieldValue('fondoUbicacionConstrucciones', false);
+                          setFieldValue('otrosUbicacionConstrucciones', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
+                    </div>
+                    <div className="col-span-6 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Agrupamiento de las construcciones</p>
+                      <Field
+                        type="radio"
+                        name="agrupamientoConstrucciones"
+                        value="unicasAgrupamientoConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('unicasAgrupamientoConstrucciones', true);
+                          setFieldValue('aisladasAgrupamientoConstrucciones', false);
+                          setFieldValue('apareadasAgrupamientoConstrucciones', false);
+                          setFieldValue('edificiosAgrupamientoConstrucciones', false);
+                          setFieldValue('otrosAgrupamientoConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Únicas</label>
+                      <Field
+                        type="radio"
+                        name="agrupamientoConstrucciones"
+                        value="aisladasAgrupamientoConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('unicasAgrupamientoConstrucciones', false);
+                          setFieldValue('aisladasAgrupamientoConstrucciones', true);
+                          setFieldValue('apareadasAgrupamientoConstrucciones', false);
+                          setFieldValue('edificiosAgrupamientoConstrucciones', false);
+                          setFieldValue('otrosAgrupamientoConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Aisladas</label>
+                      <Field
+                        type="radio"
+                        name="agrupamientoConstrucciones"
+                        value="apareadasAgrupamientoConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('unicasAgrupamientoConstrucciones', false);
+                          setFieldValue('aisladasAgrupamientoConstrucciones', false);
+                          setFieldValue('apareadasAgrupamientoConstrucciones', true);
+                          setFieldValue('edificiosAgrupamientoConstrucciones', false);
+                          setFieldValue('otrosAgrupamientoConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Apareadas</label>
+                      <Field
+                        type="radio"
+                        name="agrupamientoConstrucciones"
+                        value="edificiosAgrupamientoConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('unicasAgrupamientoConstrucciones', false);
+                          setFieldValue('aisladasAgrupamientoConstrucciones', false);
+                          setFieldValue('apareadasAgrupamientoConstrucciones', false);
+                          setFieldValue('edificiosAgrupamientoConstrucciones', true);
+                          setFieldValue('otrosAgrupamientoConstrucciones', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Edificio/s</label>
+                      <Field
+                        type="radio"
+                        name="agrupamientoConstrucciones"
+                        value="otrosAgrupamientoConstrucciones"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('unicasAgrupamientoConstrucciones', false);
+                          setFieldValue('aisladasAgrupamientoConstrucciones', false);
+                          setFieldValue('apareadasAgrupamientoConstrucciones', false);
+                          setFieldValue('edificiosAgrupamientoConstrucciones', false);
+                          setFieldValue('otrosAgrupamientoConstrucciones', true);
                         }}
                       />
                       <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
                     </div>
                   </div>
+                  <div className="col-span-12 text-center">
+                    <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
+                    <Field
+                      component="textarea"
+                      id="descripcionAspectosGenerales"
+                      name="descripcionAspectosGenerales"
+                      className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+
+                  <div className="col-span-12 text-center">
+                    <p className="text-base text-center text-gray-700 font-bold">Luminosidad/Vistas</p>
+                    <Field
+                      component="textarea"
+                      id="luminosidadVistasDescripcionInmueble"
+                      name="luminosidadVistasDescripcionInmueble"
+                      className="p-2 w-full h-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+
+
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Planilla de Superficies  y Tipo de Construcción</p>
+
+                      <div className="grid grid-template-rows: auto 1fr">
+                        <h4 className="text-sm text-center text-gray-700 font-bold">Agregar Items Obra Civil</h4>
+                        <button
+                          onClick={handleOpenModal}
+                          className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
+                          type="button"
+                        >
+                          <img src={plusIcon} alt="Plus icon" className="w-6 h-6 fill-current text-white filter invert" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 border p-3 rounded space-y-4">
+                      <h4 className="text-xl text-green-900">Items Obra Civil</h4>
+
+                      <div className="grid grid-cols-12 items-center gap-4 bg-gray-100 p-2 rounded-t-md">
+                        <div className="col-span-2 text-center text-green-900 font-bold">Tipo Obra Civil</div>
+                        <div className="col-span-2 text-center text-green-900 font-bold">Obra Civil</div>
+                        <div className="col-span-2 text-center text-green-900 font-bold">Tipo Construcción</div>
+                        <div className="col-span-3 text-center text-green-900 font-bold">Superficie Documentada (m²)</div>
+                        <div className="col-span-3 text-center text-green-900 font-bold">Superficie Verificada (m²)</div>
+                      </div>
+
+                      {itemsObraCivil && itemsObraCivil.map((itemObraCivil) => (
+                        <div key={itemObraCivil.id} className="grid grid-cols-12 items-center gap-4 mb-1 p-2 bg-white rounded-md">
+                          <Field
+                            as="select"
+                            name={`tipoObraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                            className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                            defaultValue={itemObraCivil.tipoObraCivilSeccionEDescripcionInmueble}
+                            onChange={(e) => handleSelectChange(itemObraCivil.id, e.target.value)} // Llama a handleSelectChange
+                          >
+                            <option value="">Seleccionar opción</option>
+                            <option value="Superficie Cubierta">Superficie Cubierta</option>
+                            <option value="Superficie Semi Cubierta">Superficie Semi Cubierta</option>
+                            <option value="Otros">Otros</option>
+                          </Field>
+                          <Field
+                            type="text"
+                            name={`obraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                            className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                            defaultValue={itemObraCivil.obraCivilSeccionEDescripcionInmueble}
+                          />
+                          <Field
+                            as="select"
+                            name={`tipoConstruccionSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                            className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                            defaultValue={itemObraCivil.tipoConstruccionSeccionEDescripcionInmueble}
+                          >
+                            <option value="">Seleccionar opción</option>
+                            <option value="Tradicional">Tradicional</option>
+                            <option value="Steel Framing">Steel Framing</option>
+                            <option value="Contenedor">Contenedor</option>
+                          </Field>
+                          <Field
+                            type="number"
+                            name={`superficieDocumentadaObraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                            className="col-span-3 text-center px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                            defaultValue={itemObraCivil.superficieDocumentadaObraCivilSeccionEDescripcionInmueble}
+                            onChange={(e) => handleFieldChange(itemObraCivil.id, 'superficieDocumentadaObraCivilSeccionEDescripcionInmueble', e.target.value)}
+                            onBlur={() => updateBackend(itemObraCivil.id)} // Actualiza el backend cuando el usuario sale del campo                          
+                          />
+                          <Field
+                            type="number"
+                            name={`superficieVerificadaObraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                            className="col-span-3 text-center px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                            defaultValue={itemObraCivil.superficieVerificadaObraCivilSeccionEDescripcionInmueble}
+                            onChange={(e) => handleFieldChange(itemObraCivil.id, 'superficieVerificadaObraCivilSeccionEDescripcionInmueble', e.target.value)}
+                            onBlur={() => updateBackend(itemObraCivil.id)} // Actualiza el backend cuando el usuario sale del campo   
+                          />
+                        </div>
+                      ))}
+                      <div className="grid grid-cols-12 items-center gap-4 p-2 rounded-md font-bold text-gray-800 mt-2">
+                        <div className="col-span-6 text-right">Superficie Cubierta:</div>
+                        <div className="col-span-3 text-center">{sumaCubierta.documentada}</div>
+                        <div className="col-span-3 text-center">{sumaCubierta.verificada}</div>
+                      </div>
+                      <div className="grid grid-cols-12 items-center gap-4 p-2 rounded-md font-bold text-gray-800 mt-2">
+                        <div className="col-span-6 text-right">Superficie Semi Cubierta:</div>
+                        <div className="col-span-3 text-center">{sumaSemiCubierta.documentada}</div>
+                        <div className="col-span-3 text-center">{sumaSemiCubierta.verificada}</div>
+                      </div>
+                      <div className="grid grid-cols-12 items-center gap-4 p-2 rounded-md font-bold text-gray-800 mt-2">
+                        <div className="col-span-6 text-right">Otros:</div>
+                        <div className="col-span-3 text-center">{sumaOtros.documentada}</div>
+                        <div className="col-span-3 text-center">{sumaOtros.verificada}</div>
+                      </div>
+
+                      {/* Totales Generales */}
+                      <div className="grid grid-cols-12 items-center gap-4 mt-2  p-2 rounded-md font-bold text-gray-800">
+                        <div className="col-span-6 text-right">Totales:</div>
+                        <div className="col-span-3 text-center">{sumaDocumentada}</div>
+                        <div className="col-span-3 text-center">{sumaVerificada}</div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Categoría</p>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="muyBuena1CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', true);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">1 Muy Buena</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="muyBuena2CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', true);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">1.5 Muy Buena</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="buena1CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', true);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">2 Buena</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="buena2CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', true);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">2.5 Buena</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="mediana1CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', true);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">3 Mediana</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="mediana2CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', true);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">3.5 Mediana</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="economica1CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', true);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">4 Económica</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="economica2CategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', true);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">4.5 Económica</label>
+                      <Field
+                        type="radio"
+                        name="categoriaDescripcionInmueble"
+                        value="muyEconomicaCategoriaDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('muyBuena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena1CategoriaDescripcionInmueble', false);
+                          setFieldValue('buena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana1CategoriaDescripcionInmueble', false);
+                          setFieldValue('mediana2CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica1CategoriaDescripcionInmueble', false);
+                          setFieldValue('economica2CategoriaDescripcionInmueble', false);
+                          setFieldValue('muyEconomicaCategoriaDescripcionInmueble', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">5 Muy Económica</label>
+                    </div>
+                  </div>
+
+                  <div className="col-span-12 text-center">
+                    <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
+                    <Field
+                      component="textarea"
+                      id="descripcionDescripcionInmueble"
+                      name="descripcionDescripcionInmueble"
+                      className="p-2 w-full h-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 ">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Estado conservación</p>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="excelente1EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">1 Excelente</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="excelente2EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">1.5 Excelente</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="bueno1EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">2 Bueno</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="bueno2EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">2.5 Bueno</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="regular1EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">3 Regular</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="regular2EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">3.5 Regular</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="malo1EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">4 Malo</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="malo2EstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', true);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">4.5 Malo</label>
+                      <Field
+                        type="radio"
+                        name="estadoConservacionDescripcionInmueble"
+                        value="muyMaloEstadoConservacionDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('excelente1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('excelente2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('bueno2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('regular2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo1EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('malo2EstadoConservacionDescripcionInmueble', false);
+                          setFieldValue('muyMaloEstadoConservacionDescripcionInmueble', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">4.5 Muy Malo</label>
+                    </div>
+                  </div>
+                  <div className="col-span-12 text-center">
+                    <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
+                    <Field
+                      component="textarea"
+                      id="descripcionEstadoConservacionDescripcionInmueble"
+                      name="descripcionEstadoConservacionDescripcionInmueble"
+                      className="p-2 w-full h-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 items-center">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Mantenimiento</p>
+                    </div>
+                    <div className="col-span-4 text-center">
+                      <Field
+                        type="radio"
+                        name="MantenimientoDescripcionInmueble"
+                        value="frecuenteMantenimientoDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frecuenteMantenimientoDescripcionInmueble', true);
+                          setFieldValue('ocasionalMantenimientoDescripcionInmueble', false);
+                          setFieldValue('escasoNuloMantenimientoDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Frecuente</label>
+                      <Field
+                        type="radio"
+                        name="MantenimientoDescripcionInmueble"
+                        value="ocasionalMantenimientoDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frecuenteMantenimientoDescripcionInmueble', false);
+                          setFieldValue('ocasionalMantenimientoDescripcionInmueble', true);
+                          setFieldValue('escasoNuloMantenimientoDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Ocasional</label>
+                      <Field
+                        type="radio"
+                        name="MantenimientoDescripcionInmueble"
+                        value="escasoNuloMantenimientoDescripcionInmueble"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('frecuenteMantenimientoDescripcionInmueble', false);
+                          setFieldValue('ocasionalMantenimientoDescripcionInmueble', false);
+                          setFieldValue('escasoNuloMantenimientoDescripcionInmueble', true);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Escaso/nulo</label>
+                    </div>
+                    <label
+                      htmlFor="descripcionMantenimientoDescripcionInmueble"
+                      className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    >
+                      Descripción
+                    </label>
+                    <Field
+                      type="text"
+                      id="descripcionMantenimientoDescripcionInmueble"
+                      name="descripcionMantenimientoDescripcionInmueble"
+                      className="col-span-7 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 pt-10">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Planilla de antigüedad de las construcciones</p>
+
+                      <div className="grid grid-template-rows: auto 1fr">
+                        <h4 className="text-sm text-center text-gray-700 font-bold">Asignar antiguedad a Items</h4>
+                        <button
+                          onClick={handleOpenModalAntiguedades}
+                          className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
+                          type="button"
+                        >
+                          <img src={plusIcon} alt="Plus icon" className="w-6 h-6 fill-current text-white filter invert" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 border p-3 rounded space-y-4">
+                      <h4 className="text-xl text-green-900">Items</h4>
+
+                      <div className="grid grid-cols-12 items-center gap-4 bg-gray-100 p-2 rounded-t-md">
+                        <div className="col-span-3 text-center text-green-900 font-bold">Tipo Obra Civil</div>
+                        <div className="col-span-3 text-center text-green-900 font-bold">Descripción de la  intervención</div>
+                        <div className="col-span-3 text-center text-green-900 font-bold">Superficie (m²)</div>
+                        <div className="col-span-3 text-center text-green-900 font-bold">Año</div>
+                      </div>
+
+
+
+                    </div>
+                  </div>
+
+
 
                 </div>
-
               </div>
               <div className="mt-4 text-center">
                 <button
@@ -1994,6 +3142,22 @@ const InformeBbva = () => {
           </Form>
         )}
       </Formik>
+      <ItemObraCivilModal
+        isOpen={isModalOpen}
+        onRequestClose={handleCloseModal}
+        idInformeBbva={provisionalInformeId}
+        initialFormData={currentItem || {}}
+        onSave={handleSaveItem}
+
+      />
+      <ItemAntiguedadesModal
+        isOpen={isModalAntiguedadesOpen}
+        onRequestClose={handleCloseModalAntiguedades}
+        idInformeBbva={provisionalInformeId}
+        initialFormData={currentItem || {}}
+        onSave={handleSaveItemActualizacion}
+
+      />
     </div >
   );
 };
@@ -2003,9 +3167,6 @@ export default InformeBbva;
 
 
 function initialInformeState(usuario) {
-
-  console.log('initialInformeState usuario ', usuario);
-
   return {
     fechaAsignacionServicioResumen: "",
     noSeEmitioInformacionTasadorInfNegativo: false,
