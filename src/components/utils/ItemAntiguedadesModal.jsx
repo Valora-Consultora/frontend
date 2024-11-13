@@ -22,7 +22,7 @@ const ItemAntiguedadesModal = ({ isOpen, onRequestClose, idInforme, initialFormD
         anoAntiguedad: "",
     };
 
-    console.log('selectedItemId ', selectedItemId);
+    //console.log('selectedItemId ', selectedItemId);
 
     const fetchItemsObraCivilByInformeId = async (provisionalInformeId) => {
         try {

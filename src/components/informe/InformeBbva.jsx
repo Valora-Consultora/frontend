@@ -7,6 +7,7 @@ import { Formik, Form, Field } from 'formik';
 import InformeBbvaService from '../../api/InformeBbvaService';
 import ItemObraCivilModal from '../utils/ItemObraCivilModal';
 import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
+import ItemAntiguedadesDescripcionModal from '../utils/ItemAntiguedadesDescripcionModal';
 import plusIcon from '../../images/plusIcon.png';
 import ItemObraCivilService from '../../api/ItemObraCivilService';
 
@@ -30,6 +31,8 @@ const InformeBbva = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [isModalAntiguedadesOpen, setIsModalAntiguedadesOpen] = useState(false);
+  const [isModalAntiguedadesDescripcionOpen, setIsModalAntiguedadesDescripcionOpen] = useState(false);
+  const [isAntiguedadesDescripcion, setAntiguedadesDescripcion] = useState(false);
 
 
   // Funcion para actualizar las sumas en tiempo real
@@ -63,6 +66,31 @@ const InformeBbva = () => {
     setSumaOtros(otros);
   };
 
+  const handleUpdateItemsAntiguedad = async () => {
+    try {
+      const updatePromises = itemsObraCivil.map(async (item) => {
+        const updatedFields = {
+          descripcionIntervencionAntiguedad: item.descripcionIntervencionAntiguedad,
+          superficieAntiguedad: item.superficieAntiguedad,
+          anoAntiguedad: item.anoAntiguedad,
+        };
+
+        return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
+      });
+
+      //await Promise.all(updatePromises);
+      //toast.success("Items de antigüedad actualizados correctamente");
+    } catch (error) {
+      toast.error("Error al actualizar los items de antigüedad");
+      console.error("Error al actualizar items de antigüedad:", error);
+    }
+  };
+
+  const handleItemUpdate = (id, updatedData) => {
+    setItemsObraCivil(prevItems =>
+      prevItems.map(item => item.id === id ? { ...item, ...updatedData } : item)
+    );
+  };
 
   const handleSelectChange = (id, value) => {
     const updatedItems = itemsObraCivil.map((item) =>
@@ -74,8 +102,10 @@ const InformeBbva = () => {
   };
 
   const handleFieldChange = (id, fieldName, value) => {
-    const updatedItems = itemsObraCivil.map((item) => item.id === id ? { ...item, [fieldName]: parseFloat(value) || 0 } : item);
-    setItemsObraCivil(updatedItems);
+    const updatedItems = itemsObraCivil.map((item) =>
+      item.id === id ? { ...item, [fieldName]: value } : item
+    );
+    setItemsObraCivil(updatedItems); // Mantenemos los cambios en el estado
     calcularSumas(updatedItems); // Recalcular sumas cuando se actualiza un campo
   };
 
@@ -103,7 +133,6 @@ const InformeBbva = () => {
       const fileUrl = await InformeBbvaService.uploadFirma(file);
       setFieldValue(fieldName, fileUrl); // Guarda la URL en Formik
       setPreview(URL.createObjectURL(file)); // Muestra la vista previa
-      //toast.success("Archivo subido correctamente");
     } catch (error) {
       toast.error("Error al subir el archivo");
     }
@@ -113,7 +142,7 @@ const InformeBbva = () => {
     try {
       const response = await ItemObraCivilService.getItemsObraCivilByIdInforme(provisionalInformeId);
       setItemsObraCivil(response);
-      calcularSumas(response); // Calcular sumas al cargar los datos
+      calcularSumas(response);
     } catch (error) {
       console.error('Error al obtener los items obra civil:', error);
     }
@@ -122,6 +151,8 @@ const InformeBbva = () => {
   const submitHandler = async (values, { setSubmitting }) => {
     setSubmitting(true);
     try {
+      await handleUpdateItemsAntiguedad(); // Asegúrate de actualizar los items primero
+
       let response;
       // Enviar el informe actualizado al backend
       response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
@@ -156,9 +187,21 @@ const InformeBbva = () => {
   };
 
   const handleCloseModalAntiguedades = () => {
-    setIsModalOpen(false);
-    //fetchItemsObraCivilByInformeId(provisionalInformeId); // Refresca los items obra civil
-    //calcularSumas(itemsObraCivil);
+    setIsModalAntiguedadesOpen(false);
+    fetchItemsObraCivilByInformeId(provisionalInformeId);
+  };
+
+
+  const handleOpenModalAntiguedadesDescripcion = (e, local = null) => {
+    e.stopPropagation();
+    setCurrentItem();
+    setIsModalAntiguedadesDescripcionOpen(true);
+  };
+
+  const handleCloseModalAntiguedadesDescripcion = () => {
+    setIsModalAntiguedadesDescripcionOpen(false);
+    fetchItemsObraCivilByInformeId(provisionalInformeId);
+    setAntiguedadesDescripcion(true);
   };
 
 
@@ -168,8 +211,10 @@ const InformeBbva = () => {
 
   const handleSaveItemActualizacion = async (local) => {
     handleCloseModalAntiguedades();
-    setIsModalOpen(false);
+  };
 
+  const handleSaveItemActualizacionDescripcion = async (local) => {
+    handleCloseModalAntiguedadesDescripcion();
   };
 
   return (
@@ -3114,18 +3159,163 @@ const InformeBbva = () => {
                       <h4 className="text-xl text-green-900">Items</h4>
 
                       <div className="grid grid-cols-12 items-center gap-4 bg-gray-100 p-2 rounded-t-md">
-                        <div className="col-span-3 text-center text-green-900 font-bold">Tipo Obra Civil</div>
+                        <div className="col-span-3 text-center text-green-900 font-bold"> Obra Civil</div>
                         <div className="col-span-3 text-center text-green-900 font-bold">Descripción de la  intervención</div>
                         <div className="col-span-3 text-center text-green-900 font-bold">Superficie (m²)</div>
                         <div className="col-span-3 text-center text-green-900 font-bold">Año</div>
                       </div>
 
-
+                      {itemsObraCivil
+                        .filter(itemObraCivil => itemObraCivil.descripcionIntervencionAntiguedad)
+                        .map((itemObraCivil) => (
+                          <div key={itemObraCivil.id} className="grid grid-cols-12 items-center gap-4 mb-1 p-2 bg-white rounded-md">
+                            <Field
+                              as="select"
+                              name={`obraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              defaultValue={itemObraCivil.obraCivilSeccionEDescripcionInmueble}
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'obraCivilSeccionEDescripcionInmueble', e.target.value)}
+                            >
+                              <option value="">Seleccionar opción</option>
+                              {itemsObraCivil.map((optionItem) => (
+                                <option key={optionItem.id} value={optionItem.obraCivilSeccionEDescripcionInmueble}>
+                                  {optionItem.obraCivilSeccionEDescripcionInmueble}
+                                </option>
+                              ))}
+                            </Field>
+                            <Field
+                              type="text"
+                              name={`descripcionIntervencionAntiguedad_${itemObraCivil.id}`}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              defaultValue={itemObraCivil.descripcionIntervencionAntiguedad}
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionIntervencionAntiguedad', e.target.value)}
+                            />
+                            <Field
+                              type="number"
+                              name={`superficieAntiguedad_${itemObraCivil.id}`}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              defaultValue={itemObraCivil.superficieAntiguedad}
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'superficieAntiguedad', parseFloat(e.target.value))}
+                            />
+                            <Field
+                              type="number"
+                              name={`anoAntiguedad_${itemObraCivil.id}`}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              defaultValue={itemObraCivil.anoAntiguedad}
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'anoAntiguedad', parseInt(e.target.value, 10))}
+                            />
+                          </div>
+                        ))}
 
                     </div>
                   </div>
 
 
+                  <h6 className="text-lg p-2 text-green-900 text-center">E.2 Descripción detallada</h6>
+
+                  <div className="grid grid-cols-12 gap-2 pt-10">
+                    <div className="col-span-12 text-center">
+                      <div className="grid grid-template-rows: auto 1fr">
+                        <h4 className="text-sm text-center text-gray-700 font-bold">Cimentación supuesta</h4>
+                        <button
+                          onClick={handleOpenModalAntiguedadesDescripcion}
+                          className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
+                          type="button"
+                        >
+                          <img src={plusIcon} alt="Plus icon" className="w-6 h-6 fill-current text-white filter invert" />
+                        </button>
+                      </div>
+                    </div>
+
+
+                    <div className="col-span-12 border p-3 rounded space-y-4">
+                      <h4 className="text-xl text-green-900">Items</h4>
+                      <div className="grid grid-cols-12 items-center gap-4 bg-gray-100 p-2 rounded-t-md">
+                        <div className="col-span-12 text-center text-green-900 font-bold">Cimentación supuesta</div>
+                      </div>
+                      {itemsObraCivil
+                        .filter(itemObraCivil => itemObraCivil.obraCivilSeccionEDescripcionInmueble && isAntiguedadesDescripcion)
+                        .map((itemObraCivil) => (
+                          <div key={itemObraCivil.id} className="grid grid-cols-12 items-center gap-4 mb-1 p-2 bg-white rounded-md">
+                            <Field
+                              as="select"
+                              name={`obraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              defaultValue={itemObraCivil.obraCivilSeccionEDescripcionInmueble}
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'obraCivilSeccionEDescripcionInmueble', e.target.value)}
+                            >
+                              <option value="">Seleccionar opción</option>
+                              {itemsObraCivil.map((optionItem) => (
+                                <option key={optionItem.id} value={optionItem.obraCivilSeccionEDescripcionInmueble}>
+                                  {optionItem.obraCivilSeccionEDescripcionInmueble}
+                                </option>
+                              ))}
+                            </Field>
+                            <div className="col-span-5 text-center">
+                              <Field
+                                type="radio"
+                                name={`pilotesCimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.pilotesCimentacionDescripcion}
+                                className="form-checkbox h-4 w-4"
+                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'pilotesCimentacionDescripcion', e.target.checked)}
+                              />
+                              <label className="p-2 text-gray-700 font-bold text-sm">Pilotes</label>
+
+                              <Field
+                                type="radio"
+                                name={`dadosCimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.dadosCimentacionDescripcion}
+                                className="form-checkbox h-4 w-4"
+                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'dadosCimentacionDescripcion', e.target.checked)}
+                              />
+                              <label className="p-2 text-gray-700 font-bold text-sm">Dados</label>
+
+                              <Field
+                                type="radio"
+                                name={`patinesCimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.patinesCimentacionDescripcion}
+                                className="form-checkbox h-4 w-4"
+                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'patinesCimentacionDescripcion', e.target.checked)}
+                              />
+                              <label className="p-2 text-gray-700 font-bold text-sm">Patines</label>
+
+                              <Field
+                                type="radio"
+                                name={`zapCorridaCimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.zapCorridaCimentacionDescripcion}
+                                className="form-checkbox h-4 w-4"
+                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'zapCorridaCimentacionDescripcion', e.target.checked)}
+                              />
+                              <label className="p-2 text-gray-700 font-bold text-sm">Zap. corrida</label>
+
+                              <Field
+                                type="radio"
+                                name={`plateaCimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.plateaCimentacionDescripcion}
+                                className="form-checkbox h-4 w-4"
+                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'plateaCimentacionDescripcion', e.target.checked)}
+                              />
+                              <label className="p-2 text-gray-700 font-bold text-sm">Platea</label>
+                            </div>
+                            <label
+                              htmlFor="otrosDescripcionCimentacionDescripcion"
+                              className="col-span-2 pl-3 text-sm text-gray-700 font-bold"
+                            >
+                              Otros/Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              name={`otrosDescripcionCimentacionDescripcion_${itemObraCivil.id}`}
+                              defaultValue={itemObraCivil.otrosDescripcionCimentacionDescripcion}
+                              className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                            />
+                          </div>
+                        ))}
+
+
+                    </div>
+
+                  </div>
 
                 </div>
               </div>
@@ -3148,7 +3338,6 @@ const InformeBbva = () => {
         idInformeBbva={provisionalInformeId}
         initialFormData={currentItem || {}}
         onSave={handleSaveItem}
-
       />
       <ItemAntiguedadesModal
         isOpen={isModalAntiguedadesOpen}
@@ -3156,7 +3345,15 @@ const InformeBbva = () => {
         idInformeBbva={provisionalInformeId}
         initialFormData={currentItem || {}}
         onSave={handleSaveItemActualizacion}
-
+        onUpdate={handleItemUpdate}
+      />
+      <ItemAntiguedadesDescripcionModal
+        isOpen={isModalAntiguedadesDescripcionOpen}
+        onRequestClose={handleCloseModalAntiguedadesDescripcion}
+        idInformeBbva={provisionalInformeId}
+        initialFormData={currentItem || {}}
+        onSave={handleSaveItemActualizacionDescripcion}
+        onUpdate={handleItemUpdate}
       />
     </div >
   );
