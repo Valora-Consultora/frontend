@@ -28,6 +28,7 @@ const ItemObraCivilService = {
   },
   updateItemObraCivil: async (id, updatedFields) => {
     try {
+      console.log('updatedFields ', updatedFields);
       const response = await axios.put(`${API_URL}/api/itemObraCivil/${id}`, updatedFields, {
         headers: { 'Content-Type': 'application/json' },
       });
