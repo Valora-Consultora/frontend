@@ -6,10 +6,10 @@ import BbvaLogo from "../../images/logo-bbva.png";
 import { Formik, Form, Field } from 'formik';
 import InformeBbvaService from '../../api/InformeBbvaService';
 import ItemObraCivilModal from '../utils/ItemObraCivilModal';
-import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
-import ItemAntiguedadesDescripcionModal from '../utils/ItemAntiguedadesDescripcionModal';
 import plusIcon from '../../images/plusIcon.png';
 import ItemObraCivilService from '../../api/ItemObraCivilService';
+import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
+import ItemAntiguedadesDescripcionModal from '../utils/ItemAntiguedadesDescripcionModal';
 
 const InformeBbva = () => {
   const navigate = useNavigate();
@@ -18,10 +18,10 @@ const InformeBbva = () => {
   const [firmaTasadorPreview, setFirmaTasadorPreview] = useState(null);
   const [firmaRepresentantePreview, setFirmaRepresentantePreview] = useState(null);
   const [fotoAreaCroquisUbicacionPreview, setFotoAreaCroquisUbicacionPreview] = useState(null);
-  const [bothChecked, setBothChecked] = useState(false);
-  const [itemsObraCivil, setItemsObraCivil] = useState([]);
-  const [isVisible, setIsVisible] = useState(true);
-  const [sumaDocumentada, setSumaDocumentada] = useState(0);
+/*   const [bothChecked, setBothChecked] = useState(false);
+ */  const [itemsObraCivil, setItemsObraCivil] = useState([]);
+/*   const [isVisible, setIsVisible] = useState(true);
+ */  const [sumaDocumentada, setSumaDocumentada] = useState(0);
   const [sumaVerificada, setSumaVerificada] = useState(0);
   const [sumaCubierta, setSumaCubierta] = useState({ documentada: 0, verificada: 0 });
   const [sumaSemiCubierta, setSumaSemiCubierta] = useState({ documentada: 0, verificada: 0 });
@@ -32,8 +32,10 @@ const InformeBbva = () => {
   const [currentItem, setCurrentItem] = useState(null);
   const [isModalAntiguedadesOpen, setIsModalAntiguedadesOpen] = useState(false);
   const [isModalAntiguedadesDescripcionOpen, setIsModalAntiguedadesDescripcionOpen] = useState(false);
-  const [isAntiguedadesDescripcion, setAntiguedadesDescripcion] = useState(false);
-
+  /*   const [isModalAntiguedadesCubiertaOpen, setIsModalAntiguedadesCubiertaOpen] = useState(false);
+   */
+  /*   const [isAntiguedadesCimentacionDescripcion, setAntiguedadesCimentacionDescripcion] = useState(false);
+   */
 
   // Funcion para actualizar las sumas en tiempo real
   const calcularSumas = (items) => {
@@ -43,19 +45,22 @@ const InformeBbva = () => {
     let otros = { documentada: 0, verificada: 0 };
 
     items.forEach((item) => {
-      const { superficieDocumentadaObraCivilSeccionEDescripcionInmueble: doc, superficieVerificadaObraCivilSeccionEDescripcionInmueble: ver, tipoObraCivilSeccionEDescripcionInmueble: tipo } = item;
-      totalDoc += doc || 0;
-      totalVer += ver || 0;
+      const doc = Number(item.superficieDocumentadaObraCivilSeccionEDescripcionInmueble) || 0;
+      const ver = Number(item.superficieVerificadaObraCivilSeccionEDescripcionInmueble) || 0;
+      const tipo = item.tipoObraCivilSeccionEDescripcionInmueble;
+
+      totalDoc += doc;
+      totalVer += ver;
 
       if (tipo === "Superficie Cubierta") {
-        cubierta.documentada += doc || 0;
-        cubierta.verificada += ver || 0;
+        cubierta.documentada += doc;
+        cubierta.verificada += ver;
       } else if (tipo === "Superficie Semi Cubierta") {
-        semiCubierta.documentada += doc || 0;
-        semiCubierta.verificada += ver || 0;
+        semiCubierta.documentada += doc;
+        semiCubierta.verificada += ver;
       } else {
-        otros.documentada += doc || 0;
-        otros.verificada += ver || 0;
+        otros.documentada += doc;
+        otros.verificada += ver;
       }
     });
 
@@ -64,26 +69,6 @@ const InformeBbva = () => {
     setSumaCubierta(cubierta);
     setSumaSemiCubierta(semiCubierta);
     setSumaOtros(otros);
-  };
-
-  const handleUpdateItemsAntiguedad = async () => {
-    try {
-      const updatePromises = itemsObraCivil.map(async (item) => {
-        const updatedFields = {
-          descripcionIntervencionAntiguedad: item.descripcionIntervencionAntiguedad,
-          superficieAntiguedad: item.superficieAntiguedad,
-          anoAntiguedad: item.anoAntiguedad,
-        };
-
-        return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
-      });
-
-      //await Promise.all(updatePromises);
-      //toast.success("Items de antigüedad actualizados correctamente");
-    } catch (error) {
-      toast.error("Error al actualizar los items de antigüedad");
-      console.error("Error al actualizar items de antigüedad:", error);
-    }
   };
 
   const handleItemUpdate = (id, updatedData) => {
@@ -101,15 +86,132 @@ const InformeBbva = () => {
     updateBackendTipoObraCivil(id, value); // Actualizar en el backend
   };
 
+
   const handleFieldChange = (id, fieldName, value) => {
-    const updatedItems = itemsObraCivil.map((item) =>
-      item.id === id ? { ...item, [fieldName]: value } : item
-    );
-    setItemsObraCivil(updatedItems); // Mantenemos los cambios en el estado
-    calcularSumas(updatedItems); // Recalcular sumas cuando se actualiza un campo
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          [fieldName]: value,
+        };
+      }
+      return item;
+    });
+
+    setItemsObraCivil(updatedItems);
+    calcularSumas(updatedItems); // Si es necesario recalcular sumas
   };
 
-  // Función para actualizar los valores en el backend
+
+
+  const handleFieldChangeCimentacion = (id, fieldName) => {
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        const resetFields = {
+          pilotesCimentacionDescripcion: false,
+          dadosCimentacionDescripcion: false,
+          patinesCimentacionDescripcion: false,
+          zapCorridaCimentacionDescripcion: false,
+          plateaCimentacionDescripcion: false,
+        };
+        return {
+          ...item,
+          ...resetFields,
+          [fieldName]: true, // Actualiza solo el campo seleccionado
+        };
+      }
+      return item;
+    });
+    setItemsObraCivil(updatedItems); // Actualiza el estado global
+  };
+
+  const handleFieldChangeCubierta = (id, fieldName) => {
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        const resetFields = {
+          hArmadoCubiertaDescripcion: false,
+          maderaCubiertaDescripcion: false,
+          metalicaCubiertaDescripcion: false,
+          bovedillaCubiertaDescripcion: false,
+          otrosCubiertaDescripcion: false,
+        };
+        return {
+          ...item,
+          ...resetFields,
+          [fieldName]: true, // Actualiza solo el campo seleccionado
+        };
+      }
+      return item;
+    });
+    setItemsObraCivil(updatedItems); // Actualiza el estado global
+  };
+
+  const handleFieldChangeRestoEstructura = (id, fieldName) => {
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        const resetFields = {
+          hArmadoRestoEstructuraDescripcion: false,
+          muroPortanteRestoEstructuraDescripcion: false,
+          mContencionRestoEstructuraDescripcion: false,
+          maderaRestoEstructuraDescripcion: false,
+          metalicaRestoEstructuraDescripcion: false,
+          otrosRestoEstructuraDescripcion: false,
+        };
+        return {
+          ...item,
+          ...resetFields,
+          [fieldName]: true, // Actualiza solo el campo seleccionado
+        };
+      }
+      return item;
+    });
+    setItemsObraCivil(updatedItems); // Actualiza el estado global
+  };
+
+
+  const handleFieldChangeMurosInteriorExterior = (id, fieldName) => {
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        const resetFields = {
+          ladrilloMurosInteriorExteriorDescripcion: false,
+          ticholoMurosInteriorExteriorDescripcion: false,
+          maderaMurosInteriorExteriorDescripcion: false,
+          steelFramingMurosInteriorExteriorDescripcion: false,
+          otrosMurosInteriorExteriorDescripcion: false,
+        };
+        return {
+          ...item,
+          ...resetFields,
+          [fieldName]: true, // Actualiza solo el campo seleccionado
+        };
+      }
+      return item;
+    });
+    setItemsObraCivil(updatedItems); // Actualiza el estado global
+  };
+
+  const handleFieldChangeMurosInteriorInterior = (id, fieldName) => {
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        const resetFields = {
+          ladrilloMurosInteriorInteriorDescripcion: false,
+          ticholoMurosInteriorInteriorDescripcion: false,
+          maderaMurosInteriorInteriorDescripcion: false,
+          steelFramingMurosInteriorInteriorDescripcion: false,
+          otrosMurosInteriorInteriorDescripcion: false,
+        };
+        return {
+          ...item,
+          ...resetFields,
+          [fieldName]: true, // Actualiza solo el campo seleccionado
+        };
+      }
+      return item;
+    });
+    setItemsObraCivil(updatedItems); // Actualiza el estado global
+  };
+
+
   const updateBackend = async (id) => {
     const itemToUpdate = itemsObraCivil.find((item) => item.id === id);
     try {
@@ -119,7 +221,6 @@ const InformeBbva = () => {
     }
   };
 
-  // Función para actualizar el tipo de obra civil en el backend
   const updateBackendTipoObraCivil = async (id, tipoObraCivil) => {
     try {
       await ItemObraCivilService.updateItemObraCivil(id, { tipoObraCivilSeccionEDescripcionInmueble: tipoObraCivil });
@@ -148,25 +249,37 @@ const InformeBbva = () => {
     }
   };
 
-  const submitHandler = async (values, { setSubmitting }) => {
-    setSubmitting(true);
-    try {
-      await handleUpdateItemsAntiguedad(); // Asegúrate de actualizar los items primero
 
-      let response;
-      // Enviar el informe actualizado al backend
-      response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
-      toast.success('Informe creado correctamente');
+  const submitHandler = async () => {
+    try {
+      const updatePromises = itemsObraCivil.map(async (item) => {
+
+        const updatedFields = {
+          pilotesCimentacionDescripcion: item.pilotesCimentacionDescripcion,
+          dadosCimentacionDescripcion: item.dadosCimentacionDescripcion,
+          patinesCimentacionDescripcion: item.patinesCimentacionDescripcion,
+          zapCorridaCimentacionDescripcion: item.zapCorridaCimentacionDescripcion,
+          plateaCimentacionDescripcion: item.plateaCimentacionDescripcion,
+          hArmadoCubiertaDescripcion: item.hArmadoCubiertaDescripcion,
+          maderaCubiertaDescripcion: item.maderaCubiertaDescripcion,
+          metalicaCubiertaDescripcion: item.metalicaCubiertaDescripcion,
+          bovedillaCubiertaDescripcion: item.bovedillaCubiertaDescripcion,
+          otrosCubiertaDescripcion: item.otrosCubiertaDescripcion,
+        };
+        return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
+      });
+
+      await Promise.all(updatePromises);
+      toast.success("Items actualizados correctamente");
       setTimeout(() => {
         navigate('/home');
       }, 3000);
     } catch (error) {
-      toast.error('Error al crear el informe');
-      console.error("Error al crear el informe:", error);
-    } finally {
-      setSubmitting(false);
+      toast.error("Error al actualizar los items");
+      console.error(error);
     }
   };
+
 
   const handleOpenModal = (e, local = null) => {
     e.stopPropagation();
@@ -176,7 +289,7 @@ const InformeBbva = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    fetchItemsObraCivilByInformeId(provisionalInformeId); // Refresca los items obra civil
+    fetchItemsObraCivilByInformeId(provisionalInformeId);
     calcularSumas(itemsObraCivil);
   };
 
@@ -201,8 +314,20 @@ const InformeBbva = () => {
   const handleCloseModalAntiguedadesDescripcion = () => {
     setIsModalAntiguedadesDescripcionOpen(false);
     fetchItemsObraCivilByInformeId(provisionalInformeId);
-    setAntiguedadesDescripcion(true);
-  };
+/*     setAntiguedadesCimentacionDescripcion(true);
+ */  };
+
+  /*   const handleOpenModalAntiguedadesCubiertaDescripcion = (e, local = null) => {
+      e.stopPropagation();
+      setCurrentItem();
+      setIsModalAntiguedadesCubiertaOpen(true);
+    };
+  
+    const handleCloseModalAntiguedadesCubiertaDescripcion = () => {
+      setIsModalAntiguedadesCubiertaOpen(false);
+      fetchItemsObraCivilByInformeId(provisionalInformeId);
+    }; */
+
 
 
   const handleSaveItem = async (local) => {
@@ -216,6 +341,11 @@ const InformeBbva = () => {
   const handleSaveItemActualizacionDescripcion = async (local) => {
     handleCloseModalAntiguedadesDescripcion();
   };
+
+  /*   const handleSaveItemActualizacionCubiertaDescripcion = async (local) => {
+      handleCloseModalAntiguedadesCubiertaDescripcion();
+    };
+   */
 
   return (
     <div className="bg-gray-100">
@@ -2660,7 +2790,7 @@ const InformeBbva = () => {
                             name={`tipoObraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
                             className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                             defaultValue={itemObraCivil.tipoObraCivilSeccionEDescripcionInmueble}
-                            onChange={(e) => handleSelectChange(itemObraCivil.id, e.target.value)} // Llama a handleSelectChange
+                            onChange={(e) => handleSelectChange(itemObraCivil.id, e.target.value)}
                           >
                             <option value="">Seleccionar opción</option>
                             <option value="Superficie Cubierta">Superficie Cubierta</option>
@@ -3216,7 +3346,7 @@ const InformeBbva = () => {
                   <div className="grid grid-cols-12 gap-2 pt-10">
                     <div className="col-span-12 text-center">
                       <div className="grid grid-template-rows: auto 1fr">
-                        <h4 className="text-sm text-center text-gray-700 font-bold">Cimentación supuesta</h4>
+                        <h4 className="text-sm text-center text-gray-700 font-bold">Asignar descripción a Items</h4>
                         <button
                           onClick={handleOpenModalAntiguedadesDescripcion}
                           className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
@@ -3230,85 +3360,391 @@ const InformeBbva = () => {
 
                     <div className="col-span-12 border p-3 rounded space-y-4">
                       <h4 className="text-xl text-green-900">Items</h4>
-                      <div className="grid grid-cols-12 items-center gap-4 bg-gray-100 p-2 rounded-t-md">
-                        <div className="col-span-12 text-center text-green-900 font-bold">Cimentación supuesta</div>
-                      </div>
                       {itemsObraCivil
-                        .filter(itemObraCivil => itemObraCivil.obraCivilSeccionEDescripcionInmueble && isAntiguedadesDescripcion)
-                        .map((itemObraCivil) => (
-                          <div key={itemObraCivil.id} className="grid grid-cols-12 items-center gap-4 mb-1 p-2 bg-white rounded-md">
-                            <Field
-                              as="select"
-                              name={`obraCivilSeccionEDescripcionInmueble_${itemObraCivil.id}`}
-                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              defaultValue={itemObraCivil.obraCivilSeccionEDescripcionInmueble}
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'obraCivilSeccionEDescripcionInmueble', e.target.value)}
-                            >
-                              <option value="">Seleccionar opción</option>
-                              {itemsObraCivil.map((optionItem) => (
-                                <option key={optionItem.id} value={optionItem.obraCivilSeccionEDescripcionInmueble}>
-                                  {optionItem.obraCivilSeccionEDescripcionInmueble}
-                                </option>
-                              ))}
-                            </Field>
-                            <div className="col-span-5 text-center">
-                              <Field
-                                type="radio"
-                                name={`pilotesCimentacionDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.pilotesCimentacionDescripcion}
-                                className="form-checkbox h-4 w-4"
-                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'pilotesCimentacionDescripcion', e.target.checked)}
-                              />
-                              <label className="p-2 text-gray-700 font-bold text-sm">Pilotes</label>
+                        .filter(itemObraCivil =>
+                          itemObraCivil.obraCivilSeccionEDescripcionInmueble &&
+                          (
+                            itemObraCivil.pilotesCimentacionDescripcion ||
+                            itemObraCivil.dadosCimentacionDescripcion ||
+                            itemObraCivil.patinesCimentacionDescripcion ||
+                            itemObraCivil.zapCorridaCimentacionDescripcion ||
+                            itemObraCivil.plateaCimentacionDescripcion
+                          )
+                        ).map((itemObraCivil) => (
+                          <div key={itemObraCivil.id} className="grid grid-cols-12  p-2 items-center">
 
-                              <Field
-                                type="radio"
-                                name={`dadosCimentacionDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.dadosCimentacionDescripcion}
-                                className="form-checkbox h-4 w-4"
-                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'dadosCimentacionDescripcion', e.target.checked)}
-                              />
-                              <label className="p-2 text-gray-700 font-bold text-sm">Dados</label>
-
-                              <Field
-                                type="radio"
-                                name={`patinesCimentacionDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.patinesCimentacionDescripcion}
-                                className="form-checkbox h-4 w-4"
-                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'patinesCimentacionDescripcion', e.target.checked)}
-                              />
-                              <label className="p-2 text-gray-700 font-bold text-sm">Patines</label>
-
-                              <Field
-                                type="radio"
-                                name={`zapCorridaCimentacionDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.zapCorridaCimentacionDescripcion}
-                                className="form-checkbox h-4 w-4"
-                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'zapCorridaCimentacionDescripcion', e.target.checked)}
-                              />
-                              <label className="p-2 text-gray-700 font-bold text-sm">Zap. corrida</label>
-
-                              <Field
-                                type="radio"
-                                name={`plateaCimentacionDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.plateaCimentacionDescripcion}
-                                className="form-checkbox h-4 w-4"
-                                onChange={(e) => handleFieldChange(itemObraCivil.id, 'plateaCimentacionDescripcion', e.target.checked)}
-                              />
-                              <label className="p-2 text-gray-700 font-bold text-sm">Platea</label>
+                            <div className="col-span-12 mb-3 mt-5">
+                              <span
+                                className="col-span-3 px-2 py-1 border rounded-md text-green-900 "
+                              >
+                                {itemObraCivil.obraCivilSeccionEDescripcionInmueble || ""}
+                              </span>
                             </div>
+
+                            <div className="col-span-12 text-center">
+                              <h6 className="text-center p-4  text-green-900 ">Cimentación supuesta</h6>
+                            </div>
+
+                            <div className="col-span-6 flex flex-wrap gap-x-6 gap-y-4">
+                              <Field
+                                type="radio"
+                                name={`cimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.pilotesCimentacionDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCimentacion(itemObraCivil.id, 'pilotesCimentacionDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Pilotes</label>
+
+                              <Field
+                                type="radio"
+                                name={`cimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.dadosCimentacionDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCimentacion(itemObraCivil.id, 'dadosCimentacionDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Dados</label>
+
+                              <Field
+                                type="radio"
+                                name={`cimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.patinesCimentacionDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCimentacion(itemObraCivil.id, 'patinesCimentacionDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Patines</label>
+
+                              <Field
+                                type="radio"
+                                name={`cimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.zapCorridaCimentacionDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCimentacion(itemObraCivil.id, 'zapCorridaCimentacionDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Zap. corrida</label>
+
+                              <Field
+                                type="radio"
+                                name={`cimentacionDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.plateaCimentacionDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCimentacion(itemObraCivil.id, 'plateaCimentacionDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Platea</label>
+                            </div>
+
+
+
                             <label
                               htmlFor="otrosDescripcionCimentacionDescripcion"
-                              className="col-span-2 pl-3 text-sm text-gray-700 font-bold"
-                            >
+                              className="col-span-2 pl-3 text-sm text-gray-700 font-bold">
                               Otros/Descripción
                             </label>
                             <Field
                               type="text"
                               name={`otrosDescripcionCimentacionDescripcion_${itemObraCivil.id}`}
                               defaultValue={itemObraCivil.otrosDescripcionCimentacionDescripcion}
-                              className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              className="col-span-4 mb-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'otrosDescripcionCimentacionDescripcion', e.target.value)}
                             />
+
+                            <div className="col-span-12 text-center">
+                              <h6 className="text-center p-4  text-green-900 ">Cubierta</h6>
+                            </div>
+
+                            <div className="col-span-6 flex flex-wrap gap-x-6 gap-y-4">
+
+                              <Field
+                                type="radio"
+                                name={`cubiertaDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.hArmadoCubiertaDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCubierta(itemObraCivil.id, 'hArmadoCubiertaDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">H.Armado</label>
+
+                              <Field
+                                type="radio"
+                                name={`cubiertaDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.maderaCubiertaDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCubierta(itemObraCivil.id, 'maderaCubiertaDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Madera</label>
+
+                              <Field
+                                type="radio"
+                                name={`cubiertaDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.metalicaCubiertaDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCubierta(itemObraCivil.id, 'metalicaCubiertaDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Metálica</label>
+
+
+                              <Field
+                                type="radio"
+                                name={`cubiertaDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.bovedillaCubiertaDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCubierta(itemObraCivil.id, 'bovedillaCubiertaDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Bovedilla</label>
+
+                              <Field
+                                type="radio"
+                                name={`cubiertaDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.otrosCubiertaDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeCubierta(itemObraCivil.id, 'otrosCubiertaDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Otros</label>
+
+                            </div>
+
+
+                            <label
+                              htmlFor="otrosDescripcionCubiertaDescripcion"
+                              className="col-span-2 pl-3 text-sm text-gray-700 font-bold">
+                              Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              name={`otrosDescripcionCubiertaDescripcion_${itemObraCivil.id}`}
+                              defaultValue={itemObraCivil.otrosDescripcionCubiertaDescripcion}
+                              className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'otrosDescripcionCubiertaDescripcion', e.target.value)}
+                            />
+
+
+                            <div className="col-span-12 text-center">
+                              <h6 className="text-center p-4  text-green-900 ">Tipo y composición</h6>
+                            </div>
+
+                            <label
+                              htmlFor="otrosDescripcionTipoComposicionDescripcion"
+                              className="col-span-2 pl-3 text-sm text-gray-700 font-bold">
+                              Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              name={`otrosDescripcionTipoComposicionDescripcion_${itemObraCivil.id}`}
+                              defaultValue={itemObraCivil.otrosDescripcionTipoComposicionDescripcion}
+                              className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'otrosDescripcionTipoComposicionDescripcion', e.target.value)}
+                            />
+
+
+                            <div className="col-span-12 text-center">
+                              <h6 className="text-center p-4  text-green-900 ">Resto de estructura</h6>
+                            </div>
+
+                            <div className="col-span-8 flex flex-wrap gap-x-6 gap-y-4">
+
+                              <Field
+                                type="radio"
+                                name={`hArmadoRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.hArmadoCubiertaDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'hArmadoRestoEstructuraDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">H.Armado</label>
+
+                              <Field
+                                type="radio"
+                                name={`muroPortanteRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.muroPortanteRestoEstructuraDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'muroPortanteRestoEstructuraDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Muro portante</label>
+
+                              <Field
+                                type="radio"
+                                name={`mContencionRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.mContencionRestoEstructuraDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'mContencionRestoEstructuraDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">M. contención</label>
+
+                              <Field
+                                type="radio"
+                                name={`maderaRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.maderaRestoEstructuraDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'maderaRestoEstructuraDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Madera</label>
+
+                              <Field
+                                type="radio"
+                                name={`metalicaRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.metalicaRestoEstructuraDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'metalicaRestoEstructuraDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Metálica</label>
+
+                              <Field
+                                type="radio"
+                                name={`otrosRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.otrosRestoEstructuraDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'otrosRestoEstructuraDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Otros</label>
+
+                            </div>
+
+                            <label
+                              htmlFor="descripcionRestoEstructuraDescripcion"
+                              className="col-span-1 pl-3 text-sm text-gray-700 font-bold">
+                              Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              name={`descripcionRestoEstructuraDescripcion_${itemObraCivil.id}`}
+                              defaultValue={itemObraCivil.descripcionRestoEstructuraDescripcion}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionRestoEstructuraDescripcion', e.target.value)}
+                            />
+
+
+                            <div className="col-span-12 p-4 items-center ">
+                              <h6 className="text-center col-span-12  text-green-900 ">Muros interior-exterior</h6>
+                              <h6 className="text-center col-span-12 text-green-900 ">Composición </h6>
+                            </div>
+
+                            <div className="col-span-8 flex flex-wrap gap-x-6 gap-y-4">
+
+                              <Field
+                                type="radio"
+                                name={`ladrilloMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.ladrilloMurosInteriorExteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorExterior(itemObraCivil.id, 'ladrilloMurosInteriorExteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Ladrillo</label>
+
+                              <Field
+                                type="radio"
+                                name={`ticholoMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.ticholoMurosInteriorExteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorExterior(itemObraCivil.id, 'ticholoMurosInteriorExteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Ticholo</label>
+
+                              <Field
+                                type="radio"
+                                name={`maderaMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.maderaMurosInteriorExteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorExterior(itemObraCivil.id, 'maderaMurosInteriorExteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Madera</label>
+
+                              <Field
+                                type="radio"
+                                name={`steelFramingMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.steelFramingMurosInteriorExteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorExterior(itemObraCivil.id, 'steelFramingMurosInteriorExteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Steel Framing</label>
+
+                              <Field
+                                type="radio"
+                                name={`otrosMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.otrosMurosInteriorExteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorExterior(itemObraCivil.id, 'otrosMurosInteriorExteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Otros</label>
+
+                            </div>
+
+                            <label
+                              htmlFor="descripcionMurosInteriorExteriorDescripcion"
+                              className="col-span-1 pl-3 text-sm text-gray-700 font-bold">
+                              Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              name={`descripcionMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
+                              defaultValue={itemObraCivil.descripcionMurosInteriorExteriorDescripcion}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionMurosInteriorExteriorDescripcion', e.target.value)}
+                            />
+
+
+                            <div className="col-span-12 p-4 items-center ">
+                              <h6 className="text-center col-span-12  text-green-900 ">Muros interior-interior</h6>
+                              <h6 className="text-center col-span-12 text-green-900 ">Composición </h6>
+                            </div>
+
+                            <div className="col-span-8 flex flex-wrap gap-x-6 gap-y-4">
+
+                              <Field
+                                type="radio"
+                                name={`ladrilloMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.ladrilloMurosInteriorInteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorInterior(itemObraCivil.id, 'ladrilloMurosInteriorInteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Ladrillo</label>
+
+                              <Field
+                                type="radio"
+                                name={`ticholoMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.ticholoMurosInteriorInteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorInterior(itemObraCivil.id, 'ticholoMurosInteriorInteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Ticholo</label>
+
+                              <Field
+                                type="radio"
+                                name={`maderaMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.maderaMurosInteriorInteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorInterior(itemObraCivil.id, 'maderaMurosInteriorInteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Madera</label>
+
+                              <Field
+                                type="radio"
+                                name={`steelFramingMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.steelFramingMurosInteriorInteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorInterior(itemObraCivil.id, 'steelFramingMurosInteriorInteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Steel Framing</label>
+
+                              <Field
+                                type="radio"
+                                name={`otrosMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
+                                checked={itemObraCivil.otrosMurosInteriorInteriorDescripcion}
+                                className="form-radio h-4 w-4"
+                                onChange={() => handleFieldChangeMurosInteriorInterior(itemObraCivil.id, 'otrosMurosInteriorInteriorDescripcion')}
+                              />
+                              <label className="text-gray-700 font-bold text-sm">Otros</label>
+
+                            </div>
+
+                            <label
+                              htmlFor="descripcionMurosInteriorInteriorDescripcion"
+                              className="col-span-1 pl-3 text-sm text-gray-700 font-bold">
+                              Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              name={`descripcionMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
+                              defaultValue={itemObraCivil.descripcionMurosInteriorInteriorDescripcion}
+                              className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionMurosInteriorInteriorDescripcion', e.target.value)}
+                            />
+
                           </div>
                         ))}
 
@@ -3316,6 +3752,8 @@ const InformeBbva = () => {
                     </div>
 
                   </div>
+
+
 
                 </div>
               </div>
@@ -3355,6 +3793,15 @@ const InformeBbva = () => {
         onSave={handleSaveItemActualizacionDescripcion}
         onUpdate={handleItemUpdate}
       />
+      {/*       <ItemAntiguedadesCubiertaModal
+        isOpen={isModalAntiguedadesCubiertaOpen}
+        onRequestClose={handleCloseModalAntiguedadesCubiertaDescripcion}
+        idInformeBbva={provisionalInformeId}
+        initialFormData={currentItem || {}}
+        onSave={handleSaveItemActualizacionCubiertaDescripcion}
+        onUpdate={handleItemUpdate}
+      />
+ */}
     </div >
   );
 };
