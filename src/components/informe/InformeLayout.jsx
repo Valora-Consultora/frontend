@@ -69,7 +69,7 @@ const InformeLayout = () => {
                 onChange={handleBancoChange}
                 className="rounded py-2 px-3 leading-tight border text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-900 w-2/3"
               >
-                <option value="">seleccionar</option>
+                <option value="">Seleccionar</option>
                 {bancos.map((banco) => (
                   <option key={banco.id} value={banco.id}>
                     {banco.nombre}

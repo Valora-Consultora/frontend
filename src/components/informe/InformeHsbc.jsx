@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import HsbcLogo from "../../images/logo-hsbc.png";
+import CheckboxGroup from '../../components/CheckboxGroup';
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,34 +11,79 @@ const FormularioHsbc = () => {
   const [formData, setFormData] = useState({
     /// Información General
     solicitante: "",
-    oficial: "",
+    banco: "", // Es necesario? Siempre sera HSBC?
+    contactoSolicitante: "",
+    contactoBanco: "",
+    telefonos: "", // Puede haber mas de uno?
     sucursal: "",
-    titular: "",
-    cedula: "",
-    direccion: "",
-    padron: "",
+    calle: "",
+    esquina: "",
     localidad: "",
+    numero: "",
+    seccionJudicial: "",
     departamento: "",
-    /// Superficies
-    supPredio: "",
-    supConstruida: "",
-    comodidades: "",
+    unidad: "",
+    padron: "",
+
+    /// Aspectos urbanos
+    identificacionCatastral: [], // Unico?
+    caracteristicas: [],
+    densidad: [], // Unico?
+    servicios: [],
+    indiceCrecimiento: [], // Unico?
+    oferta: [], // Unico?
+    descripcionZona: "",
+    /// Descripcion del predio
+    topografia: "",
+    forma: "",
+    retiros: [], // Unico?
+    // Deslinde
+    deslindeFrente: "",
+    deslindeFondo: "",
+    descripcionPredio: "",
+    entornoUrbano: "", // TODO: FOTO
+
+    /// Descripcion del bien
+    // Comodidades - ambiente
+    livingComedor: 0,
+    cocina: 0,
+    dormitorio: 0,
+    banio: 0, // ñ?
+    escritorio: 0,
+    toilette: 0,
+    terraza: 0,
+    garajeBox: 0,
+    // Consideraciones
+    categorizacion: "",
     conservacion: "",
-    /// Avalúo
-    valorMercado: "",
-    valorVentaRapida: "",
-    valorRemate: "",
-    costoReposicion: "",
-    /// Relevamiento Fotográfico
-    fotos: [],
-    /// Comparable
+    // Caracteristicas constructivas
+    estructura: [],
+    cubierta: [],
+    carpinteria: [],
+    muros: [],
+    terminaciones: [],
+    revestimientos: [],
+    pisos: [],
+    // Servicios - instalaciones
+    instalacionAgua: [],
+    instalacionSanitaria: [],
+    instalacionElectrica: [],
+    instalacionTermica: [],
+    // Relevamiento fotografico
+    superficieTerreno: "",
+    //   Ver como colocar estos, tenemos que obtenerlos de la lista de cosas que coloco
+    bienesPropios: [],
+    bienesComunes: [],
+    superficieEdificada: "",
+    anio: "",
+    vistaExterior: "", // FOTO
+    vistasInteriores: [], // FOTOS
+    // TODO: COMPARABLES
     comparables: [],
-    /// Anexos Gráficos o Catastrales
-    anexos: [],
-    /// Seguro de Incendio
-    seguroIncendio: [],
-    /// Observaciones
-    observaciones: "",
+
+    /// Calculo de avaluo
+    // ...
+    descripcion: "",
   });
 
   const handleInputChange = (e) => {
@@ -105,10 +151,7 @@ const FormularioHsbc = () => {
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Información General</h4>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="solicitante"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
+                  <label htmlFor="solicitante" className="col-span-2 text-sm text-gray-700 font-bold">
                     Solicitante:
                   </label>
                   <input
@@ -121,24 +164,18 @@ const FormularioHsbc = () => {
                   />
                 </div>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="oficial"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Oficial:
+                  <label htmlFor="banco" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Banco:
                   </label>
                   <input
                     type="text"
-                    id="oficial"
-                    name="oficial"
-                    value={formData.oficial}
+                    id="banco"
+                    name="banco"
+                    value={formData.banco}
                     onChange={handleInputChange}
-                    className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
-                  <label
-                    htmlFor="sucursal"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
+                  <label htmlFor="sucursal" className="col-span-2 text-sm text-gray-700 font-bold">
                     Sucursal:
                   </label>
                   <input
@@ -147,74 +184,83 @@ const FormularioHsbc = () => {
                     name="sucursal"
                     value={formData.sucursal}
                     onChange={handleInputChange}
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="titular"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Titular/es:
+                  <label htmlFor="contactoSolicitante" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Contacto Solicitante:
                   </label>
                   <input
                     type="text"
-                    id="titular"
-                    name="titular"
-                    value={formData.titular}
+                    id="contactoSolicitante"
+                    name="contactoSolicitante"
+                    value={formData.contactoSolicitante}
                     onChange={handleInputChange}
-                    className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
-                  <label
-                    htmlFor="cedula"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    CI:
+                  <label htmlFor="contactoBanco" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Contacto Banco:
                   </label>
                   <input
                     type="text"
-                    id="cedula"
-                    name="cedula"
-                    value={formData.cedula}
+                    id="contactoBanco"
+                    name="contactoBanco"
+                    value={formData.contactoBanco}
                     onChange={handleInputChange}
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="direccion"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Dirección:
+                  <label htmlFor="telefonos" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Teléfonos:
                   </label>
                   <input
                     type="text"
-                    id="direccion"
-                    name="direccion"
-                    value={formData.direccion}
+                    id="telefonos"
+                    name="telefonos"
+                    value={formData.telefonos}
                     onChange={handleInputChange}
-                    className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                  <label
-                    htmlFor="padron"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Padrón:
-                  </label>
-                  <input
-                    type="text"
-                    id="padron"
-                    name="padron"
-                    value={formData.padron}
-                    onChange={handleInputChange}
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="localidad"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
+                  <label htmlFor="calle" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Calle:
+                  </label>
+                  <input
+                    type="text"
+                    id="calle"
+                    name="calle"
+                    value={formData.calle}
+                    onChange={handleInputChange}
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label htmlFor="numero" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Número:
+                  </label>
+                  <input
+                    type="text"
+                    id="numero"
+                    name="numero"
+                    value={formData.numero}
+                    onChange={handleInputChange}
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label htmlFor="esquina" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Esquina:
+                  </label>
+                  <input
+                    type="text"
+                    id="esquina"
+                    name="esquina"
+                    value={formData.esquina}
+                    onChange={handleInputChange}
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label htmlFor="localidad" className="col-span-2 text-sm text-gray-700 font-bold">
                     Localidad:
                   </label>
                   <input
@@ -223,12 +269,22 @@ const FormularioHsbc = () => {
                     name="localidad"
                     value={formData.localidad}
                     onChange={handleInputChange}
-                    className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
-                  <label
-                    htmlFor="departamento"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label htmlFor="seccionJudicial" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Sección Judicial:
+                  </label>
+                  <input
+                    type="text"
+                    id="seccionJudicial"
+                    name="seccionJudicial"
+                    value={formData.seccionJudicial}
+                    onChange={handleInputChange}
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label htmlFor="departamento" className="col-span-2 text-sm text-gray-700 font-bold">
                     Departamento:
                   </label>
                   <input
@@ -237,72 +293,384 @@ const FormularioHsbc = () => {
                     name="departamento"
                     value={formData.departamento}
                     onChange={handleInputChange}
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label htmlFor="unidad" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Unidad:
+                  </label>
+                  <input
+                    type="text"
+                    id="unidad"
+                    name="unidad"
+                    value={formData.unidad}
+                    onChange={handleInputChange}
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label htmlFor="padron" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Padrón:
+                  </label>
+                  <input
+                    type="text"
+                    id="padron"
+                    name="padron"
+                    value={formData.padron}
+                    onChange={handleInputChange}
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
               </div>
 
-              {/* Superficies */}
+              {/* Aspectos urbanos */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Superficies</h4>
+                <h4 className="text-xl text-green-900">Aspectos urbanos</h4>
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-6">
+                    <label className="text-green-900 font-bold mb-3">
+                      Identificación Catastral
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Urbana" },
+                        { id: "Suburbana" },
+                        { id: "Rural" },
+                        { id: "Balneario" }
+                      ]}
+                      name="identificacionCatastral"
+                      selectedValues={formData.identificacionCatastral}
+                      onChange={handleInputChange}
+                      idPrefix="catastral"
+                    />
+                  </div>
+                  <div className="col-span-6">
+                    <label className="text-green-900 font-bold mb-3">
+                      Características
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Residencial" },
+                        { id: "Comercial" },
+                        { id: "Industrial" },
+                        { id: "Rural" }
+                      ]}
+                      name="caracteristicas"
+                      selectedValues={formData.caracteristicas}
+                      onChange={handleInputChange}
+                      idPrefix="caracteristica"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-6">
+                    <label className="text-green-900 font-bold mb-3">
+                      Densidad
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Compacta" },
+                        { id: "Media" },
+                        { id: "Poco densa" },
+                        { id: "Rala" },
+                      ]}
+                      name="densidad"
+                      selectedValues={formData.densidad}
+                      onChange={handleInputChange}
+                      idPrefix="densidad"
+                    />
+                  </div>
+                  <div className="col-span-6">
+                    <label className="text-green-900 font-bold mb-3">
+                      Servicios
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Agua - OSE" },
+                        { id: "Agua-otros" },
+                        { id: "Alumbrado Público" },
+                        { id: "Red eléctrica" },
+                        { id: "Instalación de Gas" },
+                        { id: "Saneamiento" },
+                        { id: "Seguridad" },
+                        { id: "Otros" },
+                      ]}
+                      name="servicios"
+                      selectedValues={formData.servicios}
+                      onChange={handleInputChange}
+                      idPrefix="servicio"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-6">
+                    <label className="text-green-900 font-bold mb-3">
+                      Índice de Crecimiento
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Creciente" },
+                        { id: "Estable" },
+                        { id: "Decreciente" },
+                        { id: "Variable" },
+                      ]}
+                      name="indiceCrecimiento"
+                      selectedValues={formData.indiceCrecimiento}
+                      onChange={handleInputChange}
+                      idPrefix="indice"
+                    />
+                  </div>
+                  <div className="col-span-6">
+                    <label className="text-green-900 font-bold mb-3">
+                      Oferta
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Escasa" },
+                        { id: "Equilibrada" },
+                        { id: "Exceso de Oferta" },
+                        { id: "Exceso de Demanda" },
+                      ]}
+                      name="oferta"
+                      selectedValues={formData.oferta}
+                      onChange={handleInputChange}
+                      idPrefix="oferta"
+                    />
+                  </div>
+                </div>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="supPredio"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Sup. Predio:
+                  <label htmlFor="descripcionZona" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Descripción de la Zona:
                   </label>
                   <input
                     type="text"
-                    id="supPredio"
-                    name="supPredio"
-                    value={formData.supPredio}
+                    id="descripcionZona"
+                    name="descripcionZona"
+                    value={formData.descripcionZona}
                     onChange={handleInputChange}
                     className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
+              </div>
+              {/* Descripcion del predio */}
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Descripción del predio</h4>
                 <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="supConstruida"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Sup. Construida:
-                  </label>
-                  <input
-                    type="text"
-                    id="supConstruida"
-                    name="supConstruida"
-                    value={formData.supConstruida}
-                    onChange={handleInputChange}
-                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="comodidades"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Comodidades:
-                  </label>
-                  <textarea
-                    id="comodidades"
-                    name="comodidades"
-                    value={formData.comodidades}
-                    onChange={handleInputChange}
-                    className="col-span-10 px-2 py-1 border min-h-32 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="conservacion"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Estado de Conservación:
+                  <label className="col-span-2 text-sm text-gray-700 font-bold">
+                    Topografía:
                   </label>
                   <div className="col-span-10">
                     <div className="grid grid-cols-12">
-                      {["Muy Bueno", "Bueno", "Aceptable", "Regular"].map(
-                        (estado, index) => (
+                      {["Alto", "Bajo", "A nivel", "Inundable"].map((tipo, index) => (
+                        <React.Fragment key={tipo}>
+                          <div className="col-span-1">
+                            <input
+                              type="radio"
+                              className="form-radio h-4 w-4 text-green-900 col-span-1 mt-1"
+                              id={`topografia${index + 1}`}
+                              name="topografia"
+                              value={tipo}
+                              checked={formData.topografia === tipo}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="col-span-3">
+                            <label
+                              htmlFor={`topografia${index + 1}`}
+                              className="text-gray-700 mr-2"
+                            >
+                              {tipo}
+                            </label>
+                          </div>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label className="col-span-2 text-sm text-gray-700 font-bold">
+                    Forma:
+                  </label>
+                  <div className="col-span-10">
+                    <div className="grid grid-cols-12">
+                      {["Regular", "Irregular"].map((tipo, index) => (
+                        <React.Fragment key={tipo}>
+                          <div className="col-span-1">
+                            <input
+                              type="radio"
+                              className="form-radio h-4 w-4 text-green-900 col-span-1 mt-1"
+                              id={`forma${index + 1}`}
+                              name="forma"
+                              value={tipo}
+                              checked={formData.forma === tipo}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div className="col-span-3">
+                            <label
+                              htmlFor={`forma${index + 1}`}
+                              className="text-gray-700 mr-2"
+                            >
+                              {tipo}
+                            </label>
+                          </div>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-12">
+                    <label className="text-green-900 font-bold mb-3">
+                      Retiros
+                    </label>
+                    <CheckboxGroup
+                      options={[
+                        { id: "Frontales" },
+                        { id: "Laterales" },
+                      ]}
+                      name="retiros"
+                      selectedValues={formData.retiros}
+                      onChange={handleInputChange}
+                      idPrefix="retiro"
+                    />
+                  </div>
+                </div>
+
+                <h5 className="text-lg text-green-900 mt-4">Deslinde</h5>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label htmlFor="deslindeFrente" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Frente:
+                  </label>
+                  <input
+                    type="text"
+                    id="deslindeFrente"
+                    name="deslindeFrente"
+                    value={formData.deslindeFrente}
+                    onChange={handleInputChange}
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label htmlFor="deslindeFondo" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Fondo:
+                  </label>
+                  <input
+                    type="text"
+                    id="deslindeFondo"
+                    name="deslindeFondo"
+                    value={formData.deslindeFondo}
+                    onChange={handleInputChange}
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label htmlFor="descripcionPredio" className="col-span-2 text-sm text-gray-700 font-bold">
+                    Descripción del Predio:
+                  </label>
+                  <textarea
+                    id="descripcionPredio"
+                    name="descripcionPredio"
+                    value={formData.descripcionPredio}
+                    onChange={handleInputChange}
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 min-h-32"
+                  />
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12">
+                    {/* <FileUploadSection
+                      title="Entorno Urbano"
+                      name="entornoUrbano"
+                      accept="image/*"
+                      files={formData.entornoUrbano}
+                      onRemove={handleRemoveFile}
+                    /> */}
+                  </div>
+                </div>
+              </div>
+
+              {/* Descripcion del bien */}
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Descripción del bien</h4>
+
+                {/* Comodidades - ambiente */}
+                <div className="space-y-4">
+                  <h5 className="text-lg text-green-900">Comodidades - ambiente</h5>
+                  <div className="grid grid-cols-12 gap-4">
+                    {[
+                      { id: "livingComedor", label: "Living Comedor" },
+                      { id: "cocina", label: "Cocina" },
+                      { id: "dormitorio", label: "Dormitorio" },
+                      { id: "banio", label: "Baño" },
+                      { id: "escritorio", label: "Escritorio" },
+                      { id: "toilette", label: "Toilette" },
+                      { id: "terraza", label: "Terraza" },
+                      { id: "garajeBox", label: "Garaje/Box" }
+                    ].map(item => (
+                      <div key={item.id} className="col-span-3">
+                        <label htmlFor={item.id} className="text-sm text-gray-700 font-bold">
+                          {item.label}:
+                        </label>
+                        <input
+                          type="number"
+                          id={item.id}
+                          name={item.id}
+                          value={formData[item.id]}
+                          onChange={handleInputChange}
+                          min="0"
+                          className="w-full px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Consideraciones */}
+                <div className="space-y-4">
+                  <h5 className="text-lg text-green-900">Consideraciones</h5>
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <label className="col-span-2 text-sm text-gray-700 font-bold">
+                      Categorización:
+                    </label>
+                    <div className="col-span-10">
+                      <div className="grid grid-cols-12">
+                        {["Modesta", "Económica", "Buena", "Muy buena", "Confortable", "Confortable con calefacción", "Muy confortable", "Suntuosa"].map((cat, index) => (
+                          <React.Fragment key={cat}>
+                            <div className="col-span-1">
+                              <input
+                                type="radio"
+                                className="form-radio h-4 w-4 text-green-900 col-span-1 mt-1"
+                                id={`categorizacion${index + 1}`}
+                                name="categorizacion"
+                                value={cat}
+                                checked={formData.categorizacion === cat}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                            <div className="col-span-3">
+                              <label
+                                htmlFor={`categorizacion${index + 1}`}
+                                className="text-gray-700 mr-2"
+                              >
+                                {cat}
+                              </label>
+                            </div>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <label className="col-span-2 text-sm text-gray-700 font-bold">
+                      Conservación:
+                    </label>
+                    <div className="col-span-10">
+                      <div className="grid grid-cols-12">
+                        {["Demoler", "Malo", "Regular", "Bueno", "Muy bueno", "Excelente", "Ampliación", "En obra"].map((estado, index) => (
                           <React.Fragment key={estado}>
                             <div className="col-span-1">
                               <input
@@ -324,242 +692,267 @@ const FormularioHsbc = () => {
                               </label>
                             </div>
                           </React.Fragment>
-                        )
-                      )}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Avalúo */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Avalúo</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="valorMercado"
-                    className="col-span-3 text-sm text-gray-700 font-bold"
-                  >
-                    Valor de Mercado:
-                  </label>
-                  <input
-                    type="text"
-                    id="valorMercado"
-                    name="valorMercado"
-                    value={formData.valorMercado}
-                    onChange={handleInputChange}
-                    className="col-span-9 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="valorVentaRapida"
-                    className="col-span-3 text-sm text-gray-700 font-bold"
-                  >
-                    Valor de Venta Rápida:
-                  </label>
-                  <input
-                    type="text"
-                    id="valorVentaRapida"
-                    name="valorVentaRapida"
-                    value={formData.valorVentaRapida}
-                    onChange={handleInputChange}
-                    className="col-span-9 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="valorRemate"
-                    className="col-span-3 text-sm text-gray-700 font-bold"
-                  >
-                    Valor de Remate:
-                  </label>
-                  <input
-                    type="text"
-                    id="valorRemate"
-                    name="valorRemate"
-                    value={formData.valorRemate}
-                    onChange={handleInputChange}
-                    className="col-span-9 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="costoReposicion"
-                    className="col-span-3 text-sm text-gray-700 font-bold"
-                  >
-                    Costo de Reposición a Nuevo:
-                  </label>
-                  <input
-                    type="text"
-                    id="costoReposicion"
-                    name="costoReposicion"
-                    value={formData.costoReposicion}
-                    onChange={handleInputChange}
-                    className="col-span-9 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-              </div>
-
-              {/* Relevamiento Fotografico */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">
-                  Relevamiento Fotográfico
-                </h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-12">
-                    <p className="text-sm text-gray-700">
-                      Aquí se podría agregar un componente para subir fotos o
-                      mostrar las fotos ya subidas. Por ahora, este espacio
-                      queda reservado para futuras implementaciones.
-                    </p>
+                {/* Caracteristicas constructivas */}
+                <div className="space-y-4">
+                  <h5 className="text-lg text-green-900">Características constructivas</h5>
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Estructura
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Hormigón Armado" },
+                          { id: "Muro portante" },
+                          { id: "Mixta" },
+                          { id: "Steel Framing" },
+                        ]}
+                        name="estructura"
+                        selectedValues={formData.estructura}
+                        onChange={handleInputChange}
+                        idPrefix="estructura"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Cubierta
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Hormigón Armado" },
+                          { id: "Liviana" },
+                          { id: "Con cielorraso" },
+                          { id: "Sin cielorraso" },
+                        ]}
+                        name="cubierta"
+                        selectedValues={formData.cubierta}
+                        onChange={handleInputChange}
+                        idPrefix="cubierta"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Carpintería
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Madera" },
+                          { id: "Hierro" },
+                          { id: "Aluminio" },
+                          { id: "Blindex" },
+                        ]}
+                        name="carpinteria"
+                        selectedValues={formData.carpinteria}
+                        onChange={handleInputChange}
+                        idPrefix="carpinteria"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Muros
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Cerámicos" },
+                          { id: "Bloques" },
+                          { id: "Yeso" },
+                          { id: "Steel Framing" },
+                        ]}
+                        name="muros"
+                        selectedValues={formData.muros}
+                        onChange={handleInputChange}
+                        idPrefix="muros"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Terminaciones
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Revoque" },
+                          { id: "Pintura al agua" },
+                          { id: "Enduido" },
+                          { id: "Ladrillo visto" },
+                        ]}
+                        name="terminaciones"
+                        selectedValues={formData.terminaciones}
+                        onChange={handleInputChange}
+                        idPrefix="terminaciones"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Revestimientos
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Cerámicos" },
+                          { id: "Azulejos" },
+                          { id: "Estuco" },
+                          { id: "Porcelanato" },
+                        ]}
+                        name="revestimientos"
+                        selectedValues={formData.revestimientos}
+                        onChange={handleInputChange}
+                        idPrefix="revestimientos"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Pisos
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Flotantes" },
+                          { id: "Cerámico" },
+                          { id: "Porcelanato" },
+                          { id: "Parquet" },
+                          { id: "Moquette" },
+                          { id: "Lajota" },
+                          { id: "Vinílico" },
+                          { id: "Piedra laja" },
+                        ]}
+                        name="pisos"
+                        selectedValues={formData.pisos}
+                        onChange={handleInputChange}
+                        idPrefix="pisos"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Comparable */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Comparable</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-12">
-                    <p className="text-sm text-gray-700">
-                      Aquí se podría agregar una tabla o lista de propiedades
-                      comparables. Por ahora, este espacio queda reservado para
-                      futuras implementaciones.
-                    </p>
+                {/* Servicios - instalaciones */}
+                <div className="space-y-4">
+                  <h5 className="text-lg text-green-900">Servicios - instalaciones</h5>
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Instalación de Agua
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Baño" },
+                          { id: "Cocina" },
+                          { id: "Fria" },
+                          { id: "Caliente" },
+                        ]}
+                        name="instalacionAgua"
+                        selectedValues={formData.instalacionAgua}
+                        onChange={handleInputChange}
+                        idPrefix="instalacionAgua"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Instalación Sanitaria
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Colector" },
+                          { id: "Cámara séptica" },
+                          { id: "Pozo negro" },
+                          { id: "Otros" },
+                        ]}
+                        name="instalacionSanitaria"
+                        selectedValues={formData.instalacionSanitaria}
+                        onChange={handleInputChange}
+                        idPrefix="instalacionSanitaria"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Instalación Eléctrica
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Embutida" },
+                          { id: "Exterior" },
+                          { id: "Mixta" },
+                          { id: "Otros" },
+                        ]}
+                        name="instalacionElectrica"
+                        selectedValues={formData.instalacionElectrica}
+                        onChange={handleInputChange}
+                        idPrefix="instalacionElectrica"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-green-900 font-bold mb-3">
+                        Instalación Térmica
+                      </label>
+                      <CheckboxGroup
+                        options={[
+                          { id: "Losa radiante" },
+                          { id: "Aire acondicionado" },
+                          { id: "Calefactores eléctricos" },
+                          { id: "Estufa a leña" },
+                        ]}
+                        name="instalacionTermica"
+                        selectedValues={formData.instalacionTermica}
+                        onChange={handleInputChange}
+                        idPrefix="instalacionTermica"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Anexos Graficos o Catastrales */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">
-                  Anexos Gráficos o Catastrales
-                </h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-12">
-                    <p className="text-sm text-gray-700">
-                      Aquí se podrían agregar documentos o imágenes relacionados
-                      con información catastral. Por ahora, este espacio queda
-                      reservado para futuras implementaciones.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Seguro de Incendio */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Seguro de Incendio</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-6">
-                    <label
-                      htmlFor="seguroIncendioA"
-                      className="text-green-900 font-bold mb-3"
-                    >
-                      Grupo A
+                {/* Superficies y Año */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <label htmlFor="superficieTerreno" className="col-span-2 text-sm text-gray-700 font-bold">
+                      Superficie Terreno:
                     </label>
-                    {[
-                      {
-                        id: "A1",
-                        desc: "Edificios construidos totalmente de material (mampostería) con techo de Hormigón Armado",
-                      },
-                      {
-                        id: "A2",
-                        desc: "Edificios levantados con sistema constructivo Steel Framing.",
-                      },
-                      {
-                        id: "A3",
-                        desc: "Edificios de material con techo de Isopanel.",
-                      },
-                    ].map((item) => (
-                      <div key={item.id} className="mb-2">
-                        <input
-                          type="checkbox"
-                          id={`seguroIncendio${item.id}`}
-                          name="seguroIncendio"
-                          value={item.id}
-                          checked={formData.seguroIncendio.includes(item.id)}
-                          onChange={handleInputChange}
-                          className="mr-2 h-4 w-4"
-                        />
-                        <span>
-                          <label
-                            htmlFor={`seguroIncendio${item.id}`}
-                            className="text-green-900 font-bold"
-                          >
-                            {item.id}
-                          </label>
-                          <p className="text-sm text-gray-700">{item.desc}</p>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="col-span-6">
-                    <label
-                      htmlFor="seguroIncendioB"
-                      className="text-green-900 font-bold mb-3"
-                    >
-                      Grupo B
+                    <input
+                      type="text"
+                      id="superficieTerreno"
+                      name="superficieTerreno"
+                      value={formData.superficieTerreno}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                    <label htmlFor="superficieEdificada" className="col-span-2 text-sm text-gray-700 font-bold">
+                      Superficie Edificada:
                     </label>
-                    {[
-                      {
-                        id: "B1",
-                        desc: "Edificios construidos totalmente de material (mampostería) con techo de chapa.",
-                      },
-                      {
-                        id: "B2",
-                        desc: "Edificios construidos con paredes de bloques, ladrillos o similar y techos livianos.",
-                      },
-                      {
-                        id: "B3",
-                        desc: "Galpones o tinglados con estructura metálica y cerramientos de chapa.",
-                      },
-                    ].map((item) => (
-                      <div key={item.id} className="mb-2">
-                        <input
-                          type="checkbox"
-                          id={`seguroIncendio${item.id}`}
-                          name="seguroIncendio"
-                          value={item.id}
-                          checked={formData.seguroIncendio.includes(item.id)}
-                          onChange={handleInputChange}
-                          className="mr-2 h-4 w-4"
-                        />
-                        <span>
-                          <label
-                            htmlFor={`seguroIncendio${item.id}`}
-                            className="text-green-900 font-bold"
-                          >
-                            {item.id}
-                          </label>
-                          <p className="text-sm text-gray-700">{item.desc}</p>
-                        </span>
+                    <input
+                      type="text"
+                      id="superficieEdificada"
+                      name="superficieEdificada"
+                      value={formData.superficieEdificada}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+                  
+                  {/* Comparable */}
+                  <div className="col-span-12 space-y-4 border p-3 rounded">
+                    <h4 className="text-xl text-green-900">Comparable</h4>
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      <div className="col-span-12">
+                        <p className="text-sm text-gray-700">
+                          Aquí se podría agregar una tabla o lista de propiedades
+                          comparables. Por ahora, este espacio queda reservado para
+                          futuras implementaciones.
+                        </p>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Observaciones */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Observaciones</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <textarea
-                    id="observaciones"
-                    name="observaciones"
-                    value={formData.observaciones}
-                    onChange={handleInputChange}
-                    className="col-span-12 min-h-32 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                <div className="mt-4 text-center">
+                  <button
+                    type="submit"
+                    className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
+                  >
+                    Crear Informe
+                  </button>
                 </div>
               </div>
-            </div>
-            <div className="mt-4 text-center">
-              <button
-                type="submit"
-                className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
-              >
-                Crear Informe
-              </button>
             </div>
           </div>
         </form>
