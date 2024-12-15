@@ -2,7 +2,7 @@ import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
 import axios from "axios";
 
-const API_URL = "http://localhost:8080";
+const API_URL = "https://valora-app-53efe0915b3a.herokuapp.com";
 
 const InformeScotiaService = {
   updateInformeScotia: async (id, informeScotiaData) => {

@@ -5,11 +5,11 @@ const SignUpService = (user) => {
   let url;
   console.log(user);
   if (user.tipo_tasador === 'relevador') {
-    url = 'http://localhost:8080/api/create-relevador';
+    url = 'https://valora-app-53efe0915b3a.herokuapp.com/api/create-relevador';
   } else if (user.tipo_tasador === 'tasador') {
-    url = 'http://localhost:8080/api/create-tasador';
+    url = 'https://valora-app-53efe0915b3a.herokuapp.com/api/create-tasador';
   } else {
-    url = `http://localhost:8080/api/create-${user.tipo_usuario.toLowerCase()}`;
+    url = `https://valora-app-53efe0915b3a.herokuapp.com/api/create-${user.tipo_usuario.toLowerCase()}`;
   }
 
 
