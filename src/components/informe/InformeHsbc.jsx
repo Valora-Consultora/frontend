@@ -1,12 +1,19 @@
 import React, { useState, useRef } from "react";
 import HsbcLogo from "../../images/logo-hsbc.png";
 import CheckboxGroup from '../../components/CheckboxGroup';
+import ComparableSection from "../comparables/ComparableSection";
+import ComparableList from "../comparables/ComparableList";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ComparablesService from "../../api/ComparablesService";
 
 const FormularioHsbc = () => {
   const formRef = useRef();
+
+  const [comparableFilters, setComparableFilters] = useState({});
+  const [comparables, setComparables] = useState([]);
+  const [comparablePage, setComparablePage] = useState(1);
 
   const [formData, setFormData] = useState({
     /// Información General
@@ -99,6 +106,104 @@ const FormularioHsbc = () => {
       setFormData({
         ...formData,
         [name]: value,
+      });
+    }
+  };
+
+  const handleSelectedComparable = (id) => {
+    setComparables((prevComparables) =>
+      prevComparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
+      )
+    );
+  }
+
+  const handleLoadMoreComparables = () => {
+    setComparablePage((prevPage) => prevPage + 1);
+  }
+
+  /// Dado un filtro de comparables, lo convierte a una URL query string
+  const filterToUrlParams = (filter) => {
+    var urlParams = new URLSearchParams();
+    for (const key in filter) {
+      const object = filter[key];
+      if (object.range) {
+        urlParams.append(key, parseRange(key, object));
+      } else {
+        urlParams.append(key, object.value);
+      }
+    }
+    return urlParams.toString();
+  };
+
+  /// Parsear el rango para que quede en formato [value1-value2] con sus 
+  /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
+  /// devolveria (*m²-200m²]
+  const parseRange = (key, object) => {
+    console.log(object);
+    var value = object.value;
+    var value2 = object.value2;
+    var subtype = object.subtype ?? "";
+
+    // Increible que los locos de ML hayan puesto un formato especifico solo para
+    // precios, pero bueno, aca estamos
+    if (key === "price") {
+      var rangeString = "";
+      rangeString += value ? + value : "*";
+      rangeString += subtype + "-";
+      rangeString += value2 ? value2 + subtype : "*" + subtype;
+    } else {
+      var rangeString = "";
+      rangeString += value ? "[" + value : "(*";
+      rangeString += subtype + "-";
+      rangeString += value2 ? value2 + subtype + "]" : "*" + subtype + ")";
+    }
+    return rangeString;
+  };
+
+  /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
+  /// formato que pueda ser utilizado en la URL y lo setea en el estado
+  const modifyFilter = (id, value, opts) => {
+    console.log('Modificando filtro:', id, value, opts)
+    var newFilter = {};
+
+    if (opts?.range !== undefined) {
+      newFilter.range = true;
+    }
+
+    if (opts?.range === 0 || !opts?.range) {
+      newFilter.value = value;
+    } else if (opts?.range === 1) {
+      newFilter.value2 = value;
+    }
+
+    if (opts?.subtype) {
+      newFilter.subtype = opts.subtype;
+    }
+
+    console.log('Seteando filtro:', newFilter);
+
+    setComparableFilters((prevFilters) => ({
+      ...prevFilters,
+      [id]: { ...prevFilters[id], ...newFilter },
+    }));
+
+    console.log(filterToUrlParams(comparableFilters));
+  };
+
+  const handleComparableSubmit = async () => {
+    try {
+      const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
+      setComparables(comparables.results);
+      setComparablePage(1);
+    } catch (error) {
+      toast.error("Error al obtener comparables.", {
+        position: "top-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
     }
   };
@@ -929,16 +1034,24 @@ const FormularioHsbc = () => {
                       className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                   </div>
-                  
+
                   {/* Comparable */}
                   <div className="col-span-12 space-y-4 border p-3 rounded">
-                    <h4 className="text-xl text-green-900">Comparable</h4>
+                    <h4 className="text-xl text-green-900">Comparables</h4>
                     <div className="grid grid-cols-12 gap-4 items-center">
                       <div className="col-span-12">
                         <p className="text-sm text-gray-700">
-                          Aquí se podría agregar una tabla o lista de propiedades
-                          comparables. Por ahora, este espacio queda reservado para
-                          futuras implementaciones.
+                          <ComparableSection
+                            filters={comparableFilters}
+                            modifyFilter={modifyFilter}
+                            handleSubmit={handleComparableSubmit}
+                          />
+                          <ComparableList
+                            handleSelectedComparable={handleSelectedComparable}
+                            handleLoadMoreComparables={handleLoadMoreComparables}
+                            comparables={comparables}
+                            page={comparablePage}
+                          />
                         </p>
                       </div>
                     </div>

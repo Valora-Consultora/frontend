@@ -4,6 +4,7 @@ import { setProvisionalInformeId } from "../../app/slices/informeSlice";
 import FormularioScotia from "./InformeScotia";
 import FormularioHsbc from "./InformeHsbc";
 import FormularioBbva from "./InformeBbva";
+import FormularioItau from "./InformeItau";
 import { useSelector } from 'react-redux';
 import InformeService from "../../api/InformeService";
 
@@ -21,6 +22,7 @@ const InformeLayout = () => {
     { id: "scotiabank", nombre: "Scotiabank" },
     { id: "hsbc", nombre: "HSBC"},
     { id: "bbva", nombre: "BBVA" },
+    { id: "itau", nombre: "ITAU" },
   ];
 
 
@@ -83,6 +85,7 @@ const InformeLayout = () => {
             {selectedBanco === "scotiabank" && <FormularioScotia />}
             {selectedBanco === "hsbc" && <FormularioHsbc />}
             {selectedBanco === "bbva" && <FormularioBbva />}
+            {selectedBanco === "itau" && <FormularioItau />}
           </>
         )}
       </div>

@@ -2,7 +2,7 @@ import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
 import axios from "axios";
 
-const API_URL = "https://valora-app-53efe0915b3a.herokuapp.com";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const InformeBbvaService = {
   updateInformeBbva: async (id, informeBbvaData) => {

@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import InformeScotiaService from "../../api/InformeScotiaService";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
+import ComparablesService from "../../api/ComparablesService";
 
 const InformeScotia = () => {
   const formRef = useRef();
@@ -164,7 +165,7 @@ const InformeScotia = () => {
 
   const handleComparableSubmit = async () => {
     try {
-      const comparables = await InformeScotiaService.getComparables(filterToUrlParams(comparableFilters));
+      const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
       setComparables(comparables.results);
       setComparablePage(1);
     } catch (error) {

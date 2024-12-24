@@ -1,15 +1,17 @@
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const SignUpService = (user) => {
 
   let url;
   console.log(user);
   if (user.tipo_tasador === 'relevador') {
-    url = 'https://valora-app-53efe0915b3a.herokuapp.com/api/create-relevador';
+    url = `${API_URL}/api/create-relevador`;
   } else if (user.tipo_tasador === 'tasador') {
-    url = 'https://valora-app-53efe0915b3a.herokuapp.com/api/create-tasador';
+    url = `${API_URL}/api/create-tasador`;
   } else {
-    url = `https://valora-app-53efe0915b3a.herokuapp.com/api/create-${user.tipo_usuario.toLowerCase()}`;
+    url = `${API_URL}/api/create-${user.tipo_usuario.toLowerCase()}`;
   }
 
 
