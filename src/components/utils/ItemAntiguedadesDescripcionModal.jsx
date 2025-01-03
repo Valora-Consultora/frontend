@@ -116,6 +116,7 @@ const ItemAntiguedadesDescripcionModal = ({ isOpen, onRequestClose, idInforme, i
     const submitHandler = async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
+            console.log('submitHandler values ', values);
             await toast.promise(
                 ItemObraCivilService.updateItemObraCivil(selectedItemId, values),
                 {
