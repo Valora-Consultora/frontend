@@ -3543,7 +3543,7 @@ const InformeBbva = () => {
                               <Field
                                 type="radio"
                                 name={`hArmadoRestoEstructuraDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.hArmadoCubiertaDescripcion}
+                                checked={itemObraCivil.hArmadoRestoEstructuraDescripcion}
                                 className="form-radio h-4 w-4"
                                 onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'hArmadoRestoEstructuraDescripcion')}
                               />
