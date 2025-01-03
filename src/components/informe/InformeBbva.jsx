@@ -265,6 +265,22 @@ const InformeBbva = () => {
           metalicaCubiertaDescripcion: item.metalicaCubiertaDescripcion,
           bovedillaCubiertaDescripcion: item.bovedillaCubiertaDescripcion,
           otrosCubiertaDescripcion: item.otrosCubiertaDescripcion,
+          hArmadoRestoEstructuraDescripcion: item.hArmadoRestoEstructuraDescripcion,
+          muroPortanteRestoEstructuraDescripcion: item.muroPortanteRestoEstructuraDescripcion,
+          mContencionRestoEstructuraDescripcion: item.mContencionRestoEstructuraDescripcion,
+          maderaRestoEstructuraDescripcion: item.maderaRestoEstructuraDescripcion,
+          metalicaRestoEstructuraDescripcion: item.metalicaRestoEstructuraDescripcion,
+          otrosRestoEstructuraDescripcion: item.otrosRestoEstructuraDescripcion,
+          ladrilloMurosInteriorExteriorDescripcion: item.ladrilloMurosInteriorExteriorDescripcion,
+          ticholoMurosInteriorExteriorDescripcion: item.ticholoMurosInteriorExteriorDescripcion,
+          maderaMurosInteriorExteriorDescripcion: item.maderaMurosInteriorExteriorDescripcion,
+          steelFramingMurosInteriorExteriorDescripcion: item.steelFramingMurosInteriorExteriorDescripcion,
+          otrosMurosInteriorExteriorDescripcion: item.otrosMurosInteriorExteriorDescripcion,
+          ladrilloMurosInteriorInteriorDescripcion: item.ladrilloMurosInteriorInteriorDescripcion,
+          ticholoMurosInteriorInteriorDescripcion: item.ticholoMurosInteriorInteriorDescripcion,
+          maderaMurosInteriorInteriorDescripcion: item.maderaMurosInteriorInteriorDescripcion,
+          steelFramingMurosInteriorInteriorDescripcion: item.steelFramingMurosInteriorInteriorDescripcion,
+          otrosMurosInteriorInteriorDescripcion: item.otrosMurosInteriorInteriorDescripcion
         };
         return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
       });
@@ -3543,7 +3559,7 @@ const InformeBbva = () => {
                               <Field
                                 type="radio"
                                 name={`hArmadoRestoEstructuraDescripcion_${itemObraCivil.id}`}
-                                checked={itemObraCivil.hArmadoCubiertaDescripcion}
+                                checked={itemObraCivil.hArmadoRestoEstructuraDescripcion}
                                 className="form-radio h-4 w-4"
                                 onChange={() => handleFieldChangeRestoEstructura(itemObraCivil.id, 'hArmadoRestoEstructuraDescripcion')}
                               />
