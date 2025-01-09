@@ -7,11 +7,15 @@ import "react-toastify/dist/ReactToastify.css";
 import InformeScotiaService from "../../api/InformeScotiaService";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
+import SelectedComparableList from "../comparables/SelectedComparableList";
 import ComparablesService from "../../api/ComparablesService";
 
 const InformeScotia = () => {
   const formRef = useRef();
   const provisionalInformeId = useSelector(state => state.informe.provisionalInformeId);
+  const preloadInforme = useSelector(state => state.informe.informe);
+
+  console.log('PRELOADED INFORME:', preloadInforme);
 
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
@@ -19,35 +23,35 @@ const InformeScotia = () => {
 
   const [formData, setFormData] = useState({
     /// Información General
-    solicitante: "",
-    oficial: "",
-    sucursal: "",
-    titular: "",
-    cedula: "",
-    direccion: "",
-    padron: "",
-    localidad: "",
-    departamento: "",
+    solicitante: preloadInforme.solicitante ?? "",
+    oficial: preloadInforme.oficial ?? "",
+    sucursal: preloadInforme.sucursal ?? "",
+    titular: preloadInforme.titular ?? "",
+    cedula: preloadInforme.cedula ?? "",
+    direccion: preloadInforme.direccion ?? "",
+    padron: preloadInforme.padron ?? "",
+    localidad: preloadInforme.localidad ?? "",
+    departamento: preloadInforme.departamento ?? "",
     /// Superficies
-    supPredio: "",
-    supConstruida: "",
-    comodidades: "",
-    conservacion: "",
+    supPredio: preloadInforme.supPredio ?? "",
+    supConstruida: preloadInforme.supConstruida ?? "",
+    comodidades: preloadInforme.comodidades ?? "",
+    conservacion: preloadInforme.conservacion ?? "",
     /// Avalúo
-    valorMercado: "",
-    valorVentaRapida: "",
-    valorRemate: "",
-    costoReposicion: "",
+    valorMercado: preloadInforme.valorMercado ?? "",
+    valorVentaRapida: preloadInforme.valorVentaRapida ?? "",
+    valorRemate: preloadInforme.valorRemate ?? "",
+    costoReposicion: preloadInforme.costoReposicion ?? "",
     /// Relevamiento Fotográfico
-    fotos: [],
+    fotos: preloadInforme.fotos ?? [],
     /// Comparable
-    comparables: [],
+    comparables: preloadInforme.comparables ?? [],
     /// Anexos Gráficos o Catastrales
-    anexos: [],
+    anexos: preloadInforme.anexos ?? [],
     /// Seguro de Incendio
-    seguroIncendio: [],
+    seguroIncendio: preloadInforme.seguroIncendio ?? [],
     /// Observaciones
-    observaciones: "",
+    observaciones: preloadInforme.observaciones ?? "",
   });
 
   const handleInputChange = (e) => {
@@ -83,11 +87,11 @@ const InformeScotia = () => {
   };
 
   const handleSelectedComparable = (id) => {
-    setComparables((prevComparables) =>
-      prevComparables.map((comparable) =>
-        comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
-      )
-    );
+    const comparable = comparables.find((comparable) => comparable.id === id);
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: [...prevData.comparables, comparable],
+    }));
   }
 
   const handleLoadMoreComparables = () => {
@@ -166,6 +170,10 @@ const InformeScotia = () => {
   const handleComparableSubmit = async () => {
     try {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
+      // setFormData((prevData) => ({
+      //   ...prevData,
+      //   comparables: comparables.results,
+      // }));
       setComparables(comparables.results);
       setComparablePage(1);
     } catch (error) {
@@ -178,6 +186,15 @@ const InformeScotia = () => {
         draggable: true,
       });
     }
+  };
+
+  const handleSelectMainComparable = (id) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: prevData.comparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, main: !comparable.main } : comparable
+      ),
+    }));
   };
 
   const submitHandler = async (e) => {
@@ -595,7 +612,22 @@ const InformeScotia = () => {
                       <ComparableList
                         handleSelectedComparable={handleSelectedComparable}
                         handleLoadMoreComparables={handleLoadMoreComparables}
+                        handleSelectMainComparable={handleSelectMainComparable}
                         comparables={comparables}
+                        page={comparablePage}
+                      />
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Comparables Seleccionados</h4>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12">
+                    <p className="text-sm text-gray-700">
+                      <SelectedComparableList
+                        handleSelectMainComparable={handleSelectMainComparable}
+                        comparables={formData.comparables}
                         page={comparablePage}
                       />
                     </p>

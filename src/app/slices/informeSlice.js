@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   provisionalInformeId: null,
+  informe: {},
 };
 
 const informeSlice = createSlice({
@@ -11,9 +12,12 @@ const informeSlice = createSlice({
     setProvisionalInformeId: (state, action) => {
       state.provisionalInformeId = action.payload;
     },
+    setGlobalInforme: (state, action) => {
+      state.informe = action.payload;
+    },
   },
 });
 
-export const { setProvisionalInformeId } = informeSlice.actions;
+export const { setProvisionalInformeId, setGlobalInforme } = informeSlice.actions;
 
 export default informeSlice.reducer;

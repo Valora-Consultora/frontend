@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from 'react-redux';
-import { setProvisionalInformeId } from "../../app/slices/informeSlice";
+import { setGlobalInforme, setProvisionalInformeId } from "../../app/slices/informeSlice";
 import FormularioScotia from "./InformeScotia";
 import FormularioHsbc from "./InformeHsbc";
 import FormularioBbva from "./InformeBbva";
@@ -12,6 +12,7 @@ const InformeLayout = () => {
   const dispatch = useDispatch();
   const [selectedBanco, setSelectedBanco] = useState("");
   const [showSelector, setShowSelector] = useState(true);
+  const [informes, setInformes] = useState([]);
   const usuario = useSelector(state => state.user);
 
   const [informe, setInforme] = useState({
@@ -19,19 +20,21 @@ const InformeLayout = () => {
   });
 
   const bancos = [
-    { id: "scotiabank", nombre: "Scotiabank" },
-    { id: "hsbc", nombre: "HSBC"},
+    { id: "scotia", nombre: "Scotiabank" },
+    { id: "hsbc", nombre: "HSBC" },
     { id: "bbva", nombre: "BBVA" },
     { id: "itau", nombre: "ITAU" },
   ];
 
-
-  const handleBancoChange = async (e) => {
-    const bancoSeleccionado = e.target.value;
-    setSelectedBanco(bancoSeleccionado);
+  const selectBanco = (banco) => {
+    setSelectedBanco(banco);
     setShowSelector(false);
+  };
+
+  const handleBancoChange = async (banco) => {
+    selectBanco(banco);
     try {
-      const response = await InformeService.createInforme(informe,bancoSeleccionado);
+      const response = await InformeService.createInforme(informe, banco);
       const provisionalId = response.id;
       dispatch(setProvisionalInformeId(provisionalId));
     } catch (error) {
@@ -43,6 +46,25 @@ const InformeLayout = () => {
     setShowSelector(true);
     setSelectedBanco("");
   };
+
+  const handleCardSelect = (informe) => {
+    selectBanco(informe.banco);
+    dispatch(setGlobalInforme(informe));
+    dispatch(setProvisionalInformeId(informe.id));
+  }
+
+  useEffect(() => {
+    const fetchInformes = async () => {
+      try {
+        const response = await InformeService.getInformesByTasador(usuario);
+        console.log(response);
+        setInformes(response);
+      } catch (error) {
+        console.error("Error al obtener los informes:", error);
+      }
+    };
+    fetchInformes();
+  }, [usuario]);
 
   return (
     <div>
@@ -61,33 +83,61 @@ const InformeLayout = () => {
 
         {showSelector ? (
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
-            <div className="text-center my-2">
-              <label htmlFor="banco" className="mr-6 text-xl text-green-900">
-                Seleccione un banco:
-              </label>
-              <select
-                id="banco"
-                name="banco"
-                onChange={handleBancoChange}
-                className="rounded py-2 px-3 leading-tight border text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-900 w-2/3"
-              >
-                <option value="">Seleccionar</option>
-                {bancos.map((banco) => (
-                  <option key={banco.id} value={banco.id}>
-                    {banco.nombre}
-                  </option>
-                ))}
-              </select>
+            <div className="text-center h-24 space-x-4 justify-evenly flex flex-row my-2">
+              {bancos.map((banco) => (
+                <div className="p-4 flex justify-center items-center w-full rounded shadow-lg hover:!ring-2 hover:!ring-green-100" key={banco.id}>
+                  <img
+                    src={'/logo-' + banco.id + '.png'}
+                    onClick={() => handleBancoChange(banco.id)}
+                    className="max-h-16"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         ) : (
           <>
-            {selectedBanco === "scotiabank" && <FormularioScotia />}
+            {selectedBanco === "scotia" && <FormularioScotia />}
             {selectedBanco === "hsbc" && <FormularioHsbc />}
-            {selectedBanco === "bbva" && <FormularioBbva />}
+            {selectedBanco === "bbva" && <FormularioBbva />} 
             {selectedBanco === "itau" && <FormularioItau />}
           </>
         )}
+
+        {/* Listado de informes creados por el usuario tasador */}
+        {showSelector &&
+          <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
+            <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10 relative">
+              INFORMES CREADOS POR {usuario.username.toUpperCase()}
+            </h2>
+            <div className="text-center my-2">
+              {informes && informes.length > 0 ? informes.map((informe) => (
+                <InformeCard key={informe.id} informe={informe} handleCardSelect={handleCardSelect} />
+              )) :
+                <h3 className="text-xl text-green-900 font-light">Todavía no creaste informes, {usuario.username}, manos a la obra...</h3>}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  );
+};
+
+const InformeCard = ({ informe, handleCardSelect }) => {
+  const backgroundColor = informe.estado === "borrador" ? "bg-yellow-100" : "bg-white";
+  const hoverColor = informe.estado === "borrador" ? "hover:bg-yellow-200" : "hover:bg-green-50";
+  return (
+    <div
+      className={`${backgroundColor} flex flex-col items-start shadow-lg rounded-xl p-3 mb-6 ${hoverColor}`}
+      onClick={() => handleCardSelect(informe)}
+    >
+      <h3 className="text-xl text-green-900 font-light">{new Date(informe.fecha).toLocaleString()}</h3>
+      <div className="flex flex-row items-center space-x-4 w-full">
+        <img src={'/logo-' + informe.banco + '.png'} alt={informe.banco} className="self-end my-auto max-w-60 ml-2" />
+        <div className="flex flex-col items-start w-full">
+          <h3 className="text-xl text-green-900 font-light">{informe.direccion}</h3>
+        </div>
+        <h1 className="text-3xl text-green-900 font-light">#{informe.id}</h1>
       </div>
     </div>
   );
