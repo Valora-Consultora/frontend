@@ -104,7 +104,7 @@ const InformeBbva = () => {
 
 
 
-  const handleFieldChangeCimentacion = (id, fieldName) => {
+  const handleFieldChangeCimentacion = (id, fieldName, value = null) => {
     const updatedItems = itemsObraCivil.map((item) => {
       if (item.id === id) {
         const resetFields = {
@@ -114,18 +114,25 @@ const InformeBbva = () => {
           zapCorridaCimentacionDescripcion: false,
           plateaCimentacionDescripcion: false,
         };
-        return {
-          ...item,
-          ...resetFields,
-          [fieldName]: true, // Actualiza solo el campo seleccionado
-        };
+        if (fieldName === 'otrosDescripcionCimentacionDescripcion') {
+          return {
+            ...item,
+            [fieldName]: value, // Actualiza solo el campo de texto
+          };
+        } else {
+          return {
+            ...item,
+            ...resetFields,
+            [fieldName]: true, // Actualiza el campo booleano seleccionado
+          };
+        }
       }
       return item;
     });
     setItemsObraCivil(updatedItems); // Actualiza el estado global
   };
 
-  const handleFieldChangeCubierta = (id, fieldName) => {
+  const handleFieldChangeCubierta = (id, fieldName, value = null) => {
     const updatedItems = itemsObraCivil.map((item) => {
       if (item.id === id) {
         const resetFields = {
@@ -135,18 +142,40 @@ const InformeBbva = () => {
           bovedillaCubiertaDescripcion: false,
           otrosCubiertaDescripcion: false,
         };
-        return {
-          ...item,
-          ...resetFields,
-          [fieldName]: true, // Actualiza solo el campo seleccionado
-        };
+        if (fieldName === 'otrosDescripcionCubiertaDescripcion') {
+          return {
+            ...item,
+            [fieldName]: value, // Actualiza solo el campo de texto
+          };
+        } else {
+          return {
+            ...item,
+            ...resetFields,
+            [fieldName]: true, // Actualiza el campo booleano seleccionado
+          };
+        }
       }
       return item;
     });
     setItemsObraCivil(updatedItems); // Actualiza el estado global
   };
 
-  const handleFieldChangeRestoEstructura = (id, fieldName) => {
+  const handleFieldChangeTipoComposicion = (id, fieldName, value = null) => {
+    const updatedItems = itemsObraCivil.map((item) => {
+      if (item.id === id) {
+        if (fieldName === 'otrosDescripcionTipoComposicionDescripcion') {
+          return {
+            ...item,
+            [fieldName]: value, // Actualiza solo el campo de texto
+          };
+        }
+      }
+      return item;
+    });
+    setItemsObraCivil(updatedItems); // Actualiza el estado global
+  };
+
+  const handleFieldChangeRestoEstructura = (id, fieldName, value = null) => {
     const updatedItems = itemsObraCivil.map((item) => {
       if (item.id === id) {
         const resetFields = {
@@ -157,11 +186,18 @@ const InformeBbva = () => {
           metalicaRestoEstructuraDescripcion: false,
           otrosRestoEstructuraDescripcion: false,
         };
-        return {
-          ...item,
-          ...resetFields,
-          [fieldName]: true, // Actualiza solo el campo seleccionado
-        };
+        if (fieldName === 'descripcionRestoEstructuraDescripcion') {
+          return {
+            ...item,
+            [fieldName]: value, // Actualiza solo el campo de texto
+          };
+        } else {
+          return {
+            ...item,
+            ...resetFields,
+            [fieldName]: true, // Actualiza el campo booleano seleccionado
+          };
+        }
       }
       return item;
     });
@@ -169,7 +205,7 @@ const InformeBbva = () => {
   };
 
 
-  const handleFieldChangeMurosInteriorExterior = (id, fieldName) => {
+  const handleFieldChangeMurosInteriorExterior = (id, fieldName, value = null) => {
     const updatedItems = itemsObraCivil.map((item) => {
       if (item.id === id) {
         const resetFields = {
@@ -179,18 +215,25 @@ const InformeBbva = () => {
           steelFramingMurosInteriorExteriorDescripcion: false,
           otrosMurosInteriorExteriorDescripcion: false,
         };
-        return {
-          ...item,
-          ...resetFields,
-          [fieldName]: true, // Actualiza solo el campo seleccionado
-        };
+        if (fieldName === 'descripcionMurosInteriorExteriorDescripcion') {
+          return {
+            ...item,
+            [fieldName]: value, // Actualiza solo el campo de texto
+          };
+        } else {
+          return {
+            ...item,
+            ...resetFields,
+            [fieldName]: true, // Actualiza el campo booleano seleccionado
+          };
+        }
       }
       return item;
     });
     setItemsObraCivil(updatedItems); // Actualiza el estado global
   };
 
-  const handleFieldChangeMurosInteriorInterior = (id, fieldName) => {
+  const handleFieldChangeMurosInteriorInterior = (id, fieldName, value = null) => {
     const updatedItems = itemsObraCivil.map((item) => {
       if (item.id === id) {
         const resetFields = {
@@ -200,11 +243,18 @@ const InformeBbva = () => {
           steelFramingMurosInteriorInteriorDescripcion: false,
           otrosMurosInteriorInteriorDescripcion: false,
         };
-        return {
-          ...item,
-          ...resetFields,
-          [fieldName]: true, // Actualiza solo el campo seleccionado
-        };
+        if (fieldName === 'descripcionMurosInteriorInteriorDescripcion') {
+          return {
+            ...item,
+            [fieldName]: value, // Actualiza solo el campo de texto
+          };
+        } else {
+          return {
+            ...item,
+            ...resetFields,
+            [fieldName]: true, // Actualiza el campo booleano seleccionado
+          };
+        }
       }
       return item;
     });
@@ -260,6 +310,12 @@ const InformeBbva = () => {
           patinesCimentacionDescripcion: item.patinesCimentacionDescripcion,
           zapCorridaCimentacionDescripcion: item.zapCorridaCimentacionDescripcion,
           plateaCimentacionDescripcion: item.plateaCimentacionDescripcion,
+          otrosDescripcionCimentacionDescripcion: item.otrosDescripcionCimentacionDescripcion,
+          otrosDescripcionCubiertaDescripcion: item.otrosDescripcionCubiertaDescripcion,
+          otrosDescripcionTipoComposicionDescripcion: item.otrosDescripcionTipoComposicionDescripcion,
+          descripcionRestoEstructuraDescripcion: item.descripcionRestoEstructuraDescripcion,
+          descripcionMurosInteriorExteriorDescripcion: item.descripcionMurosInteriorExteriorDescripcion,
+          descripcionMurosInteriorInteriorDescripcion: item.descripcionMurosInteriorInteriorDescripcion,
           hArmadoCubiertaDescripcion: item.hArmadoCubiertaDescripcion,
           maderaCubiertaDescripcion: item.maderaCubiertaDescripcion,
           metalicaCubiertaDescripcion: item.metalicaCubiertaDescripcion,
@@ -3458,9 +3514,9 @@ const InformeBbva = () => {
                             <Field
                               type="text"
                               name={`otrosDescripcionCimentacionDescripcion_${itemObraCivil.id}`}
-                              defaultValue={itemObraCivil.otrosDescripcionCimentacionDescripcion}
+                              value={itemObraCivil.otrosDescripcionCimentacionDescripcion || ""}
                               className="col-span-4 mb-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'otrosDescripcionCimentacionDescripcion', e.target.value)}
+                              onChange={(e) => handleFieldChangeCimentacion(itemObraCivil.id, 'otrosDescripcionCimentacionDescripcion', e.target.value)}
                             />
 
                             <div className="col-span-12 text-center">
@@ -3526,9 +3582,9 @@ const InformeBbva = () => {
                             <Field
                               type="text"
                               name={`otrosDescripcionCubiertaDescripcion_${itemObraCivil.id}`}
-                              defaultValue={itemObraCivil.otrosDescripcionCubiertaDescripcion}
+                              value={itemObraCivil.otrosDescripcionCubiertaDescripcion || ""}
                               className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'otrosDescripcionCubiertaDescripcion', e.target.value)}
+                              onChange={(e) => handleFieldChangeCubierta(itemObraCivil.id, 'otrosDescripcionCubiertaDescripcion', e.target.value)}
                             />
 
 
@@ -3544,9 +3600,9 @@ const InformeBbva = () => {
                             <Field
                               type="text"
                               name={`otrosDescripcionTipoComposicionDescripcion_${itemObraCivil.id}`}
-                              defaultValue={itemObraCivil.otrosDescripcionTipoComposicionDescripcion}
+                              value={itemObraCivil.otrosDescripcionTipoComposicionDescripcion || ""}
                               className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'otrosDescripcionTipoComposicionDescripcion', e.target.value)}
+                              onChange={(e) => handleFieldChangeTipoComposicion(itemObraCivil.id, 'otrosDescripcionTipoComposicionDescripcion', e.target.value)}
                             />
 
 
@@ -3620,9 +3676,9 @@ const InformeBbva = () => {
                             <Field
                               type="text"
                               name={`descripcionRestoEstructuraDescripcion_${itemObraCivil.id}`}
-                              defaultValue={itemObraCivil.descripcionRestoEstructuraDescripcion}
+                              value={itemObraCivil.descripcionRestoEstructuraDescripcion || ""}
                               className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionRestoEstructuraDescripcion', e.target.value)}
+                              onChange={(e) => handleFieldChangeRestoEstructura(itemObraCivil.id, 'descripcionRestoEstructuraDescripcion', e.target.value)}
                             />
 
 
@@ -3688,9 +3744,9 @@ const InformeBbva = () => {
                             <Field
                               type="text"
                               name={`descripcionMurosInteriorExteriorDescripcion_${itemObraCivil.id}`}
-                              defaultValue={itemObraCivil.descripcionMurosInteriorExteriorDescripcion}
+                              value={itemObraCivil.descripcionMurosInteriorExteriorDescripcion || ""}
                               className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionMurosInteriorExteriorDescripcion', e.target.value)}
+                              onChange={(e) => handleFieldChangeMurosInteriorExterior(itemObraCivil.id, 'descripcionMurosInteriorExteriorDescripcion', e.target.value)}
                             />
 
 
@@ -3756,9 +3812,9 @@ const InformeBbva = () => {
                             <Field
                               type="text"
                               name={`descripcionMurosInteriorInteriorDescripcion_${itemObraCivil.id}`}
-                              defaultValue={itemObraCivil.descripcionMurosInteriorInteriorDescripcion}
+                              value={itemObraCivil.descripcionMurosInteriorInteriorDescripcion || ""}
                               className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                              onChange={(e) => handleFieldChange(itemObraCivil.id, 'descripcionMurosInteriorInteriorDescripcion', e.target.value)}
+                              onChange={(e) => handleFieldChangeMurosInteriorInterior(itemObraCivil.id, 'descripcionMurosInteriorInteriorDescripcion', e.target.value)}
                             />
 
                           </div>
