@@ -3820,14 +3820,83 @@ const InformeBbva = () => {
                           </div>
                         ))}
 
-
                     </div>
 
                   </div>
 
 
-
+                  <div className="grid grid-cols-10 gap-2 ">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Piscina</p>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <Field
+                        type="radio"
+                        name="piscinaDescripcionDetallada"
+                        value="hArmadoPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">H. Armado</label>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <Field
+                        type="radio"
+                        name="piscinaDescripcionDetallada"
+                        value="prefabricadaPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Prefabricada</label>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <Field
+                        type="radio"
+                        name="terminacionDescripcionDetallada"
+                        value="hArmadoPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Terminación</label>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <Field
+                        type="radio"
+                        name="piscinaDescripcionDetallada"
+                        value="climatizaciónPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Climatización</label>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <Field
+                        type="radio"
+                        name="piscinaDescripcionDetallada"
+                        value="otrosPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4 "
+                        onClick={() => {
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
+                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                        }}
+                      />
+                      <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
+                    </div>
+                  </div>
                 </div>
+
               </div>
               <div className="mt-4 text-center">
                 <button
@@ -3865,15 +3934,6 @@ const InformeBbva = () => {
         onSave={handleSaveItemActualizacionDescripcion}
         onUpdate={handleItemUpdate}
       />
-      {/*       <ItemAntiguedadesCubiertaModal
-        isOpen={isModalAntiguedadesCubiertaOpen}
-        onRequestClose={handleCloseModalAntiguedadesCubiertaDescripcion}
-        idInformeBbva={provisionalInformeId}
-        initialFormData={currentItem || {}}
-        onSave={handleSaveItemActualizacionCubiertaDescripcion}
-        onUpdate={handleItemUpdate}
-      />
- */}
     </div >
   );
 };
