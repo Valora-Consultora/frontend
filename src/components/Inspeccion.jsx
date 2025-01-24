@@ -1146,7 +1146,7 @@ function Inspeccion() {
 
                         <div className="col-span-12 border p-3 rounded space-y-4 flex items-center justify-center">
                             <div className="grid grid-template-rows: auto 1fr">
-                                <h4 className="text-xl text-green-900 text-center">Agregar Lotes</h4>
+                                <h4 className="text-xl text-green-900 text-center">Agregar Locales</h4>
                                 <button
                                     onClick={handleOpenModal}
                                     className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
@@ -1160,7 +1160,7 @@ function Inspeccion() {
 
 
                         <div className="col-span-12 border p-3 rounded space-y-4">
-                            <h4 className="text-xl text-green-900">Lotes</h4>
+                            <h4 className="text-xl text-green-900">Locales</h4>
                             {locales.map((local) => (
                                 isVisible && (
                                     <div key={local.id} className="grid grid-cols-[auto,1fr,1fr,1fr,1fr,1fr,1fr] gap-4">

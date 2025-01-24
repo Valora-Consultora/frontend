@@ -20,6 +20,16 @@ const InformeService = {
       }
   },
 
+    getInformesByTasador: async (tasador) => {  
+        try {
+            const response = await axios.get(`${API_URL}/api/informe/tasador/${tasador.id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error al obtener los informes:', error);
+            throw error;
+        }
+    }
+
    /*  updateInspeccion: async (id, inspeccionData) => {
         try {
 
