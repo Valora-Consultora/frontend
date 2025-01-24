@@ -245,9 +245,15 @@ const FormularioItau = () => {
 
   const handleSelectedComparable = (id) => {
     setComparables((prevComparables) =>
-      prevComparables.map((comparable) =>
-        comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
-      )
+      prevComparables.map((comparable) => {
+        if (comparable.id === id) {
+          if (comparable.main) {
+            return comparable;
+          }
+          return { ...comparable, selected: !comparable.selected };
+        }
+        return comparable;
+      })
     );
   }
 
@@ -339,6 +345,14 @@ const FormularioItau = () => {
         draggable: true,
       });
     }
+  };
+
+  const handleSelectMainComparable = (id) => {
+    setComparables((prevComparables) =>
+      prevComparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, main: !comparable.main } : comparable
+      )
+    );
   };
 
   // Options for radio inputs (same as before)
@@ -1793,6 +1807,7 @@ const FormularioItau = () => {
                       <ComparableList
                         handleSelectedComparable={handleSelectedComparable}
                         handleLoadMoreComparables={handleLoadMoreComparables}
+                        handleSelectMainComparable={handleSelectMainComparable}
                         comparables={comparables}
                         page={comparablePage}
                       />

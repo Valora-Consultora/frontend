@@ -53,7 +53,7 @@ const InformeScotiaService = {
   createInformeScotia: async (id, informeScotiaData) => {
     try {
       console.log("ingresa en el create de InformeScotiaService");
-      console.log("informeScotiaData", informeScotiaData);
+      informeScotiaData.id = id;
 
       async function obtenerDatosFotoRelevamiento(foto) {
         const url = await InformeScotiaService.uploadFoto(foto);
@@ -83,6 +83,20 @@ const InformeScotiaService = {
 
       informeScotiaData.fotos = relevamientos;
       informeScotiaData.anexos = anexos;
+      debugger
+
+      const normalizedComparables = informeScotiaData.comparables.map((comparable) => {
+        const normalizedComparable = {...comparable};
+        if (comparable.id.id) {
+          normalizedComparable.id = comparable.id.id;
+        }
+        return normalizedComparable;
+      });
+
+
+      informeScotiaData.comparables = normalizedComparables;
+      
+      console.log("informeScotiaData", informeScotiaData);
 
       const response = await axios.post(
         `${API_URL}/api/create-informe-scotia`,
