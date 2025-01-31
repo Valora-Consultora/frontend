@@ -10,6 +10,7 @@ const MAX_PAGE = 5;
 
 const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, handleSelectMainComparable, page, comparables }) => {
   comparables = comparables.filter(comparable => comparable.title && comparable.price && comparable.location && comparable.thumbnail && comparable.permalink);
+  comparables = comparables.slice(0, ITEMS_PER_PAGE * page);
 
   console.log("viendo comparables", comparables);
   return (
@@ -23,7 +24,7 @@ const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, h
         {comparables.map((comparable, index) => (
           <div
             key={index}
-            className={`col-span-6 space-y-4 border p-3 rounded hover:ring-2 hover:ring-green-900 cursor-pointer`}
+            className={`col-span-6 space-y-4 border p-3 rounded hover:ring-2 hover:ring-green-900 cursor-pointer ${comparable.selected ? "ring-2 ring-green-900" : ""}`}
             onClick={() => handleSelectedComparable(comparable.id)}
           >
             <div className="flex flex-row space-x-2 items-center">

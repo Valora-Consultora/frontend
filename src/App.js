@@ -7,9 +7,12 @@ import Header from "./components/fragments/header/Header";
 import Footer from "./components/fragments/footer/Footer";
 import HeaderLogin from "./components/fragments/header/HeaderLogin";
 import Order from "./components/Order";
+import Revision from "./components/revision/Revision";
 import Inspeccion from "./components/Inspeccion";
 import Home from './components/Home';
 import InformeLayout from "./components/informe/InformeLayout";
+import RevisionInformes from "./components/revision/RevisionInformes";
+import VerInformeScotia from "./components/informe/VerInformeScotia";
 
 const WithHeader = ({ children }) => (
   <>
@@ -76,6 +79,38 @@ function App() {
               element={
                 <WithHeader>
                   <InformeLayout />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/Informe/:banco"
+              element={
+                <WithHeader>
+                  <InformeLayout />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/Informe/Scotia/:id"
+              element={
+                <WithHeader>
+                  <VerInformeScotia />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/Revision"
+              element={
+                <WithHeader>
+                  <Revision />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/Revision/Informes"
+              element={
+                <WithHeader>
+                  <RevisionInformes />
                 </WithHeader>
               }
             />
