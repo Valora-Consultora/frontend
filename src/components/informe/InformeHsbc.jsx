@@ -3,7 +3,10 @@ import HsbcLogo from "../../images/logo-hsbc.png";
 import CheckboxGroup from '../../components/CheckboxGroup';
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
+<<<<<<< Updated upstream
 import InformeHsbcService from "../../api/InformeHsbcService";
+=======
+>>>>>>> Stashed changes
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,6 +16,10 @@ const FormularioHsbc = () => {
   const formRef = useRef();
 
   const [comparableFilters, setComparableFilters] = useState({});
+<<<<<<< Updated upstream
+=======
+  const [comparables, setComparables] = useState([]);
+>>>>>>> Stashed changes
   const [comparablePage, setComparablePage] = useState(1);
 
   const [formData, setFormData] = useState({
@@ -111,12 +118,20 @@ const FormularioHsbc = () => {
   };
 
   const handleSelectedComparable = (id) => {
+<<<<<<< Updated upstream
     setFormData((prevData) => ({
       ...prevData,
       comparables: prevData.comparables.map((comparable) =>
         comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
       ),
     }));
+=======
+    setComparables((prevComparables) =>
+      prevComparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
+      )
+    );
+>>>>>>> Stashed changes
   }
 
   const handleLoadMoreComparables = () => {
@@ -195,10 +210,14 @@ const FormularioHsbc = () => {
   const handleComparableSubmit = async () => {
     try {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
+<<<<<<< Updated upstream
       setFormData((prevData) => ({
         ...prevData,
         comparables: comparables.results,
       }));
+=======
+      setComparables(comparables.results);
+>>>>>>> Stashed changes
       setComparablePage(1);
     } catch (error) {
       toast.error("Error al obtener comparables.", {
@@ -212,6 +231,7 @@ const FormularioHsbc = () => {
     }
   };
 
+<<<<<<< Updated upstream
   const handleSelectMainComparable = (id) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -221,6 +241,8 @@ const FormularioHsbc = () => {
     }));
   };
 
+=======
+>>>>>>> Stashed changes
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
@@ -1047,6 +1069,7 @@ const FormularioHsbc = () => {
                       className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                   </div>
+<<<<<<< Updated upstream
                 </div>
               </div>
 
@@ -1069,6 +1092,29 @@ const FormularioHsbc = () => {
                         page={comparablePage}
                       />
                     </p>
+=======
+
+                  {/* Comparable */}
+                  <div className="col-span-12 space-y-4 border p-3 rounded">
+                    <h4 className="text-xl text-green-900">Comparables</h4>
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      <div className="col-span-12">
+                        <p className="text-sm text-gray-700">
+                          <ComparableSection
+                            filters={comparableFilters}
+                            modifyFilter={modifyFilter}
+                            handleSubmit={handleComparableSubmit}
+                          />
+                          <ComparableList
+                            handleSelectedComparable={handleSelectedComparable}
+                            handleLoadMoreComparables={handleLoadMoreComparables}
+                            comparables={comparables}
+                            page={comparablePage}
+                          />
+                        </p>
+                      </div>
+                    </div>
+>>>>>>> Stashed changes
                   </div>
                 </div>
               </div>

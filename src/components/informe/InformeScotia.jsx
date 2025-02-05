@@ -7,7 +7,10 @@ import "react-toastify/dist/ReactToastify.css";
 import InformeScotiaService from "../../api/InformeScotiaService";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
+<<<<<<< Updated upstream
 import SelectedComparableList from "../comparables/SelectedComparableList";
+=======
+>>>>>>> Stashed changes
 import ComparablesService from "../../api/ComparablesService";
 
 const InformeScotia = () => {
@@ -170,10 +173,13 @@ const InformeScotia = () => {
   const handleComparableSubmit = async () => {
     try {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
+<<<<<<< Updated upstream
       // setFormData((prevData) => ({
       //   ...prevData,
       //   comparables: comparables.results,
       // }));
+=======
+>>>>>>> Stashed changes
       setComparables(comparables.results);
       setComparablePage(1);
     } catch (error) {

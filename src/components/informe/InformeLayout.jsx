@@ -99,7 +99,11 @@ const InformeLayout = () => {
           <>
             {selectedBanco === "scotia" && <FormularioScotia />}
             {selectedBanco === "hsbc" && <FormularioHsbc />}
+<<<<<<< Updated upstream
             {selectedBanco === "bbva" && <FormularioBbva />} 
+=======
+            {selectedBanco === "bbva" && <FormularioBbva />}
+>>>>>>> Stashed changes
             {selectedBanco === "itau" && <FormularioItau />}
           </>
         )}
