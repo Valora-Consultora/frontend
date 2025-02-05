@@ -8,7 +8,10 @@ import InformeScotiaService from "../../api/InformeScotiaService";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import SelectedComparableList from "../comparables/SelectedComparableList";
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 import ComparablesService from "../../api/ComparablesService";
@@ -174,10 +177,13 @@ const InformeScotia = () => {
     try {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       // setFormData((prevData) => ({
       //   ...prevData,
       //   comparables: comparables.results,
       // }));
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
       setComparables(comparables.results);
