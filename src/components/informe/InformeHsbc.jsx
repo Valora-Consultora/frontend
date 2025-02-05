@@ -5,7 +5,10 @@ import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import InformeHsbcService from "../../api/InformeHsbcService";
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
@@ -21,6 +24,10 @@ const FormularioHsbc = () => {
   const [comparableFilters, setComparableFilters] = useState({});
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+  const [comparables, setComparables] = useState([]);
+>>>>>>> Stashed changes
 =======
   const [comparables, setComparables] = useState([]);
 >>>>>>> Stashed changes
@@ -127,6 +134,7 @@ const FormularioHsbc = () => {
   const handleSelectedComparable = (id) => {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     setFormData((prevData) => ({
       ...prevData,
       comparables: prevData.comparables.map((comparable) =>
@@ -136,12 +144,17 @@ const FormularioHsbc = () => {
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     setComparables((prevComparables) =>
       prevComparables.map((comparable) =>
         comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
       )
     );
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -225,10 +238,14 @@ const FormularioHsbc = () => {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       setFormData((prevData) => ({
         ...prevData,
         comparables: comparables.results,
       }));
+=======
+      setComparables(comparables.results);
+>>>>>>> Stashed changes
 =======
       setComparables(comparables.results);
 >>>>>>> Stashed changes
@@ -250,6 +267,7 @@ const FormularioHsbc = () => {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const handleSelectMainComparable = (id) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -259,6 +277,8 @@ const FormularioHsbc = () => {
     }));
   };
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
@@ -1091,6 +1111,7 @@ const FormularioHsbc = () => {
                   </div>
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 </div>
               </div>
 
@@ -1114,6 +1135,8 @@ const FormularioHsbc = () => {
                       />
                     </p>
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 

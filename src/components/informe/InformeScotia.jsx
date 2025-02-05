@@ -9,7 +9,10 @@ import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import SelectedComparableList from "../comparables/SelectedComparableList";
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
@@ -178,10 +181,13 @@ const InformeScotia = () => {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       // setFormData((prevData) => ({
       //   ...prevData,
       //   comparables: comparables.results,
       // }));
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
