@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import BbvaLogo from "../../images/logo-bbva.png";
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, FieldArray } from 'formik';
 import InformeBbvaService from '../../api/InformeBbvaService';
 import ItemObraCivilModal from '../utils/ItemObraCivilModal';
 import plusIcon from '../../images/plusIcon.png';
 import ItemObraCivilService from '../../api/ItemObraCivilService';
 import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
 import ItemAntiguedadesDescripcionModal from '../utils/ItemAntiguedadesDescripcionModal';
+import ItemComodidadesDescripcionModal from '../utils/ItemComodidadesDescripcionModal'
+import ItemPlanillaDescripcionModal from '../utils/ItemPlanillaDescripcionModal'
 
 const InformeBbva = () => {
   const navigate = useNavigate();
@@ -26,18 +28,19 @@ const InformeBbva = () => {
   const [sumaCubierta, setSumaCubierta] = useState({ documentada: 0, verificada: 0 });
   const [sumaSemiCubierta, setSumaSemiCubierta] = useState({ documentada: 0, verificada: 0 });
   const [sumaOtros, setSumaOtros] = useState({ documentada: 0, verificada: 0 });
+  const [previewImages, setPreviewImages] = useState([]); // 🔥 Estado para vistas previas
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFilesFotos, setSelectedFilesFotos] = useState([]);
+  const [previewImagesFotos, setPreviewImagesFotos] = useState([]);
 
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [isModalAntiguedadesOpen, setIsModalAntiguedadesOpen] = useState(false);
   const [isModalAntiguedadesDescripcionOpen, setIsModalAntiguedadesDescripcionOpen] = useState(false);
-  /*   const [isModalAntiguedadesCubiertaOpen, setIsModalAntiguedadesCubiertaOpen] = useState(false);
-   */
-  /*   const [isAntiguedadesCimentacionDescripcion, setAntiguedadesCimentacionDescripcion] = useState(false);
-   */
+  const [isModalComodidadesDescripcionOpen, setIsModalComodidadesDescripcionOpen] = useState(false);
+  const [isModalPlanillaDescripcionOpen, setIsModalPlanillaDescripcionOpen] = useState(false);
 
-  // Funcion para actualizar las sumas en tiempo real
   const calcularSumas = (items) => {
     let totalDoc = 0, totalVer = 0;
     let cubierta = { documentada: 0, verificada: 0 };
@@ -233,6 +236,43 @@ const InformeBbva = () => {
     setItemsObraCivil(updatedItems); // Actualiza el estado global
   };
 
+  const handleUploadImages = async (id) => {
+    if (!selectedFiles.length) return;
+
+    const formData = new FormData();
+    selectedFiles.forEach(image => formData.append("files", image.file));
+
+    try {
+      await InformeBbvaService.uploadPlanos(id, formData);
+    } catch (error) {
+      console.error("Error al subir imágenes:", error);
+    }
+  };
+
+  const handleUploadFotos = async (id) => {
+    if (!selectedFilesFotos.length) {
+      console.log("⚠️ No hay fotos para subir.");
+      return;
+    }
+
+    const formData = new FormData();
+    selectedFilesFotos.forEach(file => formData.append("files", file));
+
+    try {
+      console.log("📤 Enviando fotos a:", `http://localhost:8080/api/informeBbva/${id}/uploadFotos`);
+      await InformeBbvaService.uploadFotos(id, formData);
+
+      toast.success("Fotos subidas correctamente");
+      setSelectedFilesFotos([]);
+      setPreviewImagesFotos([]);
+    } catch (error) {
+      console.error("❌ Error al subir fotos:", error);
+      toast.error("Error al subir fotos");
+    }
+  };
+
+
+
   const handleFieldChangeMurosInteriorInterior = (id, fieldName, value = null) => {
     const updatedItems = itemsObraCivil.map((item) => {
       if (item.id === id) {
@@ -289,6 +329,9 @@ const InformeBbva = () => {
     }
   };
 
+
+
+
   const fetchItemsObraCivilByInformeId = async (provisionalInformeId) => {
     try {
       const response = await ItemObraCivilService.getItemsObraCivilByIdInforme(provisionalInformeId);
@@ -299,10 +342,194 @@ const InformeBbva = () => {
     }
   };
 
+  const handleUploadPlanos = async (id) => {
+    if (!selectedFiles.length) {
+      console.log("⚠️ No hay archivos para subir.");
+      return;
+    }
 
-  const submitHandler = async () => {
+    const formData = new FormData();
+    selectedFiles.forEach(file => {
+      console.log("📂 Agregando archivo:", file.name);
+      formData.append("files", file);
+    });
+
     try {
+      console.log("📤 Enviando imágenes a:", `http://localhost:8080/api/informeBbva/${id}/uploadPlanos`);
+      const response = await InformeBbvaService.uploadPlanos(id, formData);
+
+      toast.success("Imágenes subidas correctamente");
+      setSelectedFiles([]);
+      setPreviewImages([]);
+    } catch (error) {
+      console.error("❌ Error al subir imágenes:", error);
+      toast.error("Error al subir imágenes");
+    }
+  };
+
+
+
+
+  const handleRemovePreviewImage = (index) => {
+    setPreviewImages(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemovePreviewFotos = (index) => {
+    setPreviewImagesFotos(prev => prev.filter((_, i) => i !== index));
+    setSelectedFilesFotos(prev => prev.filter((_, i) => i !== index));
+  };
+
+
+  const submitHandler = async (values) => {
+    try {
+
+      // **1️⃣ Actualizar el informe primero**
+      const response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
+
+      if (selectedFiles.length > 0) {
+        console.log("📤 Subiendo imágenes de planos...");
+        await handleUploadPlanos(response.id);
+      }
+
+      if (selectedFilesFotos.length > 0) {
+        console.log("📤 Subiendo imágenes de fotos...");
+        await handleUploadFotos(response.id);
+      }
+
+      // **2️⃣ Luego actualizar los items de obra civil**
       const updatePromises = itemsObraCivil.map(async (item) => {
+
+        const updatedFields = {
+          pilotesCimentacionDescripcion: item.pilotesCimentacionDescripcion,
+          dadosCimentacionDescripcion: item.dadosCimentacionDescripcion,
+          patinesCimentacionDescripcion: item.patinesCimentacionDescripcion,
+          zapCorridaCimentacionDescripcion: item.zapCorridaCimentacionDescripcion,
+          plateaCimentacionDescripcion: item.plateaCimentacionDescripcion,
+          otrosDescripcionCimentacionDescripcion: item.otrosDescripcionCimentacionDescripcion,
+          otrosDescripcionCubiertaDescripcion: item.otrosDescripcionCubiertaDescripcion,
+          otrosDescripcionTipoComposicionDescripcion: item.otrosDescripcionTipoComposicionDescripcion,
+          descripcionRestoEstructuraDescripcion: item.descripcionRestoEstructuraDescripcion,
+          descripcionMurosInteriorExteriorDescripcion: item.descripcionMurosInteriorExteriorDescripcion,
+          descripcionMurosInteriorInteriorDescripcion: item.descripcionMurosInteriorInteriorDescripcion,
+          hArmadoCubiertaDescripcion: item.hArmadoCubiertaDescripcion,
+          maderaCubiertaDescripcion: item.maderaCubiertaDescripcion,
+          metalicaCubiertaDescripcion: item.metalicaCubiertaDescripcion,
+          bovedillaCubiertaDescripcion: item.bovedillaCubiertaDescripcion,
+          otrosCubiertaDescripcion: item.otrosCubiertaDescripcion,
+          hArmadoRestoEstructuraDescripcion: item.hArmadoRestoEstructuraDescripcion,
+          muroPortanteRestoEstructuraDescripcion: item.muroPortanteRestoEstructuraDescripcion,
+          mContencionRestoEstructuraDescripcion: item.mContencionRestoEstructuraDescripcion,
+          maderaRestoEstructuraDescripcion: item.maderaRestoEstructuraDescripcion,
+          metalicaRestoEstructuraDescripcion: item.metalicaRestoEstructuraDescripcion,
+          otrosRestoEstructuraDescripcion: item.otrosRestoEstructuraDescripcion,
+          ladrilloMurosInteriorExteriorDescripcion: item.ladrilloMurosInteriorExteriorDescripcion,
+          ticholoMurosInteriorExteriorDescripcion: item.ticholoMurosInteriorExteriorDescripcion,
+          maderaMurosInteriorExteriorDescripcion: item.maderaMurosInteriorExteriorDescripcion,
+          steelFramingMurosInteriorExteriorDescripcion: item.steelFramingMurosInteriorExteriorDescripcion,
+          otrosMurosInteriorExteriorDescripcion: item.otrosMurosInteriorExteriorDescripcion,
+          ladrilloMurosInteriorInteriorDescripcion: item.ladrilloMurosInteriorInteriorDescripcion,
+          ticholoMurosInteriorInteriorDescripcion: item.ticholoMurosInteriorInteriorDescripcion,
+          maderaMurosInteriorInteriorDescripcion: item.maderaMurosInteriorInteriorDescripcion,
+          steelFramingMurosInteriorInteriorDescripcion: item.steelFramingMurosInteriorInteriorDescripcion,
+          otrosMurosInteriorInteriorDescripcion: item.otrosMurosInteriorInteriorDescripcion,
+          hallDeAccesoComodidadesDescripcion: item.hallDeAccesoComodidadesDescripcion,
+          porcheComodidadesDescripcion: item.porcheComodidadesDescripcion,
+          estarComedorComodidadesDescripcion: item.estarComedorComodidadesDescripcion,
+          estarDiarioComodidadesDescripcion: item.estarDiarioComodidadesDescripcion,
+          cocinaComodidadesDescripcion: item.cocinaComodidadesDescripcion,
+          bañoComodidadesDescripcion: item.bañoComodidadesDescripcion,
+          toiletteComodidadesDescripcion: item.toiletteComodidadesDescripcion,
+          dormitorioComodidadesDescripcion: item.dormitorioComodidadesDescripcion,
+          suiteComodidadesDescripcion: item.suiteComodidadesDescripcion,
+          vestidorComodidadesDescripcion: item.vestidorComodidadesDescripcion,
+          escritorioComodidadesDescripcion: item.escritorioComodidadesDescripcion,
+          depositoComodidadesDescripcion: item.depositoComodidadesDescripcion,
+          dormitorioServicioComodidadesDescripcion: item.dormitorioServicioComodidadesDescripcion,
+          bañoServicioComodidadesDescripcion: item.bañoServicioComodidadesDescripcion,
+          balcónComodidadesDescripcion: item.balcónComodidadesDescripcion,
+          lavaderoComodidadesDescripcion: item.lavaderoComodidadesDescripcion,
+          jardínComodidadesDescripcion: item.jardínComodidadesDescripcion,
+          patioTechadoComodidadesDescripcion: item.patioTechadoComodidadesDescripcion,
+          patioPérgolaComodidadesDescripcion: item.patioPérgolaComodidadesDescripcion,
+          patioAbiertoComodidadesDescripcion: item.patioAbiertoComodidadesDescripcion,
+          garageCerradoComodidadesDescripcion: item.garageCerradoComodidadesDescripcion,
+          cocheraTechadaComodidadesDescripcion: item.cocheraTechadaComodidadesDescripcion,
+          cocheraPérgolaComodidadesDescripcion: item.cocheraPérgolaComodidadesDescripcion,
+          estacionamientoAbiertoComodidadesDescripcion: item.estacionamientoAbiertoComodidadesDescripcion,
+          parrilleroCerradoComodidadesDescripcion: item.parrilleroCerradoComodidadesDescripcion,
+          parrilleroTechadoComodidadesDescripcion: item.parrilleroTechadoComodidadesDescripcion,
+          parrilleroPérgolaComodidadesDescripcion: item.parrilleroPérgolaComodidadesDescripcion,
+          parrilleroAbiertoComodidadesDescripcion: item.parrilleroAbiertoComodidadesDescripcion,
+          otrosComodidadesDescripcion: item.otrosComodidadesDescripcion,
+          destinoPlanillaDescripcion: item.destinoPlanillaDescripcion,
+          superficiePlanillaDescripcion: item.superficiePlanillaDescripcion,
+          pavimentoPlanillaDescripcion: item.pavimentoPlanillaDescripcion,
+          cielorrasoPlanillaDescripcion: item.cielorrasoPlanillaDescripcion,
+          murosPlanillaDescripcion: item.murosPlanillaDescripcion,
+          tipoDeCubiertaPlanillaDescripcion: item.tipoDeCubiertaPlanillaDescripcion,
+          ventilacionNaturalPlanillaDescripcion: item.ventilacionNaturalPlanillaDescripcion,
+          totalPlanillaDescripcion: item.totalPlanillaDescripcion,
+        };
+
+        return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
+      });
+
+
+
+      await Promise.all(updatePromises);
+
+
+      toast.success("Informe actualizado correctamente");
+      setTimeout(() => {
+        navigate('/home');
+      }, 3000);
+    } catch (error) {
+      toast.error("Error al actualizar el informe");
+      console.error(error);
+    }
+  };
+
+  const handleFieldChangeComodidades = (id, field, value) => {
+    setItemsObraCivil(prevItems =>
+      prevItems.map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  const handleFieldChangePlanilla = (itemId, fieldName, index, newValue) => {
+    setItemsObraCivil(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId
+          ? {
+            ...item,
+            [fieldName]: fieldName === "totalPlanillaDescripcion"
+              ? newValue // No usar split en totalPlanillaDescripcion
+              : item[fieldName]
+                .split(";")
+                .map((val, idx) => (idx === index ? newValue : val))
+                .join(";")
+          }
+          : item
+      )
+    );
+  };
+
+
+
+  /* 
+  
+  SUBMITHANDLER que funciona bien 
+
+  const submitHandler = async (values) => {
+    try {
+
+      console.log("Valores enviados al backend: ", values); // 👈 Verifica qué se está enviando
+
+      const updatePromises = itemsObraCivil.map(async (item) => {
+
+        console.log("item tipoAguaCalienteDescripcion ", item.tipoAguaCalienteDescripcion);
 
         const updatedFields = {
           pilotesCimentacionDescripcion: item.pilotesCimentacionDescripcion,
@@ -338,19 +565,22 @@ const InformeBbva = () => {
           steelFramingMurosInteriorInteriorDescripcion: item.steelFramingMurosInteriorInteriorDescripcion,
           otrosMurosInteriorInteriorDescripcion: item.otrosMurosInteriorInteriorDescripcion
         };
+
+        console.log("item tipoAguaCalienteDescripcion ", item.tipoAguaCalienteDescripcion);
+
         return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
       });
 
       await Promise.all(updatePromises);
-      toast.success("Items actualizados correctamente");
+      toast.success("Informe actualizado correctamente");
       setTimeout(() => {
         navigate('/home');
       }, 3000);
     } catch (error) {
-      toast.error("Error al actualizar los items");
+      toast.error("Error al actualizar el informe");
       console.error(error);
     }
-  };
+  };*/
 
 
   const handleOpenModal = (e, local = null) => {
@@ -386,21 +616,30 @@ const InformeBbva = () => {
   const handleCloseModalAntiguedadesDescripcion = () => {
     setIsModalAntiguedadesDescripcionOpen(false);
     fetchItemsObraCivilByInformeId(provisionalInformeId);
-/*     setAntiguedadesCimentacionDescripcion(true);
- */  };
-
-  /*   const handleOpenModalAntiguedadesCubiertaDescripcion = (e, local = null) => {
-      e.stopPropagation();
-      setCurrentItem();
-      setIsModalAntiguedadesCubiertaOpen(true);
-    };
-  
-    const handleCloseModalAntiguedadesCubiertaDescripcion = () => {
-      setIsModalAntiguedadesCubiertaOpen(false);
-      fetchItemsObraCivilByInformeId(provisionalInformeId);
-    }; */
+  };
 
 
+  const handleOpenModalComodidadesDescripcion = (e, local = null) => {
+    e.stopPropagation();
+    setCurrentItem();
+    setIsModalComodidadesDescripcionOpen(true);
+  };
+
+  const handleCloseModalComodidadesDescripcion = () => {
+    setIsModalComodidadesDescripcionOpen(false);
+    fetchItemsObraCivilByInformeId(provisionalInformeId);
+  };
+
+  const handleOpenModalPlanillaDescripcion = (e, local = null) => {
+    e.stopPropagation();
+    setCurrentItem();
+    setIsModalPlanillaDescripcionOpen(true);
+  };
+
+  const handleCloseModalPlanillaDescripcion = () => {
+    setIsModalPlanillaDescripcionOpen(false);
+    fetchItemsObraCivilByInformeId(provisionalInformeId);
+  };
 
   const handleSaveItem = async (local) => {
     handleCloseModal();
@@ -414,10 +653,45 @@ const InformeBbva = () => {
     handleCloseModalAntiguedadesDescripcion();
   };
 
-  /*   const handleSaveItemActualizacionCubiertaDescripcion = async (local) => {
-      handleCloseModalAntiguedadesCubiertaDescripcion();
-    };
-   */
+  const handleFileSelect = (event) => {
+    const files = Array.from(event.target.files);
+
+    if (files.length === 0) {
+      console.log("⚠️ No se seleccionaron archivos.");
+      return;
+    }
+
+    console.log("📂 Archivos seleccionados:", files.map(f => f.name));
+
+    setSelectedFiles(prev => [...prev, ...files]);
+    const filePreviews = files.map(file => URL.createObjectURL(file));
+    setPreviewImages(prev => [...prev, ...filePreviews]);
+  };
+
+
+  const handleFileSelectFotos = (event) => {
+    const files = Array.from(event.target.files);
+
+    if (files.length === 0) {
+      console.log("⚠️ No se seleccionaron fotos.");
+      return;
+    }
+
+    console.log("📂 Fotos seleccionadas:", files.map(f => f.name));
+
+    setSelectedFilesFotos(prev => [...prev, ...files]);
+    const filePreviews = files.map(file => URL.createObjectURL(file));
+    setPreviewImagesFotos(prev => [...prev, ...filePreviews]);
+  };
+
+
+  const handleRemoveImage = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveFotos = (index) => {
+    setSelectedFilesFotos(prev => prev.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="bg-gray-100">
@@ -448,7 +722,7 @@ const InformeBbva = () => {
         initialValues={informe}
         onSubmit={submitHandler}
       >
-        {({ isSubmitting, setFieldValue }) => (
+        {({ values, isSubmitting, setFieldValue }) => (
           <Form className="space-y-6">
             <div className="bg-white shadow-lg w-11/12 mx-auto rounded-xl p-6 mb-16">
               <div className="grid grid-cols-12 gap-2">
@@ -3825,78 +4099,1921 @@ const InformeBbva = () => {
                   </div>
 
 
-                  <div className="grid grid-cols-10 gap-2 ">
-                    <div className="col-span-12 text-center">
+                  <div className="grid grid-cols-5 gap-4 w-full">
+                    <div className="col-span-5 text-center">
                       <p className="text-base text-center text-gray-700 font-bold">Piscina</p>
                     </div>
-                    <div className="col-span-2 flex items-center">
+                    <div className="flex flex-col items-center col-span-1">
                       <Field
                         type="radio"
                         name="piscinaDescripcionDetallada"
                         value="hArmadoPiscinaDescripcionDetallada"
-                        className="form-radio h-4 w-4 "
+                        className="form-radio h-4 w-4"
                         onClick={() => {
                           setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
-                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('prefabricadaPiscinaDescripcionDetallada', false);
+                          setFieldValue('terminacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('climatizacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('otrosPiscinaDescripcionDetallada', false);
                         }}
                       />
                       <label className="p-2 text-gray-700 font-bold text-sm">H. Armado</label>
                     </div>
-                    <div className="col-span-2 flex items-center">
+                    <div className="flex flex-col items-center col-span-1">
                       <Field
                         type="radio"
                         name="piscinaDescripcionDetallada"
                         value="prefabricadaPiscinaDescripcionDetallada"
-                        className="form-radio h-4 w-4 "
+                        className="form-radio h-4 w-4"
                         onClick={() => {
-                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
-                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', false);
+                          setFieldValue('prefabricadaPiscinaDescripcionDetallada', true);
+                          setFieldValue('terminacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('climatizacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('otrosPiscinaDescripcionDetallada', false);
                         }}
                       />
                       <label className="p-2 text-gray-700 font-bold text-sm">Prefabricada</label>
                     </div>
-                    <div className="col-span-2 flex items-center">
+                    <div className="flex flex-col items-center col-span-1">
                       <Field
                         type="radio"
-                        name="terminacionDescripcionDetallada"
-                        value="hArmadoPiscinaDescripcionDetallada"
-                        className="form-radio h-4 w-4 "
+                        name="piscinaDescripcionDetallada"
+                        value="terminacionPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4"
                         onClick={() => {
-                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
-                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', false);
+                          setFieldValue('prefabricadaPiscinaDescripcionDetallada', false);
+                          setFieldValue('terminacionPiscinaDescripcionDetallada', true);
+                          setFieldValue('climatizacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('otrosPiscinaDescripcionDetallada', false);
                         }}
                       />
                       <label className="p-2 text-gray-700 font-bold text-sm">Terminación</label>
                     </div>
-                    <div className="col-span-2 flex items-center">
+                    <div className="flex flex-col items-center col-span-1">
                       <Field
                         type="radio"
                         name="piscinaDescripcionDetallada"
-                        value="climatizaciónPiscinaDescripcionDetallada"
-                        className="form-radio h-4 w-4 "
+                        value="climatizacionPiscinaDescripcionDetallada"
+                        className="form-radio h-4 w-4"
                         onClick={() => {
-                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
-                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', false);
+                          setFieldValue('prefabricadaPiscinaDescripcionDetallada', false);
+                          setFieldValue('terminacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('climatizacionPiscinaDescripcionDetallada', true);
+                          setFieldValue('otrosPiscinaDescripcionDetallada', false);
                         }}
                       />
                       <label className="p-2 text-gray-700 font-bold text-sm">Climatización</label>
                     </div>
-                    <div className="col-span-2 flex items-center">
+                    <div className="flex flex-col items-center col-span-1">
                       <Field
                         type="radio"
                         name="piscinaDescripcionDetallada"
                         value="otrosPiscinaDescripcionDetallada"
-                        className="form-radio h-4 w-4 "
+                        className="form-radio h-4 w-4"
                         onClick={() => {
-                          setFieldValue('hArmadoPiscinaDescripcionDetallada', true);
-                          setFieldValue('muyBuena2CategoriaDescripcionInmueble', false);
+                          setFieldValue('hArmadoPiscinaDescripcionDetallada', false);
+                          setFieldValue('prefabricadaPiscinaDescripcionDetallada', false);
+                          setFieldValue('terminacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('climatizacionPiscinaDescripcionDetallada', false);
+                          setFieldValue('otrosPiscinaDescripcionDetallada', true);
                         }}
                       />
                       <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-4 gap-4 w-full pt-5">
+                    <div className="flex flex-col items-center col-span-1">
+                      <p className="text-base text-center text-gray-700 font-bold">Aberturas</p>
+                      <Field
+                        type="text"
+                        id="aberturasDescripcionDetallada"
+                        name="aberturasDescripcionDetallada"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                    <div className="flex flex-col items-center col-span-1">
+                      <p className="text-base text-center text-gray-700 font-bold">Protección aberturas</p>
+                      <Field
+                        type="text"
+                        id="proteccionAberturasDescripcionDetallada"
+                        name="proteccionAberturasDescripcionDetallada"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                    <div className="flex flex-col items-center col-span-1">
+                      <p className="text-base text-center text-gray-700 font-bold">Placares en dormitorios</p>
+                      <Field
+                        type="text"
+                        id="placaresDormitoriosDescripcionDetallada"
+                        name="placaresDormitoriosDescripcionDetallada"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                    <div className="flex flex-col items-center col-span-1">
+                      <p className="text-base text-center text-gray-700 font-bold">Placares en cocina</p>
+                      <Field
+                        type="text"
+                        id="placaresCocinaDescripcionDetallada"
+                        name="placaresCocinaDescripcionDetallada"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                  </div>
+
+
+                  <div className="grid grid-cols-3 gap-6 col-span-12">
+
+                    <div className="border p-4 rounded-lg">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Agua caliente</h2>
+
+                      <Field
+                        type="text"
+                        id="tipoAguaCalienteDescripcion"
+                        name="tipoAguaCalienteDescripcion"
+                        placeholder="Tipo"
+                        className="w-full p-2 border rounded-lg mb-2"
+                      />
+
+
+                      <div className="flex items-center space-x-4 justify-center">
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="enCocinaDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="enCocinaDescripcionDetallada">En cocina</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="enBaniosDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="enBaniosDescripcionDetallada">En baños</label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="border p-4 rounded-lg">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Instalación eléctrica</h2>
+                      <div className="flex items-center space-x-4 justify-center">
+
+                        <div className="flex items-center p-2">
+                          <Field
+                            type="checkbox"
+                            name="embutidaDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="embutidaDescripcionDetallada">Embutida</label>
+                        </div>
+
+                        <div className="flex items-center p-2">
+                          <Field
+                            type="checkbox"
+                            name="exteriorDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="exteriorDescripcionDetallada">Exterior</label>
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                    <div className="border p-4 rounded-lg">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Otros</h2>
+                      <div className="flex items-center justify-center">
+
+                        <div className="flex items-center p-2">
+                          <Field
+                            type="checkbox"
+                            name="alarmaDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="alarmaDescripcionDetallada">Alarma</label>
+                        </div>
+
+                        <div className="flex items-center p-2">
+                          <Field
+                            type="checkbox"
+                            name="gElectrogDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="gElectrogDescripcionDetallada">G.electrog</label>
+                        </div>
+
+                        <div className="flex items-center p-2">
+                          <Field
+                            type="checkbox"
+                            name="cctvDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="cctvDescripcionDetallada">CCTV</label>
+                        </div>
+
+                        <div className="flex items-center p-2">
+                          <Field
+                            type="checkbox"
+                            name="portElecDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="portElecDescripcionDetallada">Port.elec.</label>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div className="grid gap-6 col-span-12">
+                    <div className="border p-4 rounded-lg">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Climatización</h2>
+                      <div className="grid grid-cols-5 items-center mb-2">
+                        <div className="col-span-1 flex">
+                          <Field
+                            type="checkbox"
+                            id="estufaDescripcionDetallada"
+                            name="estufaDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="estufaDescripcionDetallada" >Estufa</label>
+                        </div>
+                        <div className="col-span-4">
+                          <Field
+                            type="text"
+                            id="estufaUbicacionDescripcionDetallada"
+                            name="estufaUbicacionDescripcionDetallada"
+                            placeholder="Ubicación Estufa"
+                            className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-5 items-center mb-2">
+                        <div className="col-span-1 flex">
+                          <Field
+                            type="checkbox"
+                            id="splitsDescripcionDetallada"
+                            name="splitsDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="splitsDescripcionDetallada" >Splits</label>
+                        </div>
+                        <div className="col-span-4">
+                          <Field
+                            type="text"
+                            id="splitsUbicacionDescripcionDetallada"
+                            name="splitsUbicacionDescripcionDetallada"
+                            placeholder="Ubicación Splits"
+                            className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-5 items-center mb-2">
+                        <div className="col-span-1 flex">
+                          <Field
+                            type="checkbox"
+                            id="centralDescripcionDetallada"
+                            name="centralDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="centralDescripcionDetallada" >Central</label>
+                        </div>
+                        <div className="col-span-4">
+                          <Field
+                            type="text"
+                            id="centralUbicacionDescripcionDetallada"
+                            name="centralUbicacionDescripcionDetallada"
+                            placeholder="Ubicación Central"
+                            className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-5 items-center mb-2">
+                        <div className="col-span-1 flex">
+                          <Field
+                            type="checkbox"
+                            id="otrosDescripcionDetallada"
+                            name="otrosDescripcionDetallada"
+                            className="mr-2"
+                          />
+                          <label htmlFor="otrosDescripcionDetallada" >Otros</label>
+                        </div>
+                        <div className="col-span-4">
+                          <Field
+                            type="text"
+                            id="otrosUbicacionDescripcionDetallada"
+                            name="otrosUbicacionDescripcionDetallada"
+                            placeholder="Ubicación Otros"
+                            className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-5 items-center mb-2">
+                        <div className="col-span-1 mr-1">
+                          <Field
+                            type="text"
+                            id="panelesSolaresDescripcionDetallada"
+                            name="panelesSolaresDescripcionDetallada"
+                            placeholder="Alimentación Paneles Solares "
+                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
+                          />
+                        </div>
+                        <div className="col-span-4">
+                          <Field
+                            type="text"
+                            id="otrasInstalacionesDescripcionDetallada"
+                            name="otrasInstalacionesDescripcionDetallada"
+                            placeholder="Otras instalaciones"
+                            className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+                  <div className="grid grid-cols-12 gap-2 pt-10">
+                    <div className="col-span-12 text-center">
+                      <div className="grid grid-template-rows: auto 1fr">
+                        <h4 className="text-sm text-center text-gray-700 font-bold">Asignar comodidades a Items</h4>
+                        <button
+                          onClick={handleOpenModalComodidadesDescripcion}
+                          className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
+                          type="button"
+                        >
+                          <img src={plusIcon} alt="Plus icon" className="w-6 h-6 fill-current text-white filter invert" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Contenedor de Items */}
+                    <div className="col-span-12 border p-3 rounded space-y-4">
+                      <h4 className="text-xl text-green-900">Items</h4>
+
+                      {itemsObraCivil
+                        .filter(item =>
+                          item.obraCivilSeccionEDescripcionInmueble &&
+                          Object.keys(item).some(key => key.includes("ComodidadesDescripcion") && item[key] > 0)
+                        )
+                        .map((item) => (
+                          <div key={item.id} className="grid grid-cols-12 p-2 items-center">
+
+                            {/* Nombre del Item */}
+                            <div className="col-span-12 mb-3 mt-5">
+                              <span className="col-span-3 px-2 py-1 border rounded-md text-green-900">
+                                {item.obraCivilSeccionEDescripcionInmueble || ""}
+                              </span>
+                            </div>
+
+                            {/* Título de Sección */}
+                            <div className="col-span-12 text-center">
+                              <h6 className="text-center p-4 text-green-900">Comodidades</h6>
+                            </div>
+
+                            {/* Campos de Comodidades (4 columnas) */}
+                            <div className="col-span-12 grid grid-cols-4 gap-4">
+                              {Object.keys(item)
+                                .filter(key => key.includes("ComodidadesDescripcion") && key !== "otrosComodidadesDescripcion")
+                                .map((key) => (
+                                  <div key={key} className="flex flex-col items-center">
+                                    <label htmlFor={`${key}_${item.id}`} className="text-gray-700 font-bold text-sm text-center capitalize">
+                                      {key.replace(/ComodidadesDescripcion$/, "").replace(/([A-Z])/g, " $1").trim()}
+                                    </label>
+                                    <Field
+                                      type="number"
+                                      id={`${key}_${item.id}`}
+                                      name={`${key}_${item.id}`}
+                                      className="form-input border rounded-md p-2 w-full text-center"
+                                      min="0"
+                                      value={item[key] || 0}
+                                      onChange={(e) => handleFieldChangeComodidades(item.id, key, e.target.value)}
+                                    />
+                                  </div>
+                                ))}
+                            </div>
+
+                            <label htmlFor={`otrosComodidadesDescripcion_${item.id}`} className="mt-4 col-span-2 pl-3 text-sm text-gray-700 font-bold">
+                              Otros / Descripción
+                            </label>
+                            <Field
+                              type="text"
+                              id={`otrosComodidadesDescripcion_${item.id}`}
+                              name={`otrosComodidadesDescripcion_${item.id}`}
+                              value={item.otrosComodidadesDescripcion || ""}
+                              className="mt-4 col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                              onChange={(e) => handleFieldChangeComodidades(item.id, 'otrosComodidadesDescripcion', e.target.value)}
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2 pt-10">
+                    <div className="col-span-12 text-center">
+                      <div className="grid grid-template-rows: auto 1fr">
+                        <h4 className="text-sm text-center text-gray-700 font-bold">Asignar Planilla a Items</h4>
+                        <button
+                          onClick={handleOpenModalPlanillaDescripcion}
+                          className="bg-green-900 text-white hover:bg-green-700 w-10 h-10 flex items-center justify-center rounded-full mx-auto"
+                          type="button"
+                        >
+                          <img src={plusIcon} alt="Plus icon" className="w-6 h-6 fill-current text-white filter invert" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Contenedor de Items */}
+                    <div className="col-span-12 border p-3 rounded space-y-4">
+                      <h4 className="text-xl text-green-900">Items</h4>
+
+                      {itemsObraCivil
+                        .filter(item =>
+                          item.obraCivilSeccionEDescripcionInmueble &&
+                          Object.keys(item).some(key => key.includes("PlanillaDescripcion") && item[key])
+                        )
+                        .map((item) => (
+                          <div key={item.id} className="grid grid-cols-12 p-2 items-center">
+
+                            {/* Nombre del Item */}
+                            <div className="col-span-12 mb-3 mt-5 ">
+                              <span className="col-span-3 px-2 py-1 border rounded-md text-green-900">
+                                {item.obraCivilSeccionEDescripcionInmueble || ""}
+                              </span>
+                            </div>
+
+                            {/* Título de Sección */}
+                            <div className="col-span-12 text-center">
+                              <h6 className="text-center p-4 text-green-900">Planilla Descripción</h6>
+                            </div>
+
+                            {/* Campos de Planilla (8 columnas) */}
+                            <div className="col-span-12 grid grid-cols-8 gap-4">
+                              {Object.keys(item)
+                                .filter(key => key.includes("PlanillaDescripcion") && key !== "totalPlanillaDescripcion") // 🔥 Excluir total
+                                .map((key) => (
+                                  <div key={key} className="flex flex-col items-center">
+                                    <label htmlFor={`${key}_${item.id}`} className="text-gray-700 font-bold text-sm text-center capitalize mb-3">
+                                      {key.replace(/PlanillaDescripcion$/, "").replace(/([A-Z])/g, " $1").trim()}
+                                    </label>
+                                    {/* 🔥 Verificar que el valor sea una cadena antes de usar .split(";") */}
+                                    {(typeof item[key] === "string" && item[key].includes(";") ? item[key].split(";") : [item[key]]).map((value, index) => (
+                                      <Field
+                                        key={`${key}_${item.id}_${index}`}
+                                        type="text"
+                                        id={`${key}_${item.id}_${index}`}
+                                        name={`${key}_${item.id}_${index}`}
+                                        className="form-input border rounded-md p-2 w-full text-center mb-2 mt-2"
+                                        value={value || ""}
+                                        onChange={(e) => handleFieldChangePlanilla(item.id, key, index, e.target.value)}
+                                      />
+                                    ))}
+                                  </div>
+                                ))}
+                            </div>
+
+                            {/* 🔥 Campo "Total" en una fila separada con un único input */}
+                            <div className="col-span-12 grid grid-cols-8 gap-4 mt-4">
+                              <div className="col-span-1 flex flex-col items-center">
+                                <label htmlFor={`totalPlanillaDescripcion_${item.id}`} className="text-gray-700 font-bold text-sm text-center capitalize">
+                                  Total
+                                </label>
+                                <Field
+                                  type="number"
+                                  id={`totalPlanillaDescripcion_${item.id}`}
+                                  name={`totalPlanillaDescripcion_${item.id}`}
+                                  className="form-input border rounded-md p-2 w-full text-center"
+                                  min="0"
+                                  value={item.totalPlanillaDescripcion || 0.0} // 🔥 Valor único, no usar .split()
+                                  onChange={(e) => handleFieldChangePlanilla(item.id, 'totalPlanillaDescripcion', 0, e.target.value)}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+
+                  <div className="col-span-12 flex flex-col  space-y-4 p-3 ">
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-12 text-center">
+                        <label
+                          htmlFor="otrasCaracteristicasDescripcion"
+                          className="p-3 text-sm text-gray-700 font-bold "
+                        >
+                          Otras características:
+                        </label>
+                        <Field
+                          component="textarea"
+                          id="otrasCaracteristicasDescripcion"
+                          name="otrasCaracteristicasDescripcion"
+                          className="p-6 w-full h-16 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div className="col-span-12 flex flex-col  space-y-4 p-3 rounded">
+                    <h4 className="text-xl text-green-900 text-center">E.3 Observaciones</h4>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-12 text-center">
+
+                        <label
+                          htmlFor="observacionesSeccionLegalesDescripcion"
+                          className="p-3 text-sm text-gray-700 font-bold "
+                        >
+                          Observaciones de la SECCIÓN  para Legales BBVA
+                        </label>
+                        <Field
+                          component="textarea"
+                          id="observacionesSeccionLegalesDescripcion"
+                          name="observacionesSeccionLegalesDescripcion"
+                          className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                        />
+
+                        <label
+                          htmlFor="otrasObservacionesSeccionLegalesDescripcion"
+                          className="p-3 text-sm text-gray-700 font-bold "
+                        >
+                          Otras observaciones de la SECCIÓN
+                        </label>
+                        <Field
+                          component="textarea"
+                          id="otrasObservacionesSeccionLegalesDescripcion"
+                          name="otrasObservacionesSeccionLegalesDescripcion"
+                          className="p-6 w-full h-16 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                        />
+
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
+
+
+                <div className="col-span-12 space-y-4 border p-3 rounded">
+                  <h4 className="text-xl text-green-900">SECCIÓN F - Planos</h4>
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-3"></div>
+                    <div className="col-span-6 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Fuente</p>
+                      <div className="flex items-center space-x-4 justify-center">
+                        <div className="flex items-center p-2">
+                          <Field type="checkbox" name="documentacionClientePlanos" className="mr-2" />
+                          <label htmlFor="documentacionClientePlanos">Documentación Cliente</label>
+                        </div>
+                        <div className="flex items-center p-2">
+                          <Field type="checkbox" name="relevamientoTasadorPlanos" className="mr-2" />
+                          <label htmlFor="relevamientoTasadorPlanos">Relevamiento Tasador</label>
+                        </div>
+                        <div className="flex items-center p-2">
+                          <Field type="checkbox" name="otrosPlanos" className="mr-2" />
+                          <label htmlFor="otrosPlanos">Otros</label>
+                        </div>
+                      </div>
+
+                      {/* 🔥 Carga de imágenes */}
+                      <div className="flex flex-col items-center">
+                        <div className="bg-gray-50 p-4 rounded-md mb-2">
+                          <label className="block p-2 text-center text-base text-gray-700 font-bold mb-2">
+                            Subir Imágenes de Planos
+                          </label>
+
+                          <Field type="hidden" name="planosImagenesUrl" />
+
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 rounded file:border-0 file:text-sm file:font-semibold file:bg-green-900 file:text-white hover:file:bg-green-700"
+                            onChange={handleFileSelect} // 🔥 Aquí vinculamos la función correctamente
+
+                          />
+
+                          {/* 🔥 Vista previa de imágenes de planos con opción de eliminar */}
+                          {(values.planosImagenesUrl || previewImages.length > 0) && (
+                            <div className="grid grid-cols-4 gap-4 mt-2">
+                              {/* 🔹 Imágenes ya guardadas en la BD */}
+                              {values.planosImagenesUrl &&
+                                values.planosImagenesUrl
+                                  .split(";")
+                                  .filter(url => url && url.trim() !== "") // 🔥 Filtrar URLs vacías
+                                  .map((src, index) => (
+                                    <div key={`bd-${index}`} className="relative">
+                                      <img
+                                        src={`http://localhost:8080${src.trim()}`}
+                                        alt={`planos-${index}`}
+                                        className="w-full h-auto rounded-md object-cover"
+                                      />
+                                      <button
+                                        type="button"
+                                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                        onClick={() => handleRemoveImage(index, setFieldValue, values)}
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))
+                              }
+
+                              {/* 🔹 Imágenes recién subidas pero aún no guardadas */}
+                              {previewImages.map((image, index) => (
+                                <div key={index} className="relative">
+                                  <img src={image} alt={`preview-${index}`} className="w-full h-auto rounded-md object-cover" />
+                                  <button
+                                    type="button"
+                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                    onClick={() => handleRemovePreviewImage(index)}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-span-3"></div>
+                  </div>
+                </div>
+
+
+
+
+                <div className="col-span-12 space-y-4 border p-3 rounded">
+                  <h4 className="text-xl text-green-900">SECCIÓN G - Fotos</h4>
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-3"></div>
+                    <div className="col-span-6 text-center">
+
+                      {/* 🔥 Carga de imágenes */}
+                      <div className="flex flex-col items-center">
+                        <div className="bg-gray-50 p-4 rounded-md mb-2">
+                          <label className="block p-2 text-center text-base text-gray-700 font-bold mb-2">
+                            Subir Imágenes
+                          </label>
+
+                          <Field type="hidden" name="fotosImagenesUrlFotos" />
+
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 rounded file:border-0 file:text-sm file:font-semibold file:bg-green-900 file:text-white hover:file:bg-green-700"
+                            onChange={handleFileSelectFotos}
+                          />
+
+                          {/* 🔥 Vista previa de imágenes con opción de eliminar */}
+                          {(values.fotosImagenesUrlFotos || previewImagesFotos.length > 0) && (
+                            <div className="grid grid-cols-4 gap-4 mt-2">
+                              {values.fotosImagenesUrlFotos &&
+                                values.fotosImagenesUrlFotos
+                                  .split(";")
+                                  .filter(url => url && url.trim() !== "")
+                                  .map((src, index) => (
+                                    <div key={`bd-${index}`} className="relative">
+                                      <img
+                                        src={`http://localhost:8080${src.trim()}`}
+                                        alt={`foto-${index}`}
+                                        className="w-full h-auto rounded-md object-cover"
+                                      />
+                                      <button
+                                        type="button"
+                                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                        onClick={() => handleRemovePreviewFotos(index, setFieldValue, values)}
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))
+                              }
+
+                              {previewImagesFotos.map((image, index) => (
+                                <div key={index} className="relative">
+                                  <img src={image} alt={`preview-${index}`} className="w-full h-auto rounded-md object-cover" />
+                                  <button
+                                    type="button"
+                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                    onClick={() => handleRemovePreviewFotos(index)}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-span-3"></div>
+                  </div>
+                </div>
+
+
+                <div className="col-span-12 space-y-4 border p-3 rounded">
+                  <h4 className="text-xl text-green-900">SECCIÓN H- Entorno y mercado</h4>
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">H.1 Entorno</p>
+
+                      <p className="text-base text-center text-gray-700 font-bold">Descripción general </p>
+                      <Field
+                        component="textarea"
+                        id="descripcionGeneralEntorno"
+                        name="descripcionGeneralEntorno"
+                        className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      />
+
+                    </div>
+
+                    <div className="border p-4 rounded-lg col-span-4">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Construcciones</h2>
+
+                      <div className="flex items-center space-x-4 justify-center">
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="veinticincoContruccionesEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="veinticincoContruccionesEntorno">0-25%</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="setentacincoContruccionesEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="setentacincoContruccionesEntorno">25-75%</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="cienContruccionesEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="cienContruccionesEntorno">75-100%</label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="border p-4 rounded-lg col-span-4">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Crecimiento</h2>
+
+                      <div className="flex items-center space-x-4 justify-center">
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="continuoCrecimientoEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="continuoCrecimientoEntorno">Continuo</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="estableContruccionesEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="estableContruccionesEntorno">Estable</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="nuloContruccionesEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="nuloContruccionesEntorno">Nulo</label>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div className="border p-4 rounded-lg col-span-4">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Usos (%)</h2>
+                      <div className="grid grid-cols-4 gap-4">
+                        <div>
+                          <label htmlFor="viviendaUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Vivienda</label>
+                          <Field type="number" name="viviendaUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+                        </div>
+                        <div>
+                          <label htmlFor="comercioUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Comercio</label>
+                          <Field type="number" name="comercioUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+                        </div>
+                        <div>
+                          <label htmlFor="industriaUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Industria</label>
+                          <Field type="number" name="industriaUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+                        </div>
+                        <div>
+                          <label htmlFor="otrosUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Otros</label>
+                          <Field type="number" name="otrosUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Equipamiento, conectividad  y servicios</p>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-3">
+                      <p className="text-base text-center text-gray-700 font-bold">Centros enseñanza</p>
+                      <Field
+                        type="text"
+                        id="centrosEnsenanzaEntorno"
+                        name="centrosEnsenanzaEntorno"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-3">
+                      <p className="text-base text-center text-gray-700 font-bold">Centros salud</p>
+                      <Field
+                        type="text"
+                        id="centrosSaludEntorno"
+                        name="centrosSaludEntorno"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-2">
+                      <p className="text-base text-center text-gray-700 font-bold">Deportivo</p>
+
+                      <div className="grid grid-cols-2 gap-1">
+                        <div className="flex items-center space-x-2 mr-2">
+                          <Field
+                            type="checkbox"
+                            id="suficienteDeportivoEntorno"
+                            name="suficienteDeportivoEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="suficienteDeportivoEntorno" className="text-sm font-medium text-gray-700">
+                            Suficiente
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ml-2">
+                          <Field
+                            type="checkbox"
+                            id="escasoNuloDeportivoEntorno"
+                            name="escasoNuloDeportivoEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="escasoNuloDeportivoEntorno" className="text-sm font-medium text-gray-700">
+                            Escaso/Nulo
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-2">
+                      <p className="text-base text-center text-gray-700 font-bold">Esparcimiento</p>
+
+                      <div className="grid grid-cols-2 ">
+                        <div className="flex items-center space-x-2 mr-2">
+                          <Field
+                            type="checkbox"
+                            id="suficienteEsparcimientoEntorno"
+                            name="suficienteEsparcimientoEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="suficienteEsparcimientoEntorno" className="text-sm font-medium text-gray-700">
+                            Suficiente
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ml-2">
+                          <Field
+                            type="checkbox"
+                            id="escasoNuloEsparcimientoEntorno"
+                            name="escasoNuloEsparcimientoEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="escasoNuloEsparcimientoEntorno" className="text-sm font-medium text-gray-700">
+                            Escaso/Nulo
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-2">
+                      <p className="text-base text-center text-gray-700 font-bold">Zonas verdes</p>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2 mr-2">
+                          <Field
+                            type="checkbox"
+                            id="suficienteZonasVerdesEntorno"
+                            name="suficienteZonasVerdesEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="suficienteZonasVerdesEntorno" className="text-sm font-medium text-gray-700">
+                            Suficiente
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ml-2">
+                          <Field
+                            type="checkbox"
+                            id="escasoNuloZonasVerdesEntorno"
+                            name="escasoNuloZonasVerdesEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="escasoNuloZonasVerdesEntorno" className="text-sm font-medium text-gray-700">
+                            Escaso/Nulo
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-2">
+                      <p className="text-base text-center text-gray-700 font-bold">Estacionamiento</p>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2 mr-2">
+                          <Field
+                            type="checkbox"
+                            id="suficienteEstacionamientoEntorno"
+                            name="suficienteEstacionamientoEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="suficienteEstacionamientoEntorno" className="text-sm font-medium text-gray-700">
+                            Suficiente
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ml-2">
+                          <Field
+                            type="checkbox"
+                            id="insuficienteNuloEstacionamientoEntorno"
+                            name="insuficienteNuloEstacionamientoEntorno"
+                            className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="insuficienteNuloEstacionamientoEntorno" className="text-sm font-medium text-gray-700">
+                            Insuficiente
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-6">
+                      <p className="text-base text-center text-gray-700 font-bold">
+                        Proximidad transporte público/conectividad
+                      </p>
+
+                      <div className="grid grid-cols-4 ">
+                        <div className="ml-6 w-full flex items-center justify-center space-x-2">
+                          <Field
+                            type="checkbox"
+                            id="excelenteProximidadTransportePublicoConectividadEntorno"
+                            name="excelenteProximidadTransportePublicoConectividadEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="excelenteProximidadTransportePublicoConectividadEntorno"
+                            className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                            Excelente
+                          </label>
+                        </div>
+
+                        <div className="ml-6 w-full flex items-center justify-center space-x-2">
+                          <Field
+                            type="checkbox"
+                            id="buenaProximidadTransportePublicoConectividadEntorno"
+                            name="buenaProximidadTransportePublicoConectividadEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="buenaProximidadTransportePublicoConectividadEntorno"
+                            className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                            Buena
+                          </label>
+                        </div>
+
+                        <div className="ml-6 w-full flex items-center justify-center space-x-2">
+                          <Field
+                            type="checkbox"
+                            id="regularProximidadTransportePublicoConectividadEntorno"
+                            name="regularProximidadTransportePublicoConectividadEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="regularProximidadTransportePublicoConectividadEntorno"
+                            className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                            Regular
+                          </label>
+                        </div>
+
+                        <div className="w-full flex items-center justify-center space-x-2">
+                          <Field
+                            type="checkbox"
+                            id="malaProximidadTransportePublicoConectividadEntorno"
+                            name="malaProximidadTransportePublicoConectividadEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="malaProximidadTransportePublicoConectividadEntorno"
+                            className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                            Mala
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-2">
+                      <p className="text-base text-center text-gray-700 font-bold">Seguridad</p>
+
+                      <div className="grid grid-cols-2 gap-1">
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="existeSeguridadEntorno"
+                            name="existeSeguridadEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="existeSeguridadEntorno" className="text-sm font-medium text-gray-700">
+                            Existe
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="noExisteSeguridadEntorno"
+                            name="noExisteSeguridadEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="noExisteSeguridadEntorno" className="text-sm font-medium text-gray-700">
+                            No Existe
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-2">
+                      <p className="text-base text-center text-gray-700 font-bold">Situación general</p>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="favorableSituacionGeneralEntorno"
+                            name="favorableSituacionGeneralEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="favorableSituacionGeneralEntorno" className="text-sm font-medium text-gray-700">
+                            Favorable
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="desfavorableSituacionGeneralEntorno"
+                            name="desfavorableSituacionGeneralEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="desfavorableSituacionGeneralEntorno" className="text-sm font-medium text-gray-700">
+                            Desfavorable
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">H.2 Mercado inmobiliario</p>
+                      <p className="text-base text-center text-gray-700 font-bold">Descripción general </p>
+                      <Field
+                        component="textarea"
+                        id="descripcionGeneralMercadoInmobiliario"
+                        name="descripcionGeneralMercadoInmobiliario"
+                        className="p-2 w-full h-16 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      />
+                      <p className="text-base text-center text-gray-700 font-bold">Situación del Mercado</p>
+                    </div>
+
+
+                    <div className="p-4 rounded-lg col-span-4">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Oferta</h2>
+
+                      <div className="flex items-center space-x-4 justify-center">
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="altaOfertaEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="altaOfertaEntorno">Alta</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="mediaOfertaEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="mediaOfertaEntorno">Media</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="bajaOfertaEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="bajaOfertaEntorno">Baja</label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-4">
+                      <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Demanda</h2>
+
+                      <div className="flex items-center space-x-4 justify-center">
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="altaDemandaEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="altaDemandaEntorno">Alta</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="mediaDemandaEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="mediaDemandaEntorno">Media</label>
+                        </div>
+
+                        <div className="flex items-center p-3">
+                          <Field
+                            type="checkbox"
+                            name="bajaDemandaEntorno"
+                            className="mr-2"
+                          />
+                          <label htmlFor="bajaDemandaEntorno">Baja</label>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Plazos de Comercialización</p>
+                      <Field
+                        type="text"
+                        id="plazosComercializaciónEntorno"
+                        name="plazosComercializaciónEntorno"
+                        className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Inmuebles comparables en la zona </p>
+                    </div>
+
+
+                    <div className="p-4 rounded-lg col-span-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Existencia</p>
+
+                      <div className="grid grid-cols-4 gap-1">
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="altaExistenciaEntorno"
+                            name="altaExistenciaEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="altaExistenciaEntorno" className="text-sm font-medium text-gray-700">
+                            Alta
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="mediaExistenciaEntorno"
+                            name="mediaExistenciaEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="mediaExistenciaEntorno" className="text-sm font-medium text-gray-700">
+                            Media
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="bajaExistenciaEntorno"
+                            name="bajaExistenciaEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="bajaExistenciaEntorno" className="text-sm font-medium text-gray-700">
+                            Baja
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="noExisteExistenciaEntorno"
+                            name="noExisteExistenciaEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="noExisteExistenciaEntorno" className="text-sm font-medium text-gray-700">
+                            No Existe
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Valor de Mercado similar</p>
+
+                      <div className="grid grid-cols-3 gap-1">
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="abundantesValorMercadoSimilarEntorno"
+                            name="abundantesValorMercadoSimilarEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="abundantesValorMercadoSimilarEntorno" className="text-sm font-medium text-gray-700">
+                            Abundantes
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="escasasValorMercadoSimilarEntorno"
+                            name="escasasValorMercadoSimilarEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="escasasValorMercadoSimilarEntorno" className="text-sm font-medium text-gray-700">
+                            Escasas
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="muyEscasasValorMercadoSimilarEntorno"
+                            name="muyEscasasValorMercadoSimilarEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="muyEscasasValorMercadoSimilarEntorno" className="text-sm font-medium text-gray-700">
+                            Muy escasas
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg col-span-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Antigüedad similar</p>
+
+                      <div className="grid grid-cols-3 gap-1">
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="abundantesAntigüedadSimilarEntorno"
+                            name="abundantesAntigüedadSimilarEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="abundantesAntigüedadSimilarEntorno" className="text-sm font-medium text-gray-700">
+                            Abundantes
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="escasasAntigüedadSimilarEntorno"
+                            name="escasasAntigüedadSimilarEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="escasasAntigüedadSimilarEntorno" className="text-sm font-medium text-gray-700">
+                            Escasas
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="muyEscasasAntigüedadSimilarEntorno"
+                            name="muyEscasasAntigüedadSimilarEntorno"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="muyEscasasAntigüedadSimilarEntorno" className="text-sm font-medium text-gray-700">
+                            Muy escasas
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Aspectos que influyen en la comercialización</p>
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">I.1 Normativa</p>
+                      <p className="text-lg text-center text-gray-700 font-bold"> Organismos competentes:</p>
+                      <Field
+                        type="text"
+                        id="organismosCompetentesNormativa"
+                        name="organismosCompetentesNormativa"
+                        className="p-1 w-full mb-5 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+
+                    {/* Tabla editable */}
+                    <div className="col-span-12">
+                      <h5 className="text-lg font-bold text-gray-700 mb-4">
+                        Normativa Urbanística - Parámetros Edificación
+                      </h5>
+
+                      <table className="w-full border-collapse border border-gray-300 text-sm">
+                        {/* Encabezados */}
+                        <thead className="bg-gray-200 text-gray-700">
+                          <tr>
+                            <th className="border border-gray-300 px-4 py-2">Concepto</th>
+                            <th className="border border-gray-300 px-4 py-2">Normativa</th>
+                            <th className="border border-gray-300 px-4 py-2">Valores del padrón</th>
+                            <th className="border border-gray-300 px-4 py-2">Sin verificar. Faltan datos Normativa</th>
+                            <th className="border border-gray-300 px-4 py-2">Cumple</th>
+                            <th className="border border-gray-300 px-4 py-2">No cumple</th>
+                            <th className="border border-gray-300 px-4 py-2">No aplica</th>
+                            <th className="border border-gray-300 px-4 py-2">Sin verificar. Faltan datos Normativa</th>
+                            <th className="border border-gray-300 px-4 py-2">No aplica. Baldío</th>
+                          </tr>
+                        </thead>
+
+                        {/* Cuerpo editable */}
+                        <tbody>
+                          {[...Array(9)].map((_, rowIndex) => {
+                            const row = rowIndex + 1; // Número de la fila (1-9)
+                            return (
+                              <tr key={row}>
+                                {/* Concepto */}
+                                <td className="border border-gray-300 px-4 py-2">
+                                  <Field
+                                    type="text"
+                                    name={`concepto${row}Normativa`}
+                                    placeholder={` Ingrese Concepto `}
+                                    className="w-full p-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                  />
+                                </td>
+                                {/* Checkboxes */}
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`normativa${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`valoresPadron${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`sinVerificarFaltanDatosNormativa${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`cumple${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`noCumple${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`noAplica${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`sinVerificarFaltanDatosNormativaExtra${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2 text-center">
+                                  <Field
+                                    type="checkbox"
+                                    name={`noAplicaBaldio${row}Normativa`}
+                                    className="w-5 h-5 border-gray-300 focus:ring-green-900"
+                                  />
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+
+                    <div className="col-span-6 text-center p-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Requisitos inmueble valor patrimonial</p>
+                      <Field
+                        type="text"
+                        id="requisitosInmuebleValorPatrimonialNormativa"
+                        name="requisitosInmuebleValorPatrimonialNormativa"
+                        className="p-1 w-full mb-5 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+
+                    <div className="p-4 rounded-lg col-span-6">
+                      <p className="text-base text-center text-gray-700 font-bold">Área mínima vivienda/local comercial</p>
+
+                      <div className="grid grid-cols-3 gap-1 ">
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Field
+                            type="checkbox"
+                            id="cumpleAreaMinimaViviendaLocalComercialNormativa"
+                            name="cumpleAreaMinimaViviendaLocalComercialNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="cumpleAreaMinimaViviendaLocalComercialNormativa" className="text-sm font-medium text-gray-700">
+                            Cumple
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="noCumpleAreaMinimaViviendaLocalComercialNormativa"
+                            name="noCumpleAreaMinimaViviendaLocalComercialNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="noCumpleAreaMinimaViviendaLocalComercialNormativa" className="text-sm font-medium text-gray-700">
+                            No Cumple
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="sinVerificarAreaMinimaViviendaLocalComercialNormativa"
+                            name="sinVerificarAreaMinimaViviendaLocalComercialNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="sinVerificarAreaMinimaViviendaLocalComercialNormativa" className="text-sm font-medium text-gray-700">
+                            Sin Verificar
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+
+
+
+                    <div className="col-span-6 text-center p-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Otras normativas</p>
+                      <Field
+                        type="text"
+                        id="otrasNormativasNormativa"
+                        name="otrasNormativasNormativa"
+                        className="p-1 w-full mb-5 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+
+                    <div className="p-4 rounded-lg col-span-6">
+                      <p className="text-base text-center text-gray-700 font-bold">Normativa Construcción no tradicional</p>
+
+                      <div className="grid grid-cols-4 gap-1 ">
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Field
+                            type="checkbox"
+                            id="cumpleNormativaConstruccionNoTradicionalNormativa"
+                            name="cumpleNormativaConstruccionNoTradicionalNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="cumpleNormativaConstruccionNoTradicionalNormativa" className="text-sm font-medium text-gray-700">
+                            Cumple
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="noCumpleNormativaConstruccionNoTradicionalNormativa"
+                            name="noCumpleNormativaConstruccionNoTradicionalNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="noCumpleNormativaConstruccionNoTradicionalNormativa" className="text-sm font-medium text-gray-700">
+                            No Cumple
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="noAplicaNormativaConstruccionNoTradicionalNormativa"
+                            name="noAplicaNormativaConstruccionNoTradicionalNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="noAplicaNormativaConstruccionNoTradicionalNormativa" className="text-sm font-medium text-gray-700">
+                            No aplica
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="sinVerificarNormativaConstruccionNoTradicionalNormativa"
+                            name="sinVerificarNormativaConstruccionNoTradicionalNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="sinVerificarNormativaConstruccionNoTradicionalNormativa" className="text-sm font-medium text-gray-700">
+                            Sin verificar
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">Conclusiones cumplimiento normativo </p>
+                    </div>
+
+
+                    <div className="p-4 rounded-lg col-span-3">
+                      <p className="text-base text-center text-white font-bold p-2 mb-4"></p>
+
+                      <div className="grid grid-cols-2 gap-1 ">
+                        <div className="flex items-center space-x-2 ml-6">
+                          <Field
+                            type="checkbox"
+                            id="sinVerificarNormativa"
+                            name="sinVerificarNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="sinVerificarNormativa" className="text-sm font-medium text-gray-700">
+                            Sin verificar
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="cumpleNormativa"
+                            name="cumpleNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="cumpleNormativa" className="text-sm font-medium text-gray-700">
+                            Cumple
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div className="p-4 rounded-lg col-span-5">
+                      <p className="text-base text-center text-gray-700 font-bold">No cumple</p>
+
+                      <div className="grid grid-cols-3 gap-1 ">
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="regularizableNoCumpleNormativa"
+                            name="regularizableNoCumpleNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="regularizableNoCumpleNormativa" className="text-sm font-medium text-gray-700">
+                            Regularizable
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="noRegularizableNoCumpleNormativa"
+                            name="noRegularizableNoCumpleNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="noRegularizableNoCumpleNormativa" className="text-sm font-medium text-gray-700">
+                            No regularizable
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2 ">
+                          <Field
+                            type="checkbox"
+                            id="sinDatosNoCumpleNormativa"
+                            name="sinDatosNoCumpleNormativa"
+                            className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          />
+                          <label htmlFor="sinDatosNoCumpleNormativa" className="text-sm font-medium text-gray-700">
+                            Sin datos
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-4 text-center p-4">
+                      <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
+                      <Field
+                        type="text"
+                        id="descripcionNoCumpleNormativa"
+                        name="descripcionNoCumpleNormativa"
+                        className="p-1 w-full mb-5 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">I.2 Permiso de Construcción </p>
+                    </div>
+
+                    {/* 2 Checkboxes sin título (3 columnas) */}
+                    <div className="p-4 rounded-lg col-span-3 flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Field
+                          type="checkbox"
+                          id="sinDatosPermisoConstruccion"
+                          name="sinDatosPermisoConstruccion"
+                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                        />
+                        <label htmlFor="sinDatosPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                          Sin datos
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Field
+                          type="checkbox"
+                          id="sinPresentarPermisoConstruccion"
+                          name="sinPresentarPermisoConstruccion"
+                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                        />
+                        <label htmlFor="sinPresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                          Sin presentar
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="col-span-9 p-4 rounded-lg border">
+                      <p className="text-lg text-gray-700 font-bold mb-3 text-center">Presentado. Sin aprobar</p>
+
+                      <div className="grid grid-cols-9 gap-2">
+                        <div className="p-4 rounded-lg col-span-4">
+                          <p className="text-base text-gray-700 font-bold mb-2 text-center">Planos y superficie presentados coinciden con  construcciones existentes</p>
+                          <div className="flex items-center justify-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="siPlanoSuperficiePresentarPermisoConstruccion"
+                                name="siPlanoSuperficiePresentarPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="siPlanoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Si
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="noPlanoSuperficiePresentarPermisoConstruccion"
+                                name="noPlanoSuperficiePresentarPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="noPlanoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                No
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="sinVerificarPlanoSuperficiePresentarPermisoConstruccion"
+                                name="sinVerificarPlanoSuperficiePresentarPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="sinVerificarPlanoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Sin verificar
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3 Checkboxes con título 2 (5 columnas) */}
+                        <div className="p-4 rounded-lg col-span-5">
+                          <p className="text-base text-gray-700 font-bold mb-2 text-center">Observado</p>
+                          <div className="flex items-center justify-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="siObservadoSuperficiePresentarPermisoConstruccion"
+                                name="siObservadoSuperficiePresentarPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="siObservadoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Si
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="noObservadoSuperficiePresentarPermisoConstruccion"
+                                name="noObservadoSuperficiePresentarPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="noObservadoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                No
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="sinVerificarObservadoSuperficiePresentarPermisoConstruccion"
+                                name="sinVerificarObservadoSuperficiePresentarPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="sinVerificarObservadoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Sin verificar
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-4 p-4 rounded-lg ">
+                      <p className="text-lg text-gray-700 font-bold mb-3 text-center">Presentado Aprobado</p>
+
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="p-4 rounded-lg col-span-4">
+                          <p className="text-base text-gray-700 font-bold mb-2 text-center">Planos y superficie aprobados coinciden con  construcciones existentes</p>
+                          <div className="flex items-center justify-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="siPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                name="siPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="siPresentadoAprobadoPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Si
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="noPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                name="noPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="noPresentadoAprobadoPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                No
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="sinVerificarPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                name="sinVerificarPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="sinVerificarPresentadoAprobadoPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Sin verificar
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-4 p-4 rounded-lg ">
+                      <p className="text-lg text-gray-700 font-bold mb-3 text-center">Con Habilitación Final </p>
+
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="p-4 rounded-lg col-span-4">
+                          <p className="text-base text-gray-700 font-bold mb-2 text-center">Planos y superficie habilitados coinciden con  construcciones existentes</p>
+                          <div className="flex items-center justify-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="siHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                name="siHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="siHabilitacionFinalPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Si
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="noHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                name="noHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="noHabilitacionFinalPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                No
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="sinVerificarHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                name="sinVerificarHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="sinVerificarHabilitacionFinalPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Sin verificar
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div className="col-span-4 p-4 rounded-lg ">
+                      <p className="text-lg text-gray-700 font-bold mb-3 text-center">Origen información</p>
+
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="p-4 rounded-lg col-span-4">
+                          <p className="text-base text-gray-700 font-bold mb-2 text-center">Constatado Tasador</p>
+                          <div className="flex items-center justify-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="siOrigenInformacionConstatadoTasadorPermisoConstruccion"
+                                name="siOrigenInformacionConstatadoTasadorPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="siOrigenInformacionConstatadoTasadorPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                Si
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Field
+                                type="checkbox"
+                                id="noOrigenInformacionConstatadoTasadorPermisoConstruccion"
+                                name="noOrigenInformacionConstatadoTasadorPermisoConstruccion"
+                                className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                              />
+                              <label htmlFor="noOrigenInformacionConstatadoTasadorPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                                No
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-12 text-center">
+                      <p className="text-base text-center text-gray-700 font-bold">I.3 Observaciones</p>
+                      <p className="text-lg text-center text-gray-700 font-bold"> Observaciones de la SECCIÓN  para Legales BBVA</p>
+                      <Field
+                        type="text"
+                        id="observacionesSeccionLegalesObservaciones"
+                        name="observacionesSeccionLegalesObservaciones"
+                        className="p-1 w-full mb-5 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                      <p className="text-lg text-center text-gray-700 font-bold"> Otras observaciones de la SECCIÓN </p>
+                      <Field
+                        type="text"
+                        id="otrasObservacionesObservaciones"
+                        name="otrasObservacionesObservaciones"
+                        className="p-1 w-full mb-5 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+
+
+                  </div>
+                </div>
               </div>
               <div className="mt-4 text-center">
                 <button
@@ -3934,6 +6051,22 @@ const InformeBbva = () => {
         onSave={handleSaveItemActualizacionDescripcion}
         onUpdate={handleItemUpdate}
       />
+      <ItemComodidadesDescripcionModal
+        isOpen={isModalComodidadesDescripcionOpen}
+        onRequestClose={handleCloseModalComodidadesDescripcion}
+        idInformeBbva={provisionalInformeId}
+        initialFormData={currentItem || {}}
+        onSave={handleSaveItemActualizacionDescripcion}
+        onUpdate={handleItemUpdate}
+      />
+      <ItemPlanillaDescripcionModal
+        isOpen={isModalPlanillaDescripcionOpen}
+        onRequestClose={handleCloseModalPlanillaDescripcion}
+        idInformeBbva={provisionalInformeId}
+        initialFormData={currentItem || {}}
+        onSave={handleSaveItemActualizacionDescripcion}
+        onUpdate={handleItemUpdate}
+      />
     </div >
   );
 };
@@ -3944,7 +6077,9 @@ export default InformeBbva;
 
 function initialInformeState(usuario) {
   return {
+    visitaInspectorResumen: "",
     fechaAsignacionServicioResumen: "",
     noSeEmitioInformacionTasadorInfNegativo: false,
+    planosImagenesUrl: "",
   };
 }

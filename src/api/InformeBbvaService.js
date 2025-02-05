@@ -45,16 +45,71 @@ const InformeBbvaService = {
       throw error;
     }
   },
-  getInformeById: async (idInforme) => {
+
+  uploadPlanos: async (id, formData) => {
     try {
-      const response = await axios.get(`${API_URL}/api/obtenerInformeBbva/${parseInt(idInforme)}`);
+      console.log("📤 Enviando imágenes al backend con ID:", id);
+      formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
+
+      const response = await axios.post(
+        `http://localhost:8080/api/informeBbva/${id}/uploadPlanos`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      console.log("✅ Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener locales:', error);
+      console.error("❌ Error al subir imágenes:", error);
       throw error;
     }
   },
-/*   getItemsObraCivilByIdInforme: async (idInforme) => {
+
+  uploadFotos: async (id, formData) => {
+    try {
+      console.log("📤 Enviando imágenes al backend con ID:", id);
+      formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
+
+      const response = await axios.post(
+        `http://localhost:8080/api/informeBbva/${id}/uploadFotos`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      console.log("✅ Respuesta del servidor:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error al subir imágenes:", error);
+      throw error;
+    }
+  },
+
+  getInformeById: async (idInforme) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/obtenerInformeBbva/${parseInt(idInforme)}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener locales:", error);
+      throw error;
+    }
+  },
+
+  deletePlano: async (id, imageUrl) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/informeBbva/${id}/deletePlano`,
+        { params: { imageUrl } }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al eliminar la imagen:", error);
+      throw error;
+    }
+  },
+
+  /*   getItemsObraCivilByIdInforme: async (idInforme) => {
     try {
       console.log('Llega al getItemsObraCivilByIdInforme ')
       console.log('idInforme ', idInforme)
