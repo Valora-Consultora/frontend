@@ -1,48 +1,80 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ScotiaLogo from "../../images/logo-scotia.png";
+import { useSelector } from 'react-redux';
+import Modal from "react-modal";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import InformeScotiaService from "../../api/InformeScotiaService";
+import ComparableSection from "../comparables/ComparableSection";
+import ComparableList from "../comparables/ComparableList";
+import SelectedComparableList from "../comparables/SelectedComparableList";
+import ComparablesService from "../../api/ComparablesService";
 
 const InformeScotia = () => {
   const formRef = useRef();
+  const provisionalInformeId = useSelector(state => state.informe.provisionalInformeId);
+  const preloadInforme = useSelector(state => state.informe.informe);
+
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
+  const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
+
+  const [comparableFilters, setComparableFilters] = useState({});
+  const [comparables, setComparables] = useState([]);
+  const [comparablePage, setComparablePage] = useState(1);
+  const [comparableEdit, setComparableEdit] = useState(null);
+
+  const [shownComparablesML, setShownComparablesML] = useState(true);
 
   const [formData, setFormData] = useState({
     /// Información General
-    solicitante: "",
-    oficial: "",
-    sucursal: "",
-    titular: "",
-    cedula: "",
-    direccion: "",
-    padron: "",
-    localidad: "",
-    departamento: "",
+    solicitante: preloadInforme.solicitante ?? "",
+    oficial: preloadInforme.oficial ?? "",
+    sucursal: preloadInforme.sucursal ?? "",
+    titular: preloadInforme.titular ?? "",
+    cedula: preloadInforme.cedula ?? "",
+    direccion: preloadInforme.direccion ?? "",
+    padron: preloadInforme.padron ?? "",
+    localidad: preloadInforme.localidad ?? "",
+    departamento: preloadInforme.departamento ?? "",
     /// Superficies
-    supPredio: "",
-    supConstruida: "",
-    comodidades: "",
-    conservacion: "",
+    supPredio: preloadInforme.supPredio ?? "",
+    supConstruida: preloadInforme.supConstruida ?? "",
+    comodidades: preloadInforme.comodidades ?? "",
+    conservacion: preloadInforme.conservacion ?? "",
     /// Avalúo
-    valorMercado: "",
-    valorVentaRapida: "",
-    valorRemate: "",
-    costoReposicion: "",
+    valorMercado: preloadInforme.valorMercado ?? "",
+    valorVentaRapida: preloadInforme.valorVentaRapida ?? "",
+    valorRemate: preloadInforme.valorRemate ?? "",
+    costoReposicion: preloadInforme.costoReposicion ?? "",
     /// Relevamiento Fotográfico
-    fotos: [],
+    fotos: preloadInforme.fotos ?? [],
     /// Comparable
-    comparables: [],
+    comparables: preloadInforme.comparables ?? [],
     /// Anexos Gráficos o Catastrales
-    anexos: [],
+    anexos: preloadInforme.anexos ?? [],
     /// Seguro de Incendio
-    seguroIncendio: [],
+    seguroIncendio: preloadInforme.seguroIncendio ?? [],
     /// Observaciones
-    observaciones: "",
+    observaciones: preloadInforme.observaciones ?? "",
+  });
+
+  useEffect(() => {
+    function beforeUnloadHandler(e) {
+      e.preventDefault();
+    }
+
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnloadHandler);
+    };
   });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === "checkbox") {
+      console.log('Checkbox modificado:', name, value, checked);
       setFormData((prevData) => ({
         ...prevData,
         [name]: checked
@@ -50,11 +82,13 @@ const InformeScotia = () => {
           : prevData[name].filter((item) => item !== value),
       }));
     } else if (type === "file") {
+      console.log('File modificado:', name, files);
       setFormData((prevData) => ({
         ...prevData,
         [name]: [...prevData[name], ...files],
       }));
     } else {
+      console.log('Field modificado:', name, value);
       setFormData({
         ...formData,
         [name]: value,
@@ -69,13 +103,155 @@ const InformeScotia = () => {
     }));
   };
 
-  const submitHandler = async (e) => {
+  const handleSelectedComparable = (id) => {
+    const comparable = comparables.find((comparable) => comparable.id === id);
+    if (comparable.selected) {
+      setComparables((prevComparables) =>
+        prevComparables.map((comparable) =>
+          comparable.id === id ? { ...comparable, selected: false } : comparable
+        )
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: prevData.comparables.filter((comparable) => comparable.id !== id),
+      }));
+    } else {
+      setComparables((prevComparables) =>
+        prevComparables.map((comparable) =>
+          comparable.id === id ? { ...comparable, selected: true } : comparable
+        )
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: [...prevData.comparables, comparable],
+      }));
+    }
+  }
+
+  const handleLoadMoreComparables = () => {
+    setComparablePage((prevPage) => prevPage + 1);
+  }
+
+  /// Dado un filtro de comparables, lo convierte a una URL query string
+  const filterToUrlParams = (filter) => {
+    var urlParams = new URLSearchParams();
+    for (const key in filter) {
+      const object = filter[key];
+      if (object.range) {
+        urlParams.append(key, parseRange(key, object));
+      } else {
+        urlParams.append(key, object.value);
+      }
+    }
+    return urlParams.toString();
+  };
+
+  /// Parsear el rango para que quede en formato [value1-value2] con sus 
+  /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
+  /// devolveria (*m²-200m²]
+  const parseRange = (key, object) => {
+    console.log(object);
+    var value = object.value;
+    var value2 = object.value2;
+    var subtype = object.subtype ?? "";
+
+    // Increible que los locos de ML hayan puesto un formato especifico solo para
+    // precios, pero bueno, aca estamos
+    if (key === "price") {
+      var rangeString = "";
+      rangeString += value ? + value : "*";
+      rangeString += subtype + "-";
+      rangeString += value2 ? value2 + subtype : "*" + subtype;
+    } else {
+      var rangeString = "";
+      rangeString += value ? "[" + value : "(*";
+      rangeString += subtype + "-";
+      rangeString += value2 ? value2 + subtype + "]" : "*" + subtype + ")";
+    }
+    return rangeString;
+  };
+
+  /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
+  /// formato que pueda ser utilizado en la URL y lo setea en el estado
+  const modifyFilter = (id, value, opts) => {
+    console.log('Modificando filtro:', id, value, opts)
+    var newFilter = {};
+
+    if (opts?.range !== undefined) {
+      newFilter.range = true;
+    }
+
+    if (opts?.range === 0 || !opts?.range) {
+      newFilter.value = value;
+    } else if (opts?.range === 1) {
+      newFilter.value2 = value;
+    }
+
+    if (opts?.subtype) {
+      newFilter.subtype = opts.subtype;
+    }
+
+    console.log('Seteando filtro:', newFilter);
+
+    setComparableFilters((prevFilters) => ({
+      ...prevFilters,
+      [id]: { ...prevFilters[id], ...newFilter },
+    }));
+
+    console.log(filterToUrlParams(comparableFilters));
+  };
+
+  const handleComparableSubmit = async () => {
+    try {
+      const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
+      comparables.results.map((result) => {
+        result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
+        return result;
+      });
+      setComparables(comparables.results);
+      setComparablePage(1);
+    } catch (error) {
+      toast.error("Error al obtener comparables.", {
+        position: "top-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  };
+
+  const handleSelectMainComparable = (id) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: prevData.comparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, main: !comparable.main } : comparable
+      ),
+    }));
+  };
+
+  const handleEditComparable = (comparable) => {
+    // const comparable = comparables.find((comparable) => comparable.id === id);
+    setComparableEdit(comparable);
+    console.log(comparableEdit);
+    setIsModalEditOpen(true);
+  };
+
+  const handleEditHomologation = (comparable) => {
+    setComparableEdit(comparable);
+    setIsModalHomologationOpen(true);
+  };
+
+  const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
     try {
       // Simulando una llamada a API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      formData.estado = borrador ? "borrador" : "enviado";
+      const informe = await InformeScotiaService.createInformeScotia(provisionalInformeId, formData);
       // Aquí iría la lógica real para enviar los datos a una API
       console.log("Form Data:", formData);
+      console.log("Form Data:", JSON.stringify(formData));
 
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
@@ -138,6 +314,16 @@ const InformeScotia = () => {
       </div>
     </div>
   );
+
+  const handleSaveComparable = (comparable) => {
+    console.log('Attempting to save', comparable)
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: [...prevData.comparables, comparable],
+    }));
+    console.log(formData);
+    setIsModalEditOpen(false);
+  }
 
   return (
     <div className="bg-gray-100">
@@ -471,13 +657,61 @@ const InformeScotia = () => {
 
               {/* Comparable */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Comparable</h4>
+                <div className="flex flex-row justify-between items-center">
+                  <h4 className="text-xl text-green-900">Comparables MercadoLibre</h4>
+                  <button
+                    type="button"
+                    onClick={() => setShownComparablesML(!shownComparablesML)}
+                    className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                  >
+                    {shownComparablesML ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
+                <div
+                  className={`grid grid-cols-12 gap-4 items-center transition-all duration-500 overflow-hidden`}
+                  style={{
+                    maxHeight: shownComparablesML ? `9000px` : "0px",
+                  }}
+                >
+                  <div className="col-span-12">
+                    <p className="text-sm text-gray-700">
+                      <ComparableSection
+                        filters={comparableFilters}
+                        modifyFilter={modifyFilter}
+                        handleSubmit={handleComparableSubmit}
+                      />
+                      <ComparableList
+                        handleSelectedComparable={handleSelectedComparable}
+                        handleLoadMoreComparables={handleLoadMoreComparables}
+                        handleSelectMainComparable={handleSelectMainComparable}
+                        comparables={comparables}
+                        page={comparablePage}
+                      />
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Comparables Seleccionados</h4>
                 <div className="grid grid-cols-12 gap-4 items-center">
                   <div className="col-span-12">
                     <p className="text-sm text-gray-700">
-                      Aquí se podría agregar una tabla o lista de propiedades
-                      comparables. Por ahora, este espacio queda reservado para
-                      futuras implementaciones.
+                      <SelectedComparableList
+                        handleEditComparable={handleEditComparable}
+                        handleEditHomologation={handleEditHomologation}
+                        handleSelectMainComparable={handleSelectMainComparable}
+                        comparables={formData.comparables}
+                      />
+                      <button
+                        type="button"
+                        className="bg-green-900 text-white px-4 py-2 mt-2 rounded-md hover:bg-green-700"
+                        onClick={() => {
+                          setIsModalEditOpen(true);
+                          setComparableEdit(null);
+                        }}
+                      >
+                        Agregar Comparable
+                      </button>
                     </p>
                   </div>
                 </div>
@@ -605,17 +839,94 @@ const InformeScotia = () => {
                 </div>
               </div>
             </div>
-            <div className="mt-4 text-center">
+            <div className="mt-4 text-center space-x-2">
               <button
                 type="submit"
                 className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
               >
-                Crear Informe
+                Enviar Informe
+              </button>
+              <button
+                type="button"
+                className="bg-yellow-900 text-white px-4 py-2 rounded-md hover:bg-yellow-700 w-1/6 "
+                onClick={(e) => submitHandler(e, true)}
+              >
+                Guardar Borrador
               </button>
             </div>
           </div>
         </form>
       </div>
+      <ModalComparable isModalEditOpen={isModalEditOpen} setIsModalEditOpen={setIsModalEditOpen} comparableEdit={comparableEdit} handleSaveComparable={handleSaveComparable} />
+      <Modal
+        isOpen={isModalHomologationOpen}
+        onRequestClose={() => setIsModalHomologationOpen(false)}
+        contentLabel="Editar homologación"
+        className="fixed inset-0 flex items-center justify-center z-50"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      >
+        <div className="bg-gray-100 w-2/5 rounded-lg">
+          {/* Editar homologacion, campos: piso, ubicacion */}
+          <div className="bg-white shadow-lg rounded-xl p-6">
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Homologación</h4>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="piso"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Piso:
+                  </label>
+                  <input
+                    type="text"
+                    id="piso"
+                    name="piso"
+                    onChange={handleInputChange}
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="ubicacion"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Ubicación:
+                  </label>
+                  <input
+                    type="text"
+                    id="ubicacion"
+                    name="ubicacion"
+                    onChange={handleInputChange}
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-row space-x-2 justify-center mt-4">
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsModalHomologationOpen(false)}
+                  className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                >
+                  Guardar
+                </button>
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsModalHomologationOpen(false)}
+                  className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </Modal>
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -630,5 +941,117 @@ const InformeScotia = () => {
     </div>
   );
 };
+
+const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, handleSaveComparable }) => {
+  const [comparable, setComparable] = useState(comparableEdit);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'direccion') {
+      setComparable({...comparable, location: { ...(comparable?.location ?? {}), address_line: value }})
+    }
+    if (name === 'titulo') {
+      setComparable({...comparable, title: value})
+    }
+    if (name === 'precio') {
+      setComparable({...comparable, price: value })
+    }
+  }
+
+  console.log('Viendo comp', comparable)
+
+  return <Modal
+    isOpen={isModalEditOpen}
+    onRequestClose={() => setIsModalEditOpen(false)}
+    contentLabel="Editar comparable"
+    className="fixed inset-0 flex items-center justify-center z-50"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+  >
+    <div className="bg-gray-100 w-2/5 rounded-lg">
+      {/* Editar comparable, campos: direccion, titulo, precio */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 space-y-4 border p-3 rounded">
+            <h4 className="text-xl text-green-900">Modificar Datos de Comparable</h4>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="direccion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Dirección:
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                name="direccion"
+                value={comparable?.location?.address_line}
+                defaultValue={comparable?.location?.address_line}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="titulo"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Título:
+              </label>
+              <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                value={comparable?.title}
+                defaultValue={comparable?.title}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="precio"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Precio:
+              </label>
+              <input
+                type="text"
+                id="precio"
+                name="precio"
+                value={comparable?.price}
+                defaultValue={comparable?.price}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row mt-4 justify-center space-x-2">
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                handleSaveComparable(comparable)
+              }}
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              Guardar
+            </button>
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalEditOpen(false)}
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Modal>
+}
 
 export default InformeScotia;

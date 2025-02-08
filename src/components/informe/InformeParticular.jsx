@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import HsbcLogo from "../../images/logo-hsbc.png";
+import ParticularLogo from "../../images/logo-particular.png";
 import CheckboxGroup from '../../components/CheckboxGroup';
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ComparablesService from "../../api/ComparablesService";
 
-const FormularioHsbc = () => {
+const FormularioParticular = () => {
   const formRef = useRef();
 
   const [comparableFilters, setComparableFilters] = useState({});
@@ -255,9 +255,9 @@ const FormularioHsbc = () => {
         VALUACIÓN ACTIVO INMOBILIARIO
         <span>
           <img
-            src={HsbcLogo}
+            src={ParticularLogo}
             alt="Scotiabank"
-            className="h-10 inline-block ml-4"
+            className="h-20 inline-block ml-4"
           />
         </span>
       </h2>
@@ -1099,4 +1099,4 @@ const FormularioHsbc = () => {
   );
 };
 
-export default FormularioHsbc;
+export default FormularioParticular;

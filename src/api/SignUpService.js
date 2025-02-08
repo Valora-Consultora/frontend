@@ -1,15 +1,17 @@
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const SignUpService = (user) => {
 
   let url;
   console.log(user);
   if (user.tipo_tasador === 'relevador') {
-    url = 'http://localhost:8080/api/create-relevador';
+    url = `${API_URL}/api/create-relevador`;
   } else if (user.tipo_tasador === 'tasador') {
-    url = 'http://localhost:8080/api/create-tasador';
+    url = `${API_URL}/api/create-tasador`;
   } else {
-    url = `http://localhost:8080/api/create-${user.tipo_usuario.toLowerCase()}`;
+    url = `${API_URL}/api/create-${user.tipo_usuario.toLowerCase()}`;
   }
 
 
