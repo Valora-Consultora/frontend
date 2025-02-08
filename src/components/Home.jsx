@@ -120,7 +120,7 @@ const Home = () => {
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Descubrir</h3>
-            <p className="text-gray-500">Explora alguna cosa que ni idea</p>
+            <p className="text-gray-500">Descubrir</p>
           </div>
           <a className="text-green-900 no-underline hover:underline mt-4" href="/Home">
             Ir a Descubrir
