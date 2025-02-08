@@ -5855,11 +5855,11 @@ const InformeBbva = () => {
                             <div className="flex items-center space-x-2">
                               <Field
                                 type="checkbox"
-                                id="sinVerificarObservadoSuperficiePresentarPermisoConstruccion"
-                                name="sinVerificarObservadoSuperficiePresentarPermisoConstruccion"
+                                id="sinVerificarOSuperficiePresentarPermisoConstruccion"
+                                name="sinVerificarOSuperficiePresentarPermisoConstruccion"
                                 className="w-4 h-4 border-gray-300 focus:ring-green-900"
                               />
-                              <label htmlFor="sinVerificarObservadoSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
+                              <label htmlFor="sinVerificarOSuperficiePresentarPermisoConstruccion" className="text-sm font-medium text-gray-700">
                                 Sin verificar
                               </label>
                             </div>
