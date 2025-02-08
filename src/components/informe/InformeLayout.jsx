@@ -7,11 +7,16 @@ import FormularioBbva from "./InformeBbva";
 import FormularioItau from "./InformeItau";
 import { useSelector } from 'react-redux';
 import InformeService from "../../api/InformeService";
+import { InformeCard } from "./InformeCard";
+import { useParams } from "react-router-dom";
+import FormularioParticular from "./InformeParticular";
 
 const InformeLayout = () => {
   const dispatch = useDispatch();
-  const [selectedBanco, setSelectedBanco] = useState("");
-  const [showSelector, setShowSelector] = useState(true);
+  const { banco } = useParams();
+  console.log('BANCOFIRO' , banco);
+  const [selectedBanco, setSelectedBanco] = useState(banco ?? "");
+  const [showSelector, setShowSelector] = useState(banco ? false : true);
   const [informes, setInformes] = useState([]);
   const usuario = useSelector(state => state.user);
 
@@ -24,6 +29,7 @@ const InformeLayout = () => {
     { id: "hsbc", nombre: "HSBC" },
     { id: "bbva", nombre: "BBVA" },
     { id: "itau", nombre: "ITAU" },
+    { id: "particular", nombre: "Particular" },
   ];
 
   const selectBanco = (banco) => {
@@ -65,6 +71,8 @@ const InformeLayout = () => {
     };
     fetchInformes();
   }, [usuario]);
+
+  console.log('selected', selectedBanco);
 
   return (
     <div>
@@ -111,6 +119,7 @@ const InformeLayout = () => {
 =======
 >>>>>>> Stashed changes
             {selectedBanco === "itau" && <FormularioItau />}
+            {selectedBanco === "particular" && <FormularioParticular />}
           </>
         )}
 
@@ -124,30 +133,10 @@ const InformeLayout = () => {
               {informes && informes.length > 0 ? informes.map((informe) => (
                 <InformeCard key={informe.id} informe={informe} handleCardSelect={handleCardSelect} />
               )) :
-                <h3 className="text-xl text-green-900 font-light">Todavía no creaste informes, {usuario.username}, manos a la obra...</h3>}
+                <h3 className="text-xl text-green-900 font-light">Todavía no creaste informes, {usuario.nombre}</h3>}
             </div>
           </div>
         }
-      </div>
-    </div>
-  );
-};
-
-const InformeCard = ({ informe, handleCardSelect }) => {
-  const backgroundColor = informe.estado === "borrador" ? "bg-yellow-100" : "bg-white";
-  const hoverColor = informe.estado === "borrador" ? "hover:bg-yellow-200" : "hover:bg-green-50";
-  return (
-    <div
-      className={`${backgroundColor} flex flex-col items-start shadow-lg rounded-xl p-3 mb-6 ${hoverColor}`}
-      onClick={() => handleCardSelect(informe)}
-    >
-      <h3 className="text-xl text-green-900 font-light">{new Date(informe.fecha).toLocaleString()}</h3>
-      <div className="flex flex-row items-center space-x-4 w-full">
-        <img src={'/logo-' + informe.banco + '.png'} alt={informe.banco} className="self-end my-auto max-w-60 ml-2" />
-        <div className="flex flex-col items-start w-full">
-          <h3 className="text-xl text-green-900 font-light">{informe.direccion}</h3>
-        </div>
-        <h1 className="text-3xl text-green-900 font-light">#{informe.id}</h1>
       </div>
     </div>
   );
