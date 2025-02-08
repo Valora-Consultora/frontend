@@ -5900,11 +5900,11 @@ const InformeBbva = () => {
                             <div className="flex items-center space-x-2">
                               <Field
                                 type="checkbox"
-                                id="sinVerificarPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
-                                name="sinVerificarPresentadoAprobadoPlanosSuperficiePermisoConstruccion"
+                                id="sinVerificarPAPlanosSuperficiePermisoConstruccion"
+                                name="sinVerificarPAPlanosSuperficiePermisoConstruccion"
                                 className="w-4 h-4 border-gray-300 focus:ring-green-900"
                               />
-                              <label htmlFor="sinVerificarPresentadoAprobadoPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                              <label htmlFor="sinVerificarPAPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
                                 Sin verificar
                               </label>
                             </div>
@@ -5945,11 +5945,11 @@ const InformeBbva = () => {
                             <div className="flex items-center space-x-2">
                               <Field
                                 type="checkbox"
-                                id="sinVerificarHabilitacionFinalPlanosSuperficiePermisoConstruccion"
-                                name="sinVerificarHabilitacionFinalPlanosSuperficiePermisoConstruccion"
+                                id="sinVerificarHFPlanosSuperficiePermisoConstruccion"
+                                name="sinVerificarHFPlanosSuperficiePermisoConstruccion"
                                 className="w-4 h-4 border-gray-300 focus:ring-green-900"
                               />
-                              <label htmlFor="sinVerificarHabilitacionFinalPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
+                              <label htmlFor="sinVerificarHFPlanosSuperficiePermisoConstruccion" className="text-sm font-medium text-gray-700">
                                 Sin verificar
                               </label>
                             </div>
