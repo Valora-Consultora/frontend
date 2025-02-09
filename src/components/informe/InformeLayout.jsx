@@ -14,7 +14,7 @@ import FormularioParticular from "./InformeParticular";
 const InformeLayout = () => {
   const dispatch = useDispatch();
   const { banco } = useParams();
-  console.log('BANCOFIRO' , banco);
+  console.log('BANCOFIRO', banco);
   const [selectedBanco, setSelectedBanco] = useState(banco ?? "");
   const [showSelector, setShowSelector] = useState(banco ? false : true);
   const [informes, setInformes] = useState([]);
@@ -107,19 +107,10 @@ const InformeLayout = () => {
           <>
             {selectedBanco === "scotia" && <FormularioScotia />}
             {selectedBanco === "hsbc" && <FormularioHsbc />}
-<<<<<<< Updated upstream
-            {selectedBanco === "bbva" && <FormularioBbva />} 
-=======
             {selectedBanco === "bbva" && <FormularioBbva />}
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
             {selectedBanco === "itau" && <FormularioItau />}
             {selectedBanco === "particular" && <FormularioParticular />}
+
           </>
         )}
 

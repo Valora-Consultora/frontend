@@ -1108,39 +1108,7 @@ const FormularioHsbc = () => {
                       onChange={handleInputChange}
                       className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
-                  </div>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                </div>
-              </div>
-
-              {/* Comparable */}
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Comparables</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-12">
-                    <p className="text-sm text-gray-700">
-                      <ComparableSection
-                        filters={comparableFilters}
-                        modifyFilter={modifyFilter}
-                        handleSubmit={handleComparableSubmit}
-                      />
-                      <ComparableList
-                        handleSelectedComparable={handleSelectedComparable}
-                        handleLoadMoreComparables={handleLoadMoreComparables}
-                        handleSelectMainComparable={handleSelectMainComparable}
-                        comparables={formData.comparables}
-                        page={comparablePage}
-                      />
-                    </p>
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-
-                  {/* Comparable */}
+                  </div>{/* Comparable */}
                   <div className="col-span-12 space-y-4 border p-3 rounded">
                     <h4 className="text-xl text-green-900">Comparables</h4>
                     <div className="grid grid-cols-12 gap-4 items-center">
@@ -1154,28 +1122,29 @@ const FormularioHsbc = () => {
                           <ComparableList
                             handleSelectedComparable={handleSelectedComparable}
                             handleLoadMoreComparables={handleLoadMoreComparables}
-                            comparables={comparables}
+                            handleSelectMainComparable={handleSelectMainComparable}  {/* ✅ Se mantiene */}
+                            comparables={formData.comparables}  {/* ✅ Usa formData para mantener coherencia */}
                             page={comparablePage}
                           />
                         </p>
                       </div>
                     </div>
->>>>>>> Stashed changes
                   </div>
+
                 </div>
               </div>
-              <div className="col-span-12 text-center">
-                <button
-                  type="submit"
-                  className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
-                >
-                  Crear Informe
-                </button>
-              </div>
+            </div>
+            <div className="col-span-12 text-center">
+              <button
+                type="submit"
+                className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
+              >
+                Crear Informe
+              </button>
             </div>
           </div>
         </form>
-      </div>
+      </div >
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -1187,7 +1156,7 @@ const FormularioHsbc = () => {
         draggable
         pauseOnHover
       />
-    </div>
+    </div >
   );
 };
 
