@@ -1,11 +1,9 @@
 import React from "react";
-import "../../../../css/NavBarModule.css";
 import NavLinks from "./navlinks/Navlinks.jsx";
-
 
 const Navbar = () => {
   return (
-    <nav className="navbar">
+    <nav className="flex items-center h-full p-[1px]">
       <NavLinks />
     </nav>
   );

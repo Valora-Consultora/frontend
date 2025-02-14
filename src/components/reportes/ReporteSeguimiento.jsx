@@ -14,12 +14,55 @@ import {
     Button,
 } from '@mui/material';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { Chip } from "@mui/material";
 
 const ReporteSeguimiento = () => {
-    const [informes, setInformes] = useState([]);
+    //const [informes, setInformes] = useState([]);
     const [tasadores, setTasadores] = useState({});
     const [filtroEstado, setFiltroEstado] = useState('');
     const [filtroUsuario, setFiltroUsuario] = useState('');
+
+
+    const [informes, setInformes] = useState([
+        {
+            id: 1,
+            banco: "Scotia",
+            estadoInforme: "BORRADOR",
+            fechaFinalizacion: "N/A",
+            fechaInicio: "2025-02-08 11:44:12",
+            calculo_id: "",
+            inspeccion_id: "",
+            orden_id: "",
+            tasador_id: 3,
+            tasadorNombre: "Juan" // ✅ Agregamos un nombre por si es necesario en la tabla
+        },
+        {
+            id: 1,
+            banco: "Itau",
+            estadoInforme: "Pendiente",
+            fechaFinalizacion: "N/A",
+            fechaInicio: "2025-02-08 11:44:12",
+            calculo_id: "",
+            inspeccion_id: "",
+            orden_id: "",
+            tasador_id: 3,
+            tasadorNombre: "Vicente" // ✅ Agregamos un nombre por si es necesario en la tabla
+        },
+        {
+            id: 1,
+            banco: "Bbva",
+            estadoInforme: "Aprobado",
+            fechaFinalizacion: "N/A",
+            fechaInicio: "2025-02-08 11:44:12",
+            calculo_id: "",
+            inspeccion_id: "",
+            orden_id: "",
+            tasador_id: 3,
+            tasadorNombre: "Lucio" // ✅ Agregamos un nombre por si es necesario en la tabla
+        }
+    ]);
+
+
 
     useEffect(() => {
         const fetchInformes = async () => {
@@ -69,20 +112,40 @@ const ReporteSeguimiento = () => {
         // Aquí iría la lógica real para descargar el PDF
     };
 
+    const getEstadoChipProps = (estado) => {
+        switch (estado.toUpperCase()) {
+            case "BORRADOR":
+                return { label: "Borrador", color: "warning" }; // 🟠 Naranja suave
+            case "APROBADO":
+                return { label: "Aprobado", color: "success" }; // ✅ Verde
+            case "PENDIENTE":
+                return { label: "Pendiente", color: "primary" }; // 🔵 Azul
+            default:
+                return { label: "Desconocido", color: "default" }; // ⚪ Gris
+        }
+    };
+
     const columns = [
-        { accessorKey: 'id', header: 'ID' },
-        { accessorKey: 'banco', header: 'Banco' },
-        { accessorKey: 'estadoInforme', header: 'Estado' },
-        { accessorKey: 'tasadorNombre', header: 'Usuario' },
-        { accessorKey: 'fechaInicio', header: 'Fecha Inicio' },
-        { accessorKey: 'fechaFinalizacion', header: 'Fecha Finalización' },
+        { accessorKey: "id", header: "ID" },
+        { accessorKey: "banco", header: "Banco" },
         {
-            accessorKey: 'acciones',
-            header: 'Descargar',
+            accessorKey: "estadoInforme",
+            header: "Estado",
+            cell: ({ row }) => {
+                const estadoProps = getEstadoChipProps(row.original.estadoInforme);
+                return <Chip label={estadoProps.label} color={estadoProps.color} variant="outlined" />;
+            }
+        },
+        { accessorKey: "tasadorNombre", header: "Usuario" },
+        { accessorKey: "fechaInicio", header: "Fecha Inicio" },
+        { accessorKey: "fechaFinalizacion", header: "Fecha Finalización" },
+        {
+            accessorKey: "acciones",
+            header: "Descargar",
             cell: ({ row }) => (
                 <Button
                     variant="contained"
-                    sx={{ backgroundColor: 'black', color: 'white', minWidth: '32px', padding: '5px', justifyContent: 'center' }}
+                    sx={{ backgroundColor: "black", color: "white", minWidth: "32px", padding: "5px", justifyContent: "center", "&:hover":{backgroundColor:"#14532d"}  }}
                     onClick={() => downloadPDF(row.original.id)}
                 >
                     <PictureAsPdfIcon sx={{ fontSize: 18 }} />
@@ -105,7 +168,7 @@ const ReporteSeguimiento = () => {
     return (
         <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
             <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10">
-                REPORTE DE INFORMES
+                SEGUIMIENTO DE INFORMES
             </h2>
 
             <Paper elevation={3} sx={{ width: '90%', padding: 4, bgcolor: '#ffffff', borderRadius: 2 }}>

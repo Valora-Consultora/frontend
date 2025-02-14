@@ -14,6 +14,7 @@ import InformeLayout from "./components/informe/InformeLayout";
 import RevisionInformes from "./components/revision/RevisionInformes";
 import VerInformeScotia from "./components/informe/VerInformeScotia";
 import ReporteSeguimiento from "./components/reportes/ReporteSeguimiento";
+import ReportesLayout from "./components/reportes/ReportesLayout";
 
 const WithHeader = ({ children }) => (
   <>
@@ -116,7 +117,15 @@ function App() {
               }
             />
             <Route
-              path="/reportes"
+              path="/Reportes"
+              element={
+                <WithHeader>
+                  <ReportesLayout />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/ReporteSeguimiento"
               element={
                 <WithHeader>
                   <ReporteSeguimiento />

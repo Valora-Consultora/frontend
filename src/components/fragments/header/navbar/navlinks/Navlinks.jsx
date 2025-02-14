@@ -1,35 +1,27 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-import "../../../../../css/NavLinksModule.css";
 
 const Navlinks = () => {
-    /*   
-    const userLogged = AuthenticationService.isUserLoggedIn();
-    const businessLogged = AuthenticationService.isBusinessLoggedIn();
-    const location = useLocation();
-  */
-
     return (
         <>
-            <ul className="nav_links">
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home">Home</a>
+            <ul className="flex justify-around list-none m-0 p-0">
+                <li className="nav-item">
+                    <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-150" href="/Home">
+                        Home
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Inspeccion">Inspeccion</a>
+                <li className="nav-item">
+                    <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-300" href="/Inspeccion">Inspeccion</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/orden">Orden</a>
+                <li className="nav-item">
+                    <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-300" href="/orden">Orden</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/informe">Informe</a>
+                <li className="nav-item">
+                    <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-300" href="/informe">Informe</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Logout</a>
+                <li className="nav-item">
+                    <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-300" href="/">Logout</a>
                 </li>
             </ul>
-
-
         </>
     );
 };

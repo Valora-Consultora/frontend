@@ -3,16 +3,7 @@ import HsbcLogo from "../../images/logo-hsbc.png";
 import CheckboxGroup from '../../components/CheckboxGroup';
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 import InformeHsbcService from "../../api/InformeHsbcService";
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,18 +13,7 @@ const FormularioHsbc = () => {
   const formRef = useRef();
 
   const [comparableFilters, setComparableFilters] = useState({});
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
   const [comparables, setComparables] = useState([]);
->>>>>>> Stashed changes
-=======
-  const [comparables, setComparables] = useState([]);
->>>>>>> Stashed changes
-=======
-  const [comparables, setComparables] = useState([]);
->>>>>>> Stashed changes
   const [comparablePage, setComparablePage] = useState(1);
 
   const [formData, setFormData] = useState({
@@ -132,32 +112,17 @@ const FormularioHsbc = () => {
   };
 
   const handleSelectedComparable = (id) => {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     setFormData((prevData) => ({
       ...prevData,
       comparables: prevData.comparables.map((comparable) =>
         comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
       ),
     }));
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     setComparables((prevComparables) =>
       prevComparables.map((comparable) =>
         comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
       )
     );
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   }
 
   const handleLoadMoreComparables = () => {
@@ -236,22 +201,11 @@ const FormularioHsbc = () => {
   const handleComparableSubmit = async () => {
     try {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
       setFormData((prevData) => ({
         ...prevData,
         comparables: comparables.results,
       }));
-=======
       setComparables(comparables.results);
->>>>>>> Stashed changes
-=======
-      setComparables(comparables.results);
->>>>>>> Stashed changes
-=======
-      setComparables(comparables.results);
->>>>>>> Stashed changes
       setComparablePage(1);
     } catch (error) {
       toast.error("Error al obtener comparables.", {
@@ -265,9 +219,6 @@ const FormularioHsbc = () => {
     }
   };
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   const handleSelectMainComparable = (id) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -277,12 +228,6 @@ const FormularioHsbc = () => {
     }));
   };
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
@@ -1122,8 +1067,8 @@ const FormularioHsbc = () => {
                           <ComparableList
                             handleSelectedComparable={handleSelectedComparable}
                             handleLoadMoreComparables={handleLoadMoreComparables}
-                            handleSelectMainComparable={handleSelectMainComparable}  {/* ✅ Se mantiene */}
-                            comparables={formData.comparables}  {/* ✅ Usa formData para mantener coherencia */}
+                            handleSelectMainComparable={handleSelectMainComparable} 
+                            comparables={formData.comparables}  
                             page={comparablePage}
                           />
                         </p>
