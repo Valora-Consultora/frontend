@@ -668,7 +668,7 @@ const InformeScotia = () => {
                   </button>
                 </div>
                 <div
-                  className={`grid grid-cols-12 gap-4 items-center transition-all duration-500 overflow-hidden`}
+                  className="grid grid-cols-12 gap-4 items-center transition-all duration-500 overflow-hidden"
                   style={{
                     maxHeight: shownComparablesML ? `9000px` : "0px",
                   }}
@@ -858,75 +858,7 @@ const InformeScotia = () => {
         </form>
       </div>
       <ModalComparable isModalEditOpen={isModalEditOpen} setIsModalEditOpen={setIsModalEditOpen} comparableEdit={comparableEdit} handleSaveComparable={handleSaveComparable} />
-      <Modal
-        isOpen={isModalHomologationOpen}
-        onRequestClose={() => setIsModalHomologationOpen(false)}
-        contentLabel="Editar homologación"
-        className="fixed inset-0 flex items-center justify-center z-50"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
-      >
-        <div className="bg-gray-100 w-2/5 rounded-lg">
-          {/* Editar homologacion, campos: piso, ubicacion */}
-          <div className="bg-white shadow-lg rounded-xl p-6">
-            <div className="grid grid-cols-12 gap-4">
-              <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Homologación</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="piso"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Piso:
-                  </label>
-                  <input
-                    type="text"
-                    id="piso"
-                    name="piso"
-                    onChange={handleInputChange}
-                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <label
-                    htmlFor="ubicacion"
-                    className="col-span-2 text-sm text-gray-700 font-bold"
-                  >
-                    Ubicación:
-                  </label>
-                  <input
-                    type="text"
-                    id="ubicacion"
-                    name="ubicacion"
-                    onChange={handleInputChange}
-                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-row space-x-2 justify-center mt-4">
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setIsModalHomologationOpen(false)}
-                  className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                >
-                  Guardar
-                </button>
-              </div>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setIsModalHomologationOpen(false)}
-                  className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </Modal>
+      <ModalHomologacion isModalHomologationOpen={isModalHomologationOpen} setIsModalHomologationOpen={setIsModalHomologationOpen} handleInputChange={handleInputChange} />
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -1052,6 +984,76 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
       </div>
     </div>
   </Modal>
+}
+
+const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange}) => {
+  return <Modal
+    isOpen={isModalHomologationOpen}
+    onRequestClose={() => setIsModalHomologationOpen(false)}
+    contentLabel="Editar homologación"
+    className="fixed inset-0 flex items-center justify-center z-50"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+  >
+    <div className="bg-gray-100 w-2/5 rounded-lg">
+      {/* Editar homologacion, campos: piso, ubicacion */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 space-y-4 border p-3 rounded">
+            <h4 className="text-xl text-green-900">Homologación</h4>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="piso"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Piso:
+              </label>
+              <input
+                type="text"
+                id="piso"
+                name="piso"
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="ubicacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Ubicación:
+              </label>
+              <input
+                type="text"
+                id="ubicacion"
+                name="ubicacion"
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row space-x-2 justify-center mt-4">
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalHomologationOpen(false)}
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              Guardar
+            </button>
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalHomologationOpen(false)}
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </Modal>;
 }
 
 export default InformeScotia;
