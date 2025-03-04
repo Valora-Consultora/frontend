@@ -7,10 +7,12 @@ import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 import SelectedComparableList from "../comparables/SelectedComparableList";
 import InformeHsbcService from "../../api/InformeHsbcService";
+import { exportToExactExcelTemplate, exportToExactExcelTemplateExcelJS } from "../utils/excelExport.ts";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ComparablesService from "../../api/ComparablesService";
+import Excel from '../../images/icons/excel.svg';
 
 const FormularioHsbc = () => {
   const formRef = useRef();
@@ -313,6 +315,11 @@ const FormularioHsbc = () => {
       <div ref={formRef}>
         <form onSubmit={submitHandler} className="space-y-6">
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
+            <img
+              src={Excel}
+              onClick={() => exportToExactExcelTemplateExcelJS(formData, 'hsbc')}
+              className="cursor-pointer"
+            />
             <div className="grid grid-cols-12 gap-4">
               {/* Información General */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
@@ -1111,7 +1118,7 @@ const FormularioHsbc = () => {
                     {shownComparablesML ? "Ocultar" : "Mostrar"}
                   </button>
                 </div>
-                <div 
+                <div
                   className="grid grid-cols-12 gap-4 items-center transition-all duration-500 overflow-hidden"
                   style={{
                     maxHeight: shownComparablesML ? `9000px` : "0px",
@@ -1302,7 +1309,7 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
   </Modal>
 }
 
-const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange}) => {
+const ModalHomologacion = ({ isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange }) => {
   return <Modal
     isOpen={isModalHomologationOpen}
     onRequestClose={() => setIsModalHomologationOpen(false)}
