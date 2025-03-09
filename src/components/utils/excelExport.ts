@@ -1,143 +1,142 @@
-import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 
-const exportToExactExcelTemplate = (formData, templateFileName) => {
-  fetch(`/xlsx/${templateFileName}.xlsx`)
-    .then(response => response.arrayBuffer())
-    .then(buffer => {
-      // Parse the template file
-      const templateWorkbook = XLSX.read(buffer, { type: 'buffer', cellStyles: true });
+// const exportToExactExcelTemplate = (formData, templateFileName) => {
+//   fetch(`/xlsx/${templateFileName}.xlsx`)
+//     .then(response => response.arrayBuffer())
+//     .then(buffer => {
+//       // Parse the template file
+//       const templateWorkbook = XLSX.read(buffer, { type: 'buffer', cellStyles: true });
 
-      // Get the first worksheet
-      const worksheetName = templateWorkbook.SheetNames[0];
-      const worksheet = templateWorkbook.Sheets[worksheetName];
+//       // Get the first worksheet
+//       const worksheetName = templateWorkbook.SheetNames[0];
+//       const worksheet = templateWorkbook.Sheets[worksheetName];
 
-      // Mapping of JSON keys to Excel cell locations
-      const cellMappings = {
-        solicitante: 'D10',
-        banco: 'D11',
-        contactoSolicitante: 'L10',
-        contactoBanco: 'L11',
-        telefonos: 'P10', // Puede haber mas de uno?
-        sucursal: 'P11',
-        calle: 'D13',
-        esquina: 'D14',
-        localidad: 'D15',
-        // numero: '',
-        // seccionJudicial: '',
-        // departamento: '',
-        // unidad: '',
-        // padron: '',
+//       // Mapping of JSON keys to Excel cell locations
+//       const cellMappings = {
+//         solicitante: 'D10',
+//         banco: 'D11',
+//         contactoSolicitante: 'L10',
+//         contactoBanco: 'L11',
+//         telefonos: 'P10', // Puede haber mas de uno?
+//         sucursal: 'P11',
+//         calle: 'D13',
+//         esquina: 'D14',
+//         localidad: 'D15',
+//         // numero: '',
+//         // seccionJudicial: '',
+//         // departamento: '',
+//         // unidad: '',
+//         // padron: '',
 
-        // /// Aspectos urbanos
-        // identificacionCatastral: [], // Unico?
-        // caracteristicas: [],
-        // densidad: [], // Unico?
-        // servicios: [],
-        // indiceCrecimiento: [], // Unico?
-        // oferta: [], // Unico?
-        // descripcionZona: '',
-        // /// Descripcion del predio
-        // topografia: '',
-        // forma: '',
-        // retiros: [], // Unico?
-        // // Deslinde
-        // deslindeFrente: '',
-        // deslindeFondo: '',
-        // descripcionPredio: '',
-        // entornoUrbano: '', // TODO: FOTO
+//         // /// Aspectos urbanos
+//         // identificacionCatastral: [], // Unico?
+//         // caracteristicas: [],
+//         // densidad: [], // Unico?
+//         // servicios: [],
+//         // indiceCrecimiento: [], // Unico?
+//         // oferta: [], // Unico?
+//         // descripcionZona: '',
+//         // /// Descripcion del predio
+//         // topografia: '',
+//         // forma: '',
+//         // retiros: [], // Unico?
+//         // // Deslinde
+//         // deslindeFrente: '',
+//         // deslindeFondo: '',
+//         // descripcionPredio: '',
+//         // entornoUrbano: '', // TODO: FOTO
 
-        // /// Descripcion del bien
-        // // Comodidades - ambiente
-        // livingComedor: 0,
-        // cocina: 0,
-        // dormitorio: 0,
-        // banio: 0, // ñ?
-        // escritorio: 0,
-        // toilette: 0,
-        // terraza: 0,
-        // garajeBox: 0,
-        // // Consideraciones
-        // categorizacion: '',
-        // conservacion: '',
-        // // Caracteristicas constructivas
-        // estructura: [],
-        // cubierta: [],
-        // carpinteria: [],
-        // muros: [],
-        // terminaciones: [],
-        // revestimientos: [],
-        // pisos: [],
-        // // Servicios - instalaciones
-        // instalacionAgua: [],
-        // instalacionSanitaria: [],
-        // instalacionElectrica: [],
-        // instalacionTermica: [],
-        // // Relevamiento fotografico
-        // superficieTerreno: '',
-        // //   Ver como colocar estos, tenemos que obtenerlos de la lista de cosas que coloco
-        // bienesPropios: [],
-        // bienesComunes: [],
-        // superficieEdificada: '',
-        // anio: '',
-        // vistaExterior: '', // FOTO
-        // vistasInteriores: [], // FOTOS
-        // // TODO: COMPARABLES
-        // comparables: [],
+//         // /// Descripcion del bien
+//         // // Comodidades - ambiente
+//         // livingComedor: 0,
+//         // cocina: 0,
+//         // dormitorio: 0,
+//         // banio: 0, // ñ?
+//         // escritorio: 0,
+//         // toilette: 0,
+//         // terraza: 0,
+//         // garajeBox: 0,
+//         // // Consideraciones
+//         // categorizacion: '',
+//         // conservacion: '',
+//         // // Caracteristicas constructivas
+//         // estructura: [],
+//         // cubierta: [],
+//         // carpinteria: [],
+//         // muros: [],
+//         // terminaciones: [],
+//         // revestimientos: [],
+//         // pisos: [],
+//         // // Servicios - instalaciones
+//         // instalacionAgua: [],
+//         // instalacionSanitaria: [],
+//         // instalacionElectrica: [],
+//         // instalacionTermica: [],
+//         // // Relevamiento fotografico
+//         // superficieTerreno: '',
+//         // //   Ver como colocar estos, tenemos que obtenerlos de la lista de cosas que coloco
+//         // bienesPropios: [],
+//         // bienesComunes: [],
+//         // superficieEdificada: '',
+//         // anio: '',
+//         // vistaExterior: '', // FOTO
+//         // vistasInteriores: [], // FOTOS
+//         // // TODO: COMPARABLES
+//         // comparables: [],
 
-        // /// Calculo de avaluo
-        // // ...
-        // descripcion: '',
-      };
+//         // /// Calculo de avaluo
+//         // // ...
+//         // descripcion: '',
+//       };
 
-      debugger
+//       debugger
 
-      // Fill in the cells
-      Object.entries(cellMappings).forEach(([key, cell]) => {
-        if (formData[key]) {
-          const originalCell = worksheet[cell];
-          worksheet[cell] = { ...originalCell, v: formData[key] };
-        }
-      });
+//       // Fill in the cells
+//       Object.entries(cellMappings).forEach(([key, cell]) => {
+//         if (formData[key]) {
+//           const originalCell = worksheet[cell];
+//           worksheet[cell] = { ...originalCell, v: formData[key] };
+//         }
+//       });
 
-      // Handle list fields (if needed)
-      const handleListField = (listKey, sheetName, startRow = 2) => {
-        if (formData[listKey] && formData[listKey].length > 0) {
-          // Create or get the sheet
-          let listWorksheet = templateWorkbook.Sheets[sheetName];
+//       // Handle list fields (if needed)
+//       const handleListField = (listKey, sheetName, startRow = 2) => {
+//         if (formData[listKey] && formData[listKey].length > 0) {
+//           // Create or get the sheet
+//           let listWorksheet = templateWorkbook.Sheets[sheetName];
 
-          // If sheet doesn't exist, you might need to add it
-          if (!listWorksheet) {
-            listWorksheet = {};
-            templateWorkbook.Sheets[sheetName] = listWorksheet;
-            templateWorkbook.SheetNames.push(sheetName);
-          }
+//           // If sheet doesn't exist, you might need to add it
+//           if (!listWorksheet) {
+//             listWorksheet = {};
+//             templateWorkbook.Sheets[sheetName] = listWorksheet;
+//             templateWorkbook.SheetNames.push(sheetName);
+//           }
 
-          // Populate the list
-          formData[listKey].forEach((item, index) => {
-            const row = startRow + index;
-            // Adjust cell references based on your template's structure
-            listWorksheet[`A${row}`] = { v: item };
-          });
-        }
-      };
+//           // Populate the list
+//           formData[listKey].forEach((item, index) => {
+//             const row = startRow + index;
+//             // Adjust cell references based on your template's structure
+//             listWorksheet[`A${row}`] = { v: item };
+//           });
+//         }
+//       };
 
-      // Handle specific list fields
-      // handleListField('fotos', 'Fotos');
-      // handleListField('comparables', 'Comparables');
-      // handleListField('anexos', 'Anexos');
-      // handleListField('seguroIncendio', 'Seguro de Incendio');
+//       // Handle specific list fields
+//       // handleListField('fotos', 'Fotos');
+//       // handleListField('comparables', 'Comparables');
+//       // handleListField('anexos', 'Anexos');
+//       // handleListField('seguroIncendio', 'Seguro de Incendio');
 
-      // Write the modified workbook
-      XLSX.writeFile(templateWorkbook, 'informe_completado.xlsx', {
-        bookType: 'xlsx',
-        bookSST: true,
-        type: 'binary',
-        cellStyles: true,
-      });
-    })
-    .catch(err => console.error(err));
-};
+//       // Write the modified workbook
+//       XLSX.writeFile(templateWorkbook, 'informe_completado.xlsx', {
+//         bookType: 'xlsx',
+//         bookSST: true,
+//         type: 'binary',
+//         cellStyles: true,
+//       });
+//     })
+//     .catch(err => console.error(err));
+// };
 
 const exportToExactExcelTemplateExcelJS = (formData, templateFileName) => {
   fetch(`/xlsx/${templateFileName}.xlsx`)
@@ -428,4 +427,4 @@ const exportToExactExcelTemplateExcelJS = (formData, templateFileName) => {
     });
 };
 
-export { exportToExactExcelTemplate, exportToExactExcelTemplateExcelJS };
+export { exportToExactExcelTemplateExcelJS };

@@ -7,7 +7,7 @@ import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 import SelectedComparableList from "../comparables/SelectedComparableList";
 import InformeHsbcService from "../../api/InformeHsbcService";
-import { exportToExactExcelTemplate, exportToExactExcelTemplateExcelJS } from "../utils/excelExport.ts";
+import { exportToExactExcelTemplateExcelJS } from "../utils/excelExport.ts";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
