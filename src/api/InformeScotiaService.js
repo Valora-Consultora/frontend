@@ -33,15 +33,11 @@ const InformeScotiaService = {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(
-        `${API_URL}/api/fotos`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${API_URL}/api/fotos`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       return response.data; // Retorna la URL del archivo subido
     } catch (error) {
@@ -74,28 +70,31 @@ const InformeScotiaService = {
       // Pasamos las fotos al formato correcto
       // Usar Promise.all
       const relevamientos = await Promise.all(
-        informeScotiaData.fotos.map((foto) => obtenerDatosFotoRelevamiento(foto))
+        informeScotiaData.fotos.map((foto) =>
+          obtenerDatosFotoRelevamiento(foto)
+        )
       );
 
       const anexos = await Promise.all(
-        informeScotiaData.anexos.map((foto) => obtenerDatosFotoAnexo(foto)) 
+        informeScotiaData.anexos.map((foto) => obtenerDatosFotoAnexo(foto))
       );
 
       informeScotiaData.fotos = relevamientos;
       informeScotiaData.anexos = anexos;
-      debugger
+      //debugger
 
-      const normalizedComparables = informeScotiaData.comparables.map((comparable) => {
-        const normalizedComparable = {...comparable};
-        if (comparable.id.id) {
-          normalizedComparable.id = comparable.id.id;
+      const normalizedComparables = informeScotiaData.comparables.map(
+        (comparable) => {
+          const normalizedComparable = { ...comparable };
+          if (comparable.id.id) {
+            normalizedComparable.id = comparable.id.id;
+          }
+          return normalizedComparable;
         }
-        return normalizedComparable;
-      });
-
+      );
 
       informeScotiaData.comparables = normalizedComparables;
-      
+
       console.log("informeScotiaData", informeScotiaData);
 
       const response = await axios.post(
@@ -146,6 +145,89 @@ const InformeScotiaService = {
           return null;
         }
     }, */
+
+  // Añadir estos métodos a InformeScotiaService.js
+
+  // Guardar el cálculo para un informe
+  saveCalculo: async (informeId, calculoData) => {
+    try {
+      // Clonar el objeto para evitar modificar el original
+      const calculoToSend = JSON.parse(JSON.stringify(calculoData));
+      
+      // Asegurarse de que las superficies estén en el formato correcto
+      if (calculoToSend.superficies && Array.isArray(calculoToSend.superficies)) {
+        // Eliminar cualquier referencia circular o innecesaria
+        calculoToSend.superficies = calculoToSend.superficies.map(superficie => ({
+          descripcion: superficie.descripcion,
+          m2: parseFloat(superficie.m2) || 0,
+          ampliaciones: superficie.ampliaciones || '',
+          promedioEdad: parseFloat(superficie.promedioEdad) || 0,
+          factorEdad: parseFloat(superficie.factorEdad) || 0,
+          conservacion: superficie.conservacion || '',
+          factorConservacion: parseFloat(superficie.factorConservacion) || 0,
+          precioMetro: parseFloat(superficie.precioMetro) || 0,
+          precioMetroCorregido: parseFloat(superficie.precioMetroCorregido) || 0,
+          valorTotal: parseFloat(superficie.valorTotal) || 0,
+          valorTotalSinCorregir: parseFloat(superficie.valorTotalSinCorregir) || 0
+          // No incluir 'calculo' aquí, se establecerá en el backend
+        }));
+      }
+      
+      console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
+      
+      const response = await axios.post(
+        `${API_URL}/api/informeScotia/${informeId}/calculo`,
+        calculoToSend,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 30000 // 30 segundos
+        }
+      );
+      
+      console.log("Respuesta del servidor:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error al guardar el cálculo:", error);
+      
+      if (error.response) {
+        console.error("Detalles del error:", error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error("No se recibió respuesta del servidor");
+      } else {
+        console.error("Error al configurar la solicitud:", error.message);
+      }
+      
+      throw error;
+    }
+  },
+
+  // Obtener el cálculo de un informe
+  getCalculo: async (informeId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/informeScotia/${informeId}/calculo`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener el cálculo:", error);
+      return null;
+    }
+  },
+
+  // Obtener las superficies del cálculo
+  getSuperficiesCalculo: async (informeId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/informeScotia/${informeId}/calculo/superficies`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener las superficies:", error);
+      return [];
+    }
+  },
 };
 
 export default InformeScotiaService;

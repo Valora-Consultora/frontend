@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import ScotiaLogo from "../../images/logo-scotia.png";
 import { useSelector } from 'react-redux';
 import Modal from "react-modal";
-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InformeScotiaService from "../../api/InformeScotiaService";
@@ -10,6 +9,10 @@ import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 import SelectedComparableList from "../comparables/SelectedComparableList";
 import ComparablesService from "../../api/ComparablesService";
+import CalculoInforme from "../calculo/CalculoInforme";
+import { useLocation, useNavigate } from 'react-router-dom';
+
+
 
 const InformeScotia = () => {
   const formRef = useRef();
@@ -25,6 +28,8 @@ const InformeScotia = () => {
   const [comparableEdit, setComparableEdit] = useState(null);
 
   const [shownComparablesML, setShownComparablesML] = useState(true);
+  const [getCalculoData, setGetCalculoData] = useState(null);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     /// Información General
@@ -242,13 +247,26 @@ const InformeScotia = () => {
   const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
     try {
-      // Simulando una llamada a API
+      // Guardar cálculo si no es un borrador
+      if (getCalculoData && !borrador) {
+        try {
+          const calculoData = getCalculoData();
+          console.log("Datos del cálculo a enviar:", calculoData);
+          await InformeScotiaService.saveCalculo(provisionalInformeId, calculoData);
+          console.log("Cálculo guardado correctamente");
+        } catch (error) {
+          console.error("Error al guardar el cálculo:", error);
+          const confirmar = window.confirm("Hubo un error al guardar los datos del cálculo. ¿Deseas continuar sin guardarlos?");
+          if (!confirmar) {
+            return;
+          }
+        }
+      }
+
+      // Continuar con el envío del informe
       formData.estado = borrador ? "borrador" : "enviado";
       const informe = await InformeScotiaService.createInformeScotia(provisionalInformeId, formData);
-      // Aquí iría la lógica real para enviar los datos a una API
-      console.log("Form Data:", formData);
-      console.log("Form Data:", JSON.stringify(formData));
-
+      
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
         autoClose: 2500,
@@ -257,6 +275,9 @@ const InformeScotia = () => {
         pauseOnHover: true,
         draggable: true,
       });
+      setTimeout(() => {
+        navigate('/home');
+    }, 3000);
     } catch (error) {
       toast.error("Error al enviar el formulario.", {
         position: "top-right",
@@ -320,6 +341,26 @@ const InformeScotia = () => {
     console.log(formData);
     setIsModalEditOpen(false);
   }
+
+
+  /****************CALCULO************************/
+
+  const configuracionScotia = {
+    nombreBanco: 'Scotia',
+    factoresConservacion: [
+      { label: 'Nuevo', factor: 1.00 },
+      { label: 'Buen Estado', factor: 0.95 },
+      { label: 'Necesita Mantenimiento', factor: 0.90 },
+      { label: 'Necesita Reparaciones', factor: 0.90 },
+    ],
+    formulaFactorEdad: (anio) => {
+      const anioActual = new Date().getFullYear();
+      const edad = anioActual - anio;
+      return Math.max(0.5, 1 - edad * 0.01);
+    },
+  };
+
+
 
   return (
     <div className="bg-gray-100">
@@ -834,7 +875,21 @@ const InformeScotia = () => {
                   />
                 </div>
               </div>
+
             </div>
+            <CalculoInforme
+              configuracion={configuracionScotia}
+              superficieTerreno={formData.supPredio}
+              onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+              comparables=""
+              bienesPropios=""
+              bienesComunes=""
+              estadoConservacion=""
+              categoria=""
+              anioConstruccion=""
+              deslindeFrente=""  // ✅ Agregar frente
+              deslindeFondo=""    // ✅ Agregar fondo
+            />
             <div className="mt-4 text-center space-x-2">
               <button
                 type="submit"
@@ -945,13 +1000,13 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     const { name, value } = e.target;
 
     if (name === 'direccion') {
-      setComparable({...comparable, location: { ...(comparable?.location ?? {}), address_line: value }})
+      setComparable({ ...comparable, location: { ...(comparable?.location ?? {}), address_line: value } })
     }
     if (name === 'titulo') {
-      setComparable({...comparable, title: value})
+      setComparable({ ...comparable, title: value })
     }
     if (name === 'precio') {
-      setComparable({...comparable, price: value })
+      setComparable({ ...comparable, price: value })
     }
   }
 
@@ -1035,6 +1090,7 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
               Guardar
             </button>
           </div>
+
           <div className="text-center">
             <button
               type="button"

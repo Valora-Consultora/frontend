@@ -4,10 +4,10 @@ import CheckboxGroup from '../../components/CheckboxGroup';
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
 import InformeHsbcService from "../../api/InformeHsbcService";
-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ComparablesService from "../../api/ComparablesService";
+import CalculoInforme from "../calculo/CalculoInforme";
 
 const FormularioHsbc = () => {
   const formRef = useRef();
@@ -15,7 +15,7 @@ const FormularioHsbc = () => {
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
-
+  const [getCalculoData, setGetCalculoData] = useState(null);
   const [formData, setFormData] = useState({
     /// Información General
     solicitante: "",
@@ -228,13 +228,75 @@ const FormularioHsbc = () => {
     }));
   };
 
-  const submitHandler = async (e) => {
+  const configuracionHsbc = {
+    nombreBanco: 'HSBC',
+    factoresConservacion: [
+      { label: 'Nuevo', factor: 1.00 },
+      { label: 'Buen Estado', factor: 0.95 },
+      { label: 'Necesita Mantenimiento', factor: 0.90 },
+      { label: 'Necesita Reparaciones', factor: 0.90 },
+    ],
+    formulaFactorEdad: (anio) => {
+      const anioActual = new Date().getFullYear();
+      const edad = anioActual - anio;
+      return Math.max(0.5, 1 - edad * 0.01);
+    },
+  };
+
+
+  // Modificación en submitHandler en InformeHsbc.jsx
+  const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
     try {
-      // Simulando una llamada a API
-      const informe = await InformeHsbcService.createInformeHsbc(formData);
-      // Aquí iría la lógica real para enviar los datos a una API
-      console.log("Form Data:", formData);
+      // Guardar cálculo si existe la función getCalculoData y no es un borrador
+      if (getCalculoData && !borrador) {
+        try {
+          const calculoData = getCalculoData();
+          console.log("Datos del cálculo a enviar:", calculoData);
+
+          // Verificar si hay un ID de informe válido antes de guardar el cálculo
+          if (formData.id) {
+            // Guardar los cálculos usando el servicio
+            await InformeHsbcService.saveCalculo(formData.id, calculoData);
+
+            // Actualizar valores en formData basados en cálculos
+            setFormData(prevData => ({
+              ...prevData,
+              valorMercado: calculoData.valorMercado,
+              valorVentaRapida: calculoData.valorVentaRapida,
+              valorRemate: calculoData.valorRemate,
+              costoReposicion: calculoData.costoReposicion
+            }));
+          } else {
+            console.log("No hay ID de informe para guardar el cálculo. Se guardará después de crear el informe.");
+          }
+        } catch (error) {
+          console.error("Error al obtener datos del cálculo:", error);
+          const confirmar = window.confirm("Hubo un error al procesar los datos del cálculo. ¿Deseas continuar sin guardarlos?");
+          if (!confirmar) {
+            return;
+          }
+        }
+      }
+
+      // Establecer estado del formulario según si es borrador o no
+      const dataToSend = {
+        ...formData,
+        estado: borrador ? "borrador" : "enviado"
+      };
+
+      // Enviar el formulario
+      const informe = await InformeHsbcService.createInformeHsbc(dataToSend);
+
+      // Si tenemos datos de cálculo y no se guardaron antes, guardarlos ahora con el ID del informe creado
+      if (getCalculoData && !borrador && !formData.id && informe.id) {
+        try {
+          const calculoData = getCalculoData();
+          await InformeHsbcService.saveCalculo(informe.id, calculoData);
+        } catch (error) {
+          console.error("Error al guardar cálculo después de crear informe:", error);
+        }
+      }
 
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
@@ -1067,24 +1129,43 @@ const FormularioHsbc = () => {
                           <ComparableList
                             handleSelectedComparable={handleSelectedComparable}
                             handleLoadMoreComparables={handleLoadMoreComparables}
-                            handleSelectMainComparable={handleSelectMainComparable} 
-                            comparables={formData.comparables}  
+                            handleSelectMainComparable={handleSelectMainComparable}
+                            comparables={formData.comparables}
                             page={comparablePage}
                           />
                         </p>
                       </div>
                     </div>
                   </div>
-
                 </div>
+                <CalculoInforme
+                  configuracion={configuracionHsbc}
+                  superficieTerreno={formData.superficieTerreno}
+                  onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+                  comparables={formData.comparables}
+                  bienesPropios={formData.bienesPropios}
+                  bienesComunes={formData.bienesComunes}
+                  estadoConservacion={formData.conservacion}
+                  categoria={formData.categorizacion}
+                  anioConstruccion={formData.anio}
+                  deslindeFrente={formData.deslindeFrente}
+                  deslindeFondo={formData.deslindeFondo}
+                />
               </div>
             </div>
-            <div className="col-span-12 text-center">
+            <div className="mt-4 text-center space-x-2">
               <button
                 type="submit"
-                className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
+                className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6"
               >
-                Crear Informe
+                Enviar Informe
+              </button>
+              <button
+                type="button"
+                className="bg-yellow-900 text-white px-4 py-2 rounded-md hover:bg-yellow-700 w-1/6"
+                onClick={(e) => submitHandler(e, true)}
+              >
+                Guardar Borrador
               </button>
             </div>
           </div>
