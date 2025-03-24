@@ -10,6 +10,7 @@ import plusIcon from '../../images/plusIcon.png';
 import ItemObraCivilService from '../../api/ItemObraCivilService';
 import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
 import ItemAntiguedadesDescripcionModal from '../utils/ItemAntiguedadesDescripcionModal';
+import CalculoInforme from '../calculo/CalculoInforme';
 
 const InformeBbva = () => {
   const navigate = useNavigate();
@@ -32,6 +33,10 @@ const InformeBbva = () => {
   const [currentItem, setCurrentItem] = useState(null);
   const [isModalAntiguedadesOpen, setIsModalAntiguedadesOpen] = useState(false);
   const [isModalAntiguedadesDescripcionOpen, setIsModalAntiguedadesDescripcionOpen] = useState(false);
+
+  const [getCalculoData, setGetCalculoData] = useState(null);
+
+
   /*   const [isModalAntiguedadesCubiertaOpen, setIsModalAntiguedadesCubiertaOpen] = useState(false);
    */
   /*   const [isAntiguedadesCimentacionDescripcion, setAntiguedadesCimentacionDescripcion] = useState(false);
@@ -249,11 +254,74 @@ const InformeBbva = () => {
     }
   };
 
+  // Componente para conectar los cálculos con Formik
+  const CalculoFormikConnector = ({ getCalculoData, setFieldValue }) => {
+    useEffect(() => {
+      const actualizarValoresFormik = () => {
+        if (!getCalculoData) return;
 
-  const submitHandler = async () => {
+        try {
+          const calculoData = getCalculoData();
+
+          // Actualizamos los valores relevantes en el formulario Formik
+          setFieldValue('valorMercadoTotalResumen', calculoData.valorMercado || 0);
+          setFieldValue('valorMercadoM2Resumen', calculoData.valorMercadoMetroCuadrado || 0);
+          setFieldValue('valorRemateTotalResumen', calculoData.valorRemate || 0);
+          setFieldValue('valorRemateM2Resumen', calculoData.valorRemateMetroCuadrado || 0);
+          setFieldValue('valorTerrenoTotalResumen', calculoData.valorTerreno || 0);
+          setFieldValue('valorTerrenoM2Resumen', calculoData.valorMetroTerreno || 0);
+          setFieldValue('superficieTerrenoResumen', calculoData.superficieTerreno || 0);
+          setFieldValue('valorObraCivilTotalResumen', calculoData.valorObraCivil || 0);
+          setFieldValue('valorObraCivilM2Resumen', calculoData.costoReposicionMetroCuadrado || 0);
+
+          // También podemos actualizar el valor en superficieTerreno para que se refleje en el componente CalculoInforme
+          setFieldValue('superficieTerrenoCaracteristicas', calculoData.superficieTerreno || 0);
+        } catch (error) {
+          console.error("Error al actualizar valores desde cálculo:", error);
+        }
+      };
+
+      // Ejecutar una vez inmediatamente
+      actualizarValoresFormik();
+
+      // Configuramos un intervalo para actualizar periódicamente
+      const intervalId = setInterval(actualizarValoresFormik, 2000);
+
+      // Limpiamos el intervalo cuando el componente se desmonte
+      return () => clearInterval(intervalId);
+    }, [getCalculoData, setFieldValue]);
+
+    // Este componente no renderiza nada visible
+    return null;
+  };
+
+
+  const submitHandler = async (values, { setSubmitting }) => {
     try {
-      const updatePromises = itemsObraCivil.map(async (item) => {
+      // Guardar cálculo si existe la función getCalculoData
+      if (getCalculoData) {
+        try {
+          const calculoData = getCalculoData();
+          console.log("Datos del cálculo a enviar:", calculoData);
 
+          // Si hay un ID de informe, guardar el cálculo
+          if (provisionalInformeId) {
+            await InformeBbvaService.saveCalculo(provisionalInformeId, calculoData);
+          } else {
+            console.log("No hay ID de informe disponible para guardar el cálculo");
+          }
+        } catch (error) {
+          console.error("Error al obtener o guardar datos del cálculo:", error);
+          const confirmar = window.confirm("Hubo un error al procesar los datos del cálculo. ¿Deseas continuar sin guardarlos?");
+          if (!confirmar) {
+            setSubmitting(false);
+            return;
+          }
+        }
+      }
+
+      // Continuar con la lógica original de actualización de items
+      const updatePromises = itemsObraCivil.map(async (item) => {
         const updatedFields = {
           pilotesCimentacionDescripcion: item.pilotesCimentacionDescripcion,
           dadosCimentacionDescripcion: item.dadosCimentacionDescripcion,
@@ -265,18 +333,25 @@ const InformeBbva = () => {
           metalicaCubiertaDescripcion: item.metalicaCubiertaDescripcion,
           bovedillaCubiertaDescripcion: item.bovedillaCubiertaDescripcion,
           otrosCubiertaDescripcion: item.otrosCubiertaDescripcion,
+          // Añade más campos si es necesario
         };
         return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
       });
 
       await Promise.all(updatePromises);
-      toast.success("Items actualizados correctamente");
+
+      // Actualizar el informe BBVA con todos los valores del formulario
+      await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
+
+      toast.success("Informe guardado correctamente");
       setTimeout(() => {
         navigate('/home');
       }, 3000);
     } catch (error) {
-      toast.error("Error al actualizar los items");
+      toast.error("Error al guardar el informe");
       console.error(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -378,6 +453,8 @@ const InformeBbva = () => {
       >
         {({ isSubmitting, setFieldValue }) => (
           <Form className="space-y-6">
+            <CalculoFormikConnector getCalculoData={getCalculoData} setFieldValue={setFieldValue} />
+
             <div className="bg-white shadow-lg w-11/12 mx-auto rounded-xl p-6 mb-16">
               <div className="grid grid-cols-12 gap-2">
                 {/* Información General */}
@@ -3753,7 +3830,28 @@ const InformeBbva = () => {
 
                   </div>
 
-
+                  <CalculoInforme
+                    configuracion={{
+                      nombreBanco: 'BBVA',
+                      factoresConservacion: [
+                        { label: 'Nuevo', factor: 1.00 },
+                        { label: 'Buen Estado', factor: 0.95 },
+                        { label: 'Necesita Mantenimiento', factor: 0.90 },
+                        { label: 'Necesita Reparaciones', factor: 0.90 },
+                      ],
+                      formulaFactorEdad: (anio) => {
+                        const anioActual = new Date().getFullYear();
+                        const edad = anioActual - anio;
+                        return Math.max(0.5, 1 - edad * 0.01);
+                      },
+                    }}
+                    /*superficieTerreno={values.superficieTerrenoCaracteristicas || 0} */
+                    onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+                  /* estadoConservacion={values.estadoConservacionDescripcionInmueble || "Buen estado"}
+                  categoria={values.categoriaDescripcionInmueble || ""}
+                  deslindeFrente={values.frente1Caracteristicas || 0}
+                  deslindeFondo={values.fondoCaracteristicas || 0} */
+                  />
 
                 </div>
               </div>
