@@ -1,7 +1,6 @@
 import { useState } from "react";
 import SignUpService from "../api/SignUpService";
 import 'bootstrap/dist/css/bootstrap.min.css'
-import "../css/FormsModule.css";
 
 const SignUp = () => {
   const [info, setInfo] = useState({

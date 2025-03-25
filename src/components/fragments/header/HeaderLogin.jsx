@@ -1,11 +1,10 @@
 import LogoLogin from "./logo/LogoLogin";
-import Navbar from "./navbar/Navbar";
-import "../../../css/HeaderLoginModule.css";
 
 const HeaderLogin = () => {
     return (
-        <header className="header">
-            <div className="logo_container">
+        <header className="grid grid-cols-2 items-center bg-[#01502f] h-[80px] p-0 m-0">
+            <div></div> {/* Espacio vacío para la primera columna */}
+            <div className="flex items-center justify-end flex-1">
                 <LogoLogin />
             </div>
         </header>

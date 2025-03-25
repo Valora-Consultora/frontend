@@ -4,7 +4,7 @@ const ComparableSection = ({ filters, modifyFilter, handleSubmit }) => {
   const availableFilters = [
     {
       "id": "price",
-      "name": "Precio (en pesos)",
+      "name": "Precio (en dolares)",
       "type": "range",
       "values": [
         {

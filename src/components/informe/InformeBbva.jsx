@@ -12,6 +12,7 @@ import ItemAntiguedadesModal from '../utils/ItemAntiguedadesModal';
 import ItemAntiguedadesDescripcionModal from '../utils/ItemAntiguedadesDescripcionModal';
 import ItemComodidadesDescripcionModal from '../utils/ItemComodidadesDescripcionModal'
 import ItemPlanillaDescripcionModal from '../utils/ItemPlanillaDescripcionModal'
+import CalculoInforme from '../calculo/CalculoInforme';
 
 const InformeBbva = () => {
   const navigate = useNavigate();
@@ -40,6 +41,14 @@ const InformeBbva = () => {
   const [isModalAntiguedadesDescripcionOpen, setIsModalAntiguedadesDescripcionOpen] = useState(false);
   const [isModalComodidadesDescripcionOpen, setIsModalComodidadesDescripcionOpen] = useState(false);
   const [isModalPlanillaDescripcionOpen, setIsModalPlanillaDescripcionOpen] = useState(false);
+
+  const [getCalculoData, setGetCalculoData] = useState(null);
+
+
+  /*   const [isModalAntiguedadesCubiertaOpen, setIsModalAntiguedadesCubiertaOpen] = useState(false);
+   */
+  /*   const [isAntiguedadesCimentacionDescripcion, setAntiguedadesCimentacionDescripcion] = useState(false);
+   */
 
   const calcularSumas = (items) => {
     let totalDoc = 0, totalVer = 0;
@@ -380,12 +389,71 @@ const InformeBbva = () => {
     setSelectedFilesFotos(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Componente para conectar los cálculos con Formik
+  const CalculoFormikConnector = ({ getCalculoData, setFieldValue }) => {
+    useEffect(() => {
+      const actualizarValoresFormik = () => {
+        if (!getCalculoData) return;
+
+        try {
+          const calculoData = getCalculoData();
+
+          // Actualizamos los valores relevantes en el formulario Formik
+          setFieldValue('valorMercadoTotalResumen', calculoData.valorMercado || 0);
+          setFieldValue('valorMercadoM2Resumen', calculoData.valorMercadoMetroCuadrado || 0);
+          setFieldValue('valorRemateTotalResumen', calculoData.valorRemate || 0);
+          setFieldValue('valorRemateM2Resumen', calculoData.valorRemateMetroCuadrado || 0);
+          setFieldValue('valorTerrenoTotalResumen', calculoData.valorTerreno || 0);
+          setFieldValue('valorTerrenoM2Resumen', calculoData.valorMetroTerreno || 0);
+          setFieldValue('superficieTerrenoResumen', calculoData.superficieTerreno || 0);
+          setFieldValue('valorObraCivilTotalResumen', calculoData.valorObraCivil || 0);
+          setFieldValue('valorObraCivilM2Resumen', calculoData.costoReposicionMetroCuadrado || 0);
+
+          // También podemos actualizar el valor en superficieTerreno para que se refleje en el componente CalculoInforme
+          setFieldValue('superficieTerrenoCaracteristicas', calculoData.superficieTerreno || 0);
+        } catch (error) {
+          console.error("Error al actualizar valores desde cálculo:", error);
+        }
+      };
+
+      // Ejecutar una vez inmediatamente
+      actualizarValoresFormik();
+
+      // Configuramos un intervalo para actualizar periódicamente
+      const intervalId = setInterval(actualizarValoresFormik, 2000);
+
+      // Limpiamos el intervalo cuando el componente se desmonte
+      return () => clearInterval(intervalId);
+    }, [getCalculoData, setFieldValue]);
+
+    // Este componente no renderiza nada visible
+    return null;
+  };
+
 
   const submitHandler = async (values) => {
     try {
 
-      // **1️⃣ Actualizar el informe primero**
-      const response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
+      if (getCalculoData) {
+        try {
+          const calculoData = getCalculoData();
+          console.log("Datos del cálculo a enviar:", calculoData);
+
+          // Si hay un ID de informe, guardar el cálculo
+          if (provisionalInformeId) {
+            await InformeBbvaService.saveCalculo(provisionalInformeId, calculoData);
+          } else {
+            console.log("No hay ID de informe disponible para guardar el cálculo");
+          }
+        } catch (error) {
+          console.error("Error al obtener o guardar datos del cálculo:", error);
+          const confirmar = window.confirm("Hubo un error al procesar los datos del cálculo. ¿Deseas continuar sin guardarlos?");
+          if (!confirmar) {
+            setSubmitting(false);
+            return;
+          }
+        }
+      }
 
       if (selectedFiles.length > 0) {
         console.log("📤 Subiendo imágenes de planos...");
@@ -397,9 +465,8 @@ const InformeBbva = () => {
         await handleUploadFotos(response.id);
       }
 
-      // **2️⃣ Luego actualizar los items de obra civil**
+      // Continuar con la lógica original de actualización de items
       const updatePromises = itemsObraCivil.map(async (item) => {
-
         const updatedFields = {
           pilotesCimentacionDescripcion: item.pilotesCimentacionDescripcion,
           dadosCimentacionDescripcion: item.dadosCimentacionDescripcion,
@@ -475,18 +542,20 @@ const InformeBbva = () => {
         return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
       });
 
-
-
       await Promise.all(updatePromises);
 
+      // Actualizar el informe BBVA con todos los valores del formulario
+      await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
 
-      toast.success("Informe actualizado correctamente");
+      toast.success("Informe guardado correctamente");
       setTimeout(() => {
         navigate('/home');
       }, 3000);
     } catch (error) {
-      toast.error("Error al actualizar el informe");
+      toast.error("Error al guardar el informe");
       console.error(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -724,6 +793,8 @@ const InformeBbva = () => {
       >
         {({ values, isSubmitting, setFieldValue }) => (
           <Form className="space-y-6">
+            <CalculoFormikConnector getCalculoData={getCalculoData} setFieldValue={setFieldValue} />
+
             <div className="bg-white shadow-lg w-11/12 mx-auto rounded-xl p-6 mb-16">
               <div className="grid grid-cols-12 gap-2">
                 {/* Información General */}
@@ -4184,6 +4255,28 @@ const InformeBbva = () => {
                       <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
                     </div>
                   </div>
+                  <CalculoInforme
+                    configuracion={{
+                      nombreBanco: 'BBVA',
+                      factoresConservacion: [
+                        { label: 'Nuevo', factor: 1.00 },
+                        { label: 'Buen Estado', factor: 0.95 },
+                        { label: 'Necesita Mantenimiento', factor: 0.90 },
+                        { label: 'Necesita Reparaciones', factor: 0.90 },
+                      ],
+                      formulaFactorEdad: (anio) => {
+                        const anioActual = new Date().getFullYear();
+                        const edad = anioActual - anio;
+                        return Math.max(0.5, 1 - edad * 0.01);
+                      },
+                    }}
+                    /*superficieTerreno={values.superficieTerrenoCaracteristicas || 0} */
+                    onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+                  /* estadoConservacion={values.estadoConservacionDescripcionInmueble || "Buen estado"}
+                  categoria={values.categoriaDescripcionInmueble || ""}
+                  deslindeFrente={values.frente1Caracteristicas || 0}
+                  deslindeFondo={values.fondoCaracteristicas || 0} */
+                  />
 
                   <div className="grid grid-cols-4 gap-4 w-full pt-5">
                     <div className="flex flex-col items-center col-span-1">

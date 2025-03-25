@@ -1,14 +1,12 @@
 import React from "react";
 import logo from "../../../../images/valoraLogo.png";
 import { NavLink } from "react-router-dom";
-import "../../../../css/LogoModule.css";
 
 const Logo = () => {
-
   return (
-    <section className="logo_container">
+    <section className="flex items-center justify-end flex-1">
         <NavLink>
-          <img className="imgHeader" src={logo} alt="logo" />
+          <img className="w-[100px] h-auto mr-[20px] filter brightness-0 invert" src={logo} alt="logo" />
         </NavLink>
     </section>
   );

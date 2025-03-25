@@ -52,7 +52,7 @@ const InformeBbvaService = {
       formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
 
       const response = await axios.post(
-        `http://localhost:8080/api/informeBbva/${id}/uploadPlanos`,
+        `${API_URL}/api/informeBbva/${id}/uploadPlanos`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -71,7 +71,7 @@ const InformeBbvaService = {
       formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
 
       const response = await axios.post(
-        `http://localhost:8080/api/informeBbva/${id}/uploadFotos`,
+        `${API_URL}/api/informeBbva/${id}/uploadFotos`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -99,7 +99,7 @@ const InformeBbvaService = {
   deletePlano: async (id, imageUrl) => {
     try {
       const response = await axios.delete(
-        `http://localhost:8080/api/informeBbva/${id}/deletePlano`,
+        `${API_URL}/api/informeBbva/${id}/deletePlano`,
         { params: { imageUrl } }
       );
       return response.data;
@@ -173,6 +173,46 @@ const InformeBbvaService = {
           return null;
         }
     }, */
+
+  // Obtener el cálculo de un informe
+  getCalculo: async (informeId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/informeBbva/${informeId}/calculo`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener el cálculo:", error);
+      return null;
+    }
+  },
+
+  // Obtener las superficies del cálculo
+  getSuperficiesCalculo: async (informeId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/informeBbva/${informeId}/calculo/superficies`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener las superficies:", error);
+      return [];
+    }
+  },
+
+  // Guardar el cálculo para un informe
+  saveCalculo: async (informeId, calculoData) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/informeBbva/${informeId}/calculo`,
+        calculoData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al guardar el cálculo:", error);
+      throw error;
+    }
+  },
 };
 
 export default InformeBbvaService;

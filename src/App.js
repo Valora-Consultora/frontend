@@ -9,10 +9,12 @@ import HeaderLogin from "./components/fragments/header/HeaderLogin";
 import Order from "./components/Order";
 import Revision from "./components/revision/Revision";
 import Inspeccion from "./components/Inspeccion";
-import Home from './components/Home';
+import Home from "./components/Home";
 import InformeLayout from "./components/informe/InformeLayout";
 import RevisionInformes from "./components/revision/RevisionInformes";
 import VerInformeScotia from "./components/informe/VerInformeScotia";
+import ReporteSeguimiento from "./components/reportes/ReporteSeguimiento";
+import ReportesLayout from "./components/reportes/ReportesLayout";
 
 const WithHeader = ({ children }) => (
   <>
@@ -32,7 +34,7 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="bg-gray-100">
+        <div className="bg-gray-100 min-h-screen flex flex-col">
           <Routes>
             <Route
               path="/"
@@ -50,13 +52,13 @@ function App() {
                 </WithHeader>
               }
             />
-            <Route 
-              path="/Home" 
+            <Route
+              path="/Home"
               element={
                 <WithHeader>
                   <Home />
                 </WithHeader>
-              } 
+              }
             />
             <Route
               path="/Orden"
@@ -114,9 +116,25 @@ function App() {
                 </WithHeader>
               }
             />
+            <Route
+              path="/Reportes"
+              element={
+                <WithHeader>
+                  <ReportesLayout />
+                </WithHeader>
+              }
+            />
+            <Route
+              path="/ReporteSeguimiento"
+              element={
+                <WithHeader>
+                  <ReporteSeguimiento />
+                </WithHeader>
+              }
+            />
           </Routes>
         </div>
-        <Footer className="text-center bg-gray-200" />
+        <Footer className="text-center bg-gray-200 mt-auto py-4" />
       </Router>
     </ThemeProvider>
   );
