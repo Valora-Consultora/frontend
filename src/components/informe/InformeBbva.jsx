@@ -431,7 +431,7 @@ const InformeBbva = () => {
   };
 
 
-  const submitHandler = async (values) => {
+  const submitHandler = async (values, { setSubmitting }) => {
     try {
 
       if (getCalculoData) {
@@ -453,16 +453,6 @@ const InformeBbva = () => {
             return;
           }
         }
-      }
-
-      if (selectedFiles.length > 0) {
-        console.log("📤 Subiendo imágenes de planos...");
-        await handleUploadPlanos(response.id);
-      }
-
-      if (selectedFilesFotos.length > 0) {
-        console.log("📤 Subiendo imágenes de fotos...");
-        await handleUploadFotos(response.id);
       }
 
       // Continuar con la lógica original de actualización de items
@@ -545,7 +535,17 @@ const InformeBbva = () => {
       await Promise.all(updatePromises);
 
       // Actualizar el informe BBVA con todos los valores del formulario
-      await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
+      const response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
+
+      if (selectedFiles.length > 0) {
+        console.log("📤 Subiendo imágenes de planos...");
+        await handleUploadPlanos(response.id);
+      }
+
+      if (selectedFilesFotos.length > 0) {
+        console.log("📤 Subiendo imágenes de fotos...");
+        await handleUploadFotos(response.id);
+      }
 
       toast.success("Informe guardado correctamente");
       setTimeout(() => {
