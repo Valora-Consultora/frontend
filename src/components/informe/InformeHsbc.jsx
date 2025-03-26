@@ -1,21 +1,34 @@
 import React, { useState, useRef } from "react";
+import Modal from "react-modal";
+
 import HsbcLogo from "../../images/logo-hsbc.png";
 import CheckboxGroup from '../../components/CheckboxGroup';
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
+import SelectedComparableList from "../comparables/SelectedComparableList";
 import InformeHsbcService from "../../api/InformeHsbcService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ComparablesService from "../../api/ComparablesService";
 import CalculoInforme from "../calculo/CalculoInforme";
+import { exportToExactExcelTemplateExcelJS } from "../utils/excelExport.ts";
+
+import Excel from '../../images/icons/excel.svg';
 
 const FormularioHsbc = () => {
   const formRef = useRef();
+
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
+  const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
 
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
   const [getCalculoData, setGetCalculoData] = useState(null);
+  const [comparableEdit, setComparableEdit] = useState(null);
+
+  const [shownComparablesML, setShownComparablesML] = useState(true);
+
   const [formData, setFormData] = useState({
     /// Información General
     solicitante: "",
@@ -112,17 +125,28 @@ const FormularioHsbc = () => {
   };
 
   const handleSelectedComparable = (id) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      comparables: prevData.comparables.map((comparable) =>
-        comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
-      ),
-    }));
-    setComparables((prevComparables) =>
-      prevComparables.map((comparable) =>
-        comparable.id === id ? { ...comparable, selected: !comparable.selected } : comparable
-      )
-    );
+    const comparable = comparables.find((comparable) => comparable.id === id);
+    if (comparable.selected) {
+      setComparables((prevComparables) =>
+        prevComparables.map((comparable) =>
+          comparable.id === id ? { ...comparable, selected: false } : comparable
+        )
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: prevData.comparables.filter((comparable) => comparable.id !== id),
+      }));
+    } else {
+      setComparables((prevComparables) =>
+        prevComparables.map((comparable) =>
+          comparable.id === id ? { ...comparable, selected: true } : comparable
+        )
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: [...prevData.comparables, comparable],
+      }));
+    }
   }
 
   const handleLoadMoreComparables = () => {
@@ -201,10 +225,10 @@ const FormularioHsbc = () => {
   const handleComparableSubmit = async () => {
     try {
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
-      setFormData((prevData) => ({
-        ...prevData,
-        comparables: comparables.results,
-      }));
+      comparables.results.map((result) => {
+        result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
+        return result;
+      });
       setComparables(comparables.results);
       setComparablePage(1);
     } catch (error) {
@@ -241,6 +265,18 @@ const FormularioHsbc = () => {
       const edad = anioActual - anio;
       return Math.max(0.5, 1 - edad * 0.01);
     },
+  };
+
+  const handleEditComparable = (comparable) => {
+    // const comparable = comparables.find((comparable) => comparable.id === id);
+    setComparableEdit(comparable);
+    console.log(comparableEdit);
+    setIsModalEditOpen(true);
+  };
+
+  const handleEditHomologation = (comparable) => {
+    setComparableEdit(comparable);
+    setIsModalHomologationOpen(true);
   };
 
 
@@ -318,6 +354,16 @@ const FormularioHsbc = () => {
     }
   };
 
+  const handleSaveComparable = (comparable) => {
+    console.log('Attempting to save', comparable)
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: [...prevData.comparables, comparable],
+    }));
+    console.log(formData);
+    setIsModalEditOpen(false);
+  }
+
   return (
     <div className="bg-gray-100">
       <h2 className="text-center text-2xl font-medium text-green-900 mx-auto my-10">
@@ -333,6 +379,11 @@ const FormularioHsbc = () => {
       <div ref={formRef}>
         <form onSubmit={submitHandler} className="space-y-6">
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
+            <img
+              src={Excel}
+              onClick={() => exportToExactExcelTemplateExcelJS(formData, 'hsbc')}
+              className="cursor-pointer"
+            />
             <div className="grid grid-cols-12 gap-4">
               {/* Información General */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
@@ -1152,25 +1203,90 @@ const FormularioHsbc = () => {
                   deslindeFondo={formData.deslindeFondo}
                 />
               </div>
-            </div>
-            <div className="mt-4 text-center space-x-2">
-              <button
-                type="submit"
-                className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6"
-              >
-                Enviar Informe
-              </button>
-              <button
-                type="button"
-                className="bg-yellow-900 text-white px-4 py-2 rounded-md hover:bg-yellow-700 w-1/6"
-                onClick={(e) => submitHandler(e, true)}
-              >
-                Guardar Borrador
-              </button>
+
+              {/* Comparable */}
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <div className="flex flex-row justify-between items-center">
+                  <h4 className="text-xl text-green-900">Comparables MercadoLibre</h4>
+                  <button
+                    type="button"
+                    onClick={() => setShownComparablesML(!shownComparablesML)}
+                    className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                  >
+                    {shownComparablesML ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
+                <div
+                  className="grid grid-cols-12 gap-4 items-center transition-all duration-500 overflow-hidden"
+                  style={{
+                    maxHeight: shownComparablesML ? `9000px` : "0px",
+                  }}
+                >
+                  <div className="col-span-12">
+                    <p className="text-sm text-gray-700">
+                      <ComparableSection
+                        filters={comparableFilters}
+                        modifyFilter={modifyFilter}
+                        handleSubmit={handleComparableSubmit}
+                      />
+                      <ComparableList
+                        handleSelectedComparable={handleSelectedComparable}
+                        handleLoadMoreComparables={handleLoadMoreComparables}
+                        handleSelectMainComparable={handleSelectMainComparable}
+                        comparables={comparables}
+                        page={comparablePage}
+                      />
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Comparables Seleccionados</h4>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12">
+                    <p className="text-sm text-gray-700">
+                      <SelectedComparableList
+                        handleEditComparable={handleEditComparable}
+                        handleEditHomologation={handleEditHomologation}
+                        handleSelectMainComparable={handleSelectMainComparable}
+                        comparables={formData.comparables}
+                      />
+                      <button
+                        type="button"
+                        className="bg-green-900 text-white px-4 py-2 mt-2 rounded-md hover:bg-green-700"
+                        onClick={() => {
+                          setIsModalEditOpen(true);
+                          setComparableEdit(null);
+                        }}
+                      >
+                        Agregar Comparable
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 text-center space-x-2">
+                <button
+                  type="submit"
+                  className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6"
+                >
+                  Enviar Informe
+                </button>
+                <button
+                  type="button"
+                  className="bg-yellow-900 text-white px-4 py-2 rounded-md hover:bg-yellow-700 w-1/6"
+                  onClick={(e) => submitHandler(e, true)}
+                >
+                  Guardar Borrador
+                </button>
+              </div>
             </div>
           </div>
         </form>
-      </div >
+      </div>
+      <ModalComparable isModalEditOpen={isModalEditOpen} setIsModalEditOpen={setIsModalEditOpen} comparableEdit={comparableEdit} handleSaveComparable={handleSaveComparable} />
+      <ModalHomologacion isModalHomologationOpen={isModalHomologationOpen} setIsModalHomologationOpen={setIsModalHomologationOpen} handleInputChange={handleInputChange} />
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -1185,5 +1301,187 @@ const FormularioHsbc = () => {
     </div >
   );
 };
+
+const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, handleSaveComparable }) => {
+  const [comparable, setComparable] = useState(comparableEdit);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'direccion') {
+      setComparable({ ...comparable, location: { ...(comparable?.location ?? {}), address_line: value } })
+    }
+    if (name === 'titulo') {
+      setComparable({ ...comparable, title: value })
+    }
+    if (name === 'precio') {
+      setComparable({ ...comparable, price: value })
+    }
+  }
+
+  console.log('Viendo comp', comparable)
+
+  return <Modal
+    isOpen={isModalEditOpen}
+    onRequestClose={() => setIsModalEditOpen(false)}
+    contentLabel="Editar comparable"
+    className="fixed inset-0 flex items-center justify-center z-50"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+  >
+    <div className="bg-gray-100 w-2/5 rounded-lg">
+      {/* Editar comparable, campos: direccion, titulo, precio */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 space-y-4 border p-3 rounded">
+            <h4 className="text-xl text-green-900">Modificar Datos de Comparable</h4>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="direccion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Dirección:
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                name="direccion"
+                value={comparable?.location?.address_line}
+                defaultValue={comparable?.location?.address_line}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="titulo"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Título:
+              </label>
+              <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                value={comparable?.title}
+                defaultValue={comparable?.title}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="precio"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Precio:
+              </label>
+              <input
+                type="text"
+                id="precio"
+                name="precio"
+                value={comparable?.price}
+                defaultValue={comparable?.price}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row mt-4 justify-center space-x-2">
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                handleSaveComparable(comparable)
+              }}
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              Guardar
+            </button>
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalEditOpen(false)}
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Modal>
+}
+
+const ModalHomologacion = ({ isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange }) => {
+  return <Modal
+    isOpen={isModalHomologationOpen}
+    onRequestClose={() => setIsModalHomologationOpen(false)}
+    contentLabel="Editar homologación"
+    className="fixed inset-0 flex items-center justify-center z-50"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+  >
+    <div className="bg-gray-100 w-2/5 rounded-lg">
+      {/* Editar homologacion, campos: piso, ubicacion */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 space-y-4 border p-3 rounded">
+            <h4 className="text-xl text-green-900">Homologación</h4>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="piso"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Piso:
+              </label>
+              <input
+                type="text"
+                id="piso"
+                name="piso"
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="ubicacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Ubicación:
+              </label>
+              <input
+                type="text"
+                id="ubicacion"
+                name="ubicacion"
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row space-x-2 justify-center mt-4">
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalHomologationOpen(false)}
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              Guardar
+            </button>
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalHomologationOpen(false)}
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </Modal>;
+}
 
 export default FormularioHsbc;
