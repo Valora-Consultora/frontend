@@ -5,6 +5,7 @@ import ComparableList from "../comparables/ComparableList";
 
 import { ToastContainer, toast } from "react-toastify";
 import ComparablesService from "../../api/ComparablesService";
+import InformeItauService from '../../api/InformeItauService';
 
 const FormularioItau = () => {
   const [comparableFilters, setComparableFilters] = useState({});
@@ -223,6 +224,7 @@ const FormularioItau = () => {
     try {
       // Handle form submission
       console.log(formData);
+      const response = await InformeItauService.createInformeItau(formData);
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
         autoClose: 2500,
@@ -1010,7 +1012,7 @@ const FormularioItau = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Comodidades de planta industrial */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Comodidades de planta industrial</h4>
@@ -1827,6 +1829,17 @@ const FormularioItau = () => {
           </div>
         </form>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
