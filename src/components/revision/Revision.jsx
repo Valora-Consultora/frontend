@@ -80,6 +80,34 @@ const Revision = () => {
       </div>
     </div>
   );
+  opciones.push(
+    <div className="bg-white rounded-lg shadow-md" key="reporte">
+      <div className="flex flex-col items-center justify-center gap-4 p-6">
+        <div className="text-gray-500">
+          <svg
+            className="w-10 h-10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              strokeLinecap="round"
+              strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="text-center">
+          <h3 className="text-lg font-semibold">Usuario</h3>
+          <p className="text-gray-500">Revisar los Usuarios</p>
+        </div>
+        <a className="text-green-900 no-underline hover:underline" href="/Revision/Usuarios">
+          Ir a Usuario
+        </a>
+      </div>
+    </div>
+  );
 
   return <div>
     <div className="bg-gray-100 min-h-screen">
@@ -87,7 +115,7 @@ const Revision = () => {
         <p className="text-gray-500 text-2xl mb-10">PORTAL DE REVISIONES</p>
       </div>
       {/* Aplicar las clases de Tailwind dinámicamente */}
-      <div className={`grid grid-cols-3 gap-6 w-4/5 mx-auto`}>
+      <div className={`grid grid-cols-4 gap-6 w-4/5 mx-auto`}>
         {opciones}
       </div>
     </div>

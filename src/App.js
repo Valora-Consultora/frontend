@@ -12,9 +12,11 @@ import Inspeccion from "./components/Inspeccion";
 import Home from "./components/Home";
 import InformeLayout from "./components/informe/InformeLayout";
 import RevisionInformes from "./components/revision/RevisionInformes";
+import RevisionUsuarios from "./components/revision/RevisionUsuarios";
 import VerInformeScotia from "./components/informe/VerInformeScotia";
 import ReporteSeguimiento from "./components/reportes/ReporteSeguimiento";
 import ReportesLayout from "./components/reportes/ReportesLayout";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const WithHeader = ({ children }) => (
   <>
@@ -32,111 +34,121 @@ const WithHeaderLogin = ({ children }) => (
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <div className="bg-gray-100 min-h-screen flex flex-col">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <WithHeaderLogin>
-                  <Login />
-                </WithHeaderLogin>
-              }
-            />
-            <Route
-              path="/RegistroUsuarios"
-              element={
-                <WithHeader>
-                  <SignUp />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Home"
-              element={
-                <WithHeader>
-                  <Home />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Orden"
-              element={
-                <WithHeader>
-                  <Order />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Inspeccion"
-              element={
-                <WithHeader>
-                  <Inspeccion />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Informe"
-              element={
-                <WithHeader>
-                  <InformeLayout />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Informe/:banco"
-              element={
-                <WithHeader>
-                  <InformeLayout />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Informe/Scotia/:id"
-              element={
-                <WithHeader>
-                  <VerInformeScotia />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Revision"
-              element={
-                <WithHeader>
-                  <Revision />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Revision/Informes"
-              element={
-                <WithHeader>
-                  <RevisionInformes />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/Reportes"
-              element={
-                <WithHeader>
-                  <ReportesLayout />
-                </WithHeader>
-              }
-            />
-            <Route
-              path="/ReporteSeguimiento"
-              element={
-                <WithHeader>
-                  <ReporteSeguimiento />
-                </WithHeader>
-              }
-            />
-          </Routes>
-        </div>
-        <Footer className="text-center bg-gray-200 mt-auto py-4" />
-      </Router>
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <ThemeProvider>
+        <Router>
+          <div className="bg-gray-100 min-h-screen flex flex-col">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <WithHeaderLogin>
+                    <Login />
+                  </WithHeaderLogin>
+                }
+              />
+              <Route
+                path="/RegistroUsuarios"
+                element={
+                  <WithHeader>
+                    <SignUp />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Home"
+                element={
+                  <WithHeader>
+                    <Home />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Orden"
+                element={
+                  <WithHeader>
+                    <Order />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Inspeccion"
+                element={
+                  <WithHeader>
+                    <Inspeccion />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Informe"
+                element={
+                  <WithHeader>
+                    <InformeLayout />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Informe/:banco"
+                element={
+                  <WithHeader>
+                    <InformeLayout />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Informe/Scotia/:id"
+                element={
+                  <WithHeader>
+                    <VerInformeScotia />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Revision"
+                element={
+                  <WithHeader>
+                    <Revision />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Revision/Informes"
+                element={
+                  <WithHeader>
+                    <RevisionInformes />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Revision/Usuarios"
+                element={
+                  <WithHeader>
+                    <RevisionUsuarios />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/Reportes"
+                element={
+                  <WithHeader>
+                    <ReportesLayout />
+                  </WithHeader>
+                }
+              />
+              <Route
+                path="/ReporteSeguimiento"
+                element={
+                  <WithHeader>
+                    <ReporteSeguimiento />
+                  </WithHeader>
+                }
+              />
+            </Routes>
+          </div>
+          <Footer className="text-center bg-gray-200 mt-auto py-4" />
+        </Router>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   );
 }
 
