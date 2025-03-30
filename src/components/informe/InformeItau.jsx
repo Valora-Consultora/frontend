@@ -12,6 +12,7 @@ const FormularioItau = () => {
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
   const [getCalculoData, setGetCalculoData] = useState(null);
+  const [valorMetroTerreno, setValorMetroTerreno] = useState(0);
 
   const [formData, setFormData] = useState({
     /// INFORMACION SOBRE LA TASACION
@@ -209,6 +210,16 @@ const FormularioItau = () => {
 
     obeservacionesCondicionesMercado: "",
 
+    superficieConstruida: 0,
+    valorMetroTerreno: 0,
+    valorMercado: 0,
+    valorVentaRapida: 0,
+    valorRemate: 0,
+    valorIntrinseco: 0,
+    costoReposicion: 0,
+    deslindeFrente: 0,
+    deslindeFondo: 0,
+
     comparables: [],
   });
 
@@ -220,20 +231,29 @@ const FormularioItau = () => {
     }));
   };
 
+
+  // Manejar el cambio de valorMetroTerreno
+  const handleValorMetroTerrenoChange = (e) => {
+    const valor = parseFloat(e.target.value) || 0;
+    setValorMetroTerreno(valor);
+    setFormData({
+      ...formData,
+      valorMetroTerreno: valor
+    });
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Handle form submission
-      console.log(formData);
-
-      // Crear el informe
-      const informe = await InformeItauService.createInformeItau(formData);
+      // Primero crear el informe
+      const response = await InformeItauService.createInformeItau(formData);
 
       // Si tenemos datos de cálculo, guardarlos
-      if (getCalculoData && informe && informe.id) {
+      if (getCalculoData && response && response.id) {
         try {
           const calculoData = getCalculoData();
-          await InformeItauService.saveCalculo(informe.id, calculoData);
+          console.log("Datos del cálculo a enviar:", calculoData);
+          await InformeItauService.saveCalculo(response.id, calculoData);
         } catch (error) {
           console.error("Error al guardar el cálculo:", error);
           toast.warning("El informe se guardó, pero hubo un problema al guardar los cálculos.", {
@@ -370,10 +390,11 @@ const FormularioItau = () => {
   const configuracionItau = {
     nombreBanco: 'Itaú',
     factoresConservacion: [
-      { label: 'Nuevo', factor: 1.00 },
-      { label: 'Buen Estado', factor: 0.95 },
-      { label: 'Necesita Mantenimiento', factor: 0.90 },
-      { label: 'Necesita Reparaciones', factor: 0.85 },
+      { label: 'Excelente', factor: 1.00 },
+      { label: 'Bueno', factor: 0.95 },
+      { label: 'Medio', factor: 0.90 },
+      { label: 'Regular', factor: 0.85 },
+      { label: 'Malo', factor: 0.80 },
     ],
     formulaFactorEdad: (anio) => {
       const anioActual = new Date().getFullYear();
@@ -1045,6 +1066,7 @@ const FormularioItau = () => {
                   </div>
                 </div>
               </div>
+
 
               {/* Comodidades de planta industrial */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
@@ -1872,6 +1894,17 @@ const FormularioItau = () => {
           </div>
         </form>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
