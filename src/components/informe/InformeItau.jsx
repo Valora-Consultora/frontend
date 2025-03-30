@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import ItauLogo from "../../images/logo-itau.png";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
-
+import InformeItauService from "../../api/InformeItauService";
 import { ToastContainer, toast } from "react-toastify";
 import ComparablesService from "../../api/ComparablesService";
+import CalculoInforme from "../calculo/CalculoInforme";
 
 const FormularioItau = () => {
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
+  const [getCalculoData, setGetCalculoData] = useState(null);
 
   const [formData, setFormData] = useState({
     /// INFORMACION SOBRE LA TASACION
@@ -223,6 +225,24 @@ const FormularioItau = () => {
     try {
       // Handle form submission
       console.log(formData);
+
+      // Crear el informe
+      const informe = await InformeItauService.createInformeItau(formData);
+
+      // Si tenemos datos de cálculo, guardarlos
+      if (getCalculoData && informe && informe.id) {
+        try {
+          const calculoData = getCalculoData();
+          await InformeItauService.saveCalculo(informe.id, calculoData);
+        } catch (error) {
+          console.error("Error al guardar el cálculo:", error);
+          toast.warning("El informe se guardó, pero hubo un problema al guardar los cálculos.", {
+            position: "top-right",
+            autoClose: 5000,
+          });
+        }
+      }
+
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
         autoClose: 2500,
@@ -345,6 +365,21 @@ const FormularioItau = () => {
         draggable: true,
       });
     }
+  };
+
+  const configuracionItau = {
+    nombreBanco: 'Itaú',
+    factoresConservacion: [
+      { label: 'Nuevo', factor: 1.00 },
+      { label: 'Buen Estado', factor: 0.95 },
+      { label: 'Necesita Mantenimiento', factor: 0.90 },
+      { label: 'Necesita Reparaciones', factor: 0.85 },
+    ],
+    formulaFactorEdad: (anio) => {
+      const anioActual = new Date().getFullYear();
+      const edad = anioActual - anio;
+      return Math.max(0.5, 1 - edad * 0.01);
+    },
   };
 
   const handleSelectMainComparable = (id) => {
@@ -1010,7 +1045,7 @@ const FormularioItau = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Comodidades de planta industrial */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Comodidades de planta industrial</h4>
@@ -1816,6 +1851,16 @@ const FormularioItau = () => {
                 </div>
               </div>
             </div>
+
+            <CalculoInforme
+              tipoInforme="ITAU"
+              configuracion={configuracionItau}
+              superficieTerreno={parseFloat(formData.superficieTerreno) || 0}
+              onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+              comparables={formData.comparables || []}
+              estadoConservacion={formData.calidadMantenimiento}
+              anioConstruccion={formData.anioConstruccion}
+            />
             <div className="mt-4 text-center">
               <button
                 type="submit"

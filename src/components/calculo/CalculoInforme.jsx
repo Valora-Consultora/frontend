@@ -80,8 +80,19 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
 
     const getCalculoData = () => {
         // Objeto base para todos los tipos de informe (mantener como estaba)
+
+        // Mapa de conversión para tipoPropiedad
+        const tipoConversion = {
+            'pc': 'CASA',    // Cambiamos "PC" (Propiedad Común) a "CASA"
+            'ph': 'PH',      // "PH" coincide con el valor del enum
+            'terreno': 'TERRENO' // "TERRENO" coincide con el valor del enum
+        };
+
+        // Obtener el valor correcto para el tipo de propiedad usando el mapa de conversión
+        const tipoValido = tipoConversion[tipoPropiedad.toLowerCase()] || 'CASA';
+
         const calculoBase = {
-            tipoPropiedad: tipoPropiedad.toUpperCase(),
+            tipoPropiedad: tipoValido, // Usamos el valor mapeado en lugar del original
             estadoConservacion: estadoConservacion,
             factorConservacion: factorConservacionValor,
             superficieTerreno: parseFloat(superficieTerreno || 0),
@@ -126,31 +137,6 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                 cuotaParteValor: parseFloat(cuotaParteValor || 0),
             };
         }
-
-        // Agregar campos específicos según el tipo de informe
-        /*         if (tipoInforme === 'HSBC') {
-                    return {
-                        ...calculoBase,
-                        tipoBanco: 'HSBC',
-                        cuotaPartePorcentaje: parseFloat(hsbcExtensionData.cuotaPartePorcentaje || 0),
-                        cuotaParteValor: parseFloat(hsbcExtensionData.cuotaParteValor || 0),
-                        bienesExclusivos: (hsbcExtensionData.bienesExclusivos || []).map(bien => ({
-                            descripcion: bien.descripcion || '',
-                            metros: parseFloat(bien.metros || 0),
-                            valorMetro: parseFloat(bien.valorMetro || 0),
-                            valor: parseFloat(bien.valor || 0)
-                        })),
-                        bienesComunes: (hsbcExtensionData.bienesComunes || []).map(bien => ({
-                            descripcion: bien.descripcion || '',
-                            metros: parseFloat(bien.metros || 0),
-                            valorMetro: parseFloat(bien.valorMetro || 0),
-                            valor: parseFloat(bien.valor || 0)
-                        })),
-                        murosDuctosValor: parseFloat(hsbcExtensionData.murosDuctosValor || 0),
-                        totalObraCivilHsbc: parseFloat(hsbcExtensionData.totalObraCivilHsbc || 0)
-                    };
-                } */
-        // Podrías agregar condicionales para otros bancos si es necesario
 
         // Por defecto, devolver calculoBase
         return calculoBase;
@@ -269,6 +255,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     // Exponemos la función a través de una ref o useImperativeHandle si es necesario
     useEffect(() => {
         if (onGetCalculoData) {
+            console.log("CalculoInforme - Registrando función getCalculoData");
             onGetCalculoData(getCalculoData);
         }
     }, [
@@ -276,7 +263,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
         valorMetroTerreno, valorTerreno, valorMercado, valorVentaRapida, valorRemate,
         costoReposicion, valorIntrinseco, valorMercadoMetroCuadrado, valorVentaRapidaMetroCuadrado,
         valorRemateMetroCuadrado, costoReposicionMetroCuadrado, superficieConstruida, superficies,
-        onGetCalculoData, tipoInforme, hsbcData // Agregar hsbcData a las dependencias
+        onGetCalculoData, tipoInforme, hsbcData
     ]);
 
     // Función para iniciar el proceso de eliminación
