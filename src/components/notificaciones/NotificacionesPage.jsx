@@ -14,7 +14,6 @@ const NotificacionesPage = () => {
   const [notificaciones, setNotificaciones] = useContext(NotificacionContext);
   const user = useSelector((state) => state.user);
   const userId = user?.id || null;
-  const userType = user?.tipoUsuario || null;
 
   const unread = notificaciones?.filter((notificacion) => !notificacion.leido)?.length ?? 0;
 
@@ -33,7 +32,7 @@ const NotificacionesPage = () => {
 
   const markAllAsRead = async () => {
     try {
-      await NotificacionService.markAllAsRead(userId, userType);
+      await NotificacionService.markAllAsRead(userId);
       setNotificaciones((prevNotificaciones) =>
         prevNotificaciones.map((notificacion) => ({ ...notificacion, leido: true }))
       );

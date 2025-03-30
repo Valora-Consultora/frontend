@@ -14,9 +14,9 @@ const NotificacionService = {
     }
   },
 
-  getNotificacionesByUserIdOrUserType: async (userId, tipoUsuario) => {
+  getNotificacionesByUserId: async (userId) => {
     try {
-      const response = await axios.get(`${API_URL}/api/notificaciones/${userId}/${tipoUsuario}`);
+      const response = await axios.get(`${API_URL}/api/notificaciones/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener notificaciones por ID de usuario:', error);
@@ -68,9 +68,9 @@ const NotificacionService = {
     }
   },
 
-  markAllAsRead: async (userId, tipoUsuario) => {
+  markAllAsRead: async (userId) => {
     try {
-      const response = await axios.put(`${API_URL}/api/notificacion/leido/${userId}/${tipoUsuario}`);
+      const response = await axios.put(`${API_URL}/api/notificacion/leido/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error al marcar todas las notificaciones como leídas:', error);

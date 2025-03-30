@@ -21,7 +21,7 @@ const Notificaciones = () => {
   useEffect(() => {
     const fetchNotificaciones = async () => {
       try {
-        const response = await NotificacionService.getNotificacionesByUserIdOrUserType(userId, tipoUsuario);
+        const response = await NotificacionService.getNotificacionesByUserId(userId);
         console.log("Notificaciones:", response);
         setNotificaciones(response);
       } catch (error) {
@@ -33,6 +33,7 @@ const Notificaciones = () => {
   }, [user]);
 
   useEffect(() => {
+    console.log('Listening to notifications...', user);
     const eventSource = new EventSource(`${API_URL}/api/notificaciones/stream/${userId}/${tipoUsuario}`);
 
     eventSource.onmessage = (event) => {
