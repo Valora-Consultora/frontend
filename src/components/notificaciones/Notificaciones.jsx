@@ -40,6 +40,7 @@ const Notificaciones = () => {
       if (data.tipoNotificacion === "INFORME_APROBADO") {
         toast.success(notificacionToMessage(data));
       }
+      console.log(data);
       setNotificaciones((prevNotificaciones) => [...prevNotificaciones, data]);
     }
 
