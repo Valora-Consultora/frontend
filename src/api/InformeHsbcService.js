@@ -138,11 +138,9 @@ const InformeHsbcService = {
     }
   }, */
 
-  // Guardar el cálculo para un informe
-  // Guardar el cálculo para un informe
   saveCalculo: async (informeId, calculoData) => {
     try {
-      // Verificar que tenemos un ID válido
+      // Verificar que el ID de informe es válido
       if (!informeId || informeId === "undefined") {
         console.error("ID de informe no válido:", informeId);
         throw new Error("ID de informe no válido para guardar el cálculo");
@@ -160,18 +158,27 @@ const InformeHsbcService = {
         calculoToSend.superficies = calculoToSend.superficies.map(
           (superficie) => ({
             descripcion: superficie.descripcion,
-            m2: parseFloat(superficie.m2) || 0,
+            m2: superficie.m2 === "G" ? "G" : parseFloat(superficie.m2) || 0,
             ampliaciones: superficie.ampliaciones || "",
             promedioEdad: parseFloat(superficie.promedioEdad) || 0,
             factorEdad: parseFloat(superficie.factorEdad) || 0,
             conservacion: superficie.conservacion || "",
             factorConservacion: parseFloat(superficie.factorConservacion) || 0,
-            precioMetro: parseFloat(superficie.precioMetro) || 0,
+            precioMetro:
+              superficie.precioMetro === "G"
+                ? "G"
+                : parseFloat(superficie.precioMetro) || 0,
             precioMetroCorregido:
-              parseFloat(superficie.precioMetroCorregido) || 0,
+              superficie.precioMetroCorregido === "G"
+                ? "G"
+                : parseFloat(superficie.precioMetroCorregido) || 0,
             valorTotal: parseFloat(superficie.valorTotal) || 0,
             valorTotalSinCorregir:
               parseFloat(superficie.valorTotalSinCorregir) || 0,
+            tipoSuperficie: superficie.tipoSuperficie || "propio",
+            editadoManualmente: superficie.editadoManualmente || false,
+            editadoManualmenteValorTotal:
+              superficie.editadoManualmenteValorTotal || false,
           })
         );
       }
@@ -235,6 +242,7 @@ const InformeHsbcService = {
       return [];
     }
   },
+  
 };
 
 export default InformeHsbcService;

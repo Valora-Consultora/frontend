@@ -285,6 +285,7 @@ const FormularioHsbc = () => {
     e.preventDefault();
     try {
       // Guardar cálculo si existe la función getCalculoData y no es un borrador
+      // En el método submitHandler de InformeHsbc.jsx
       if (getCalculoData && !borrador) {
         try {
           const calculoData = getCalculoData();
@@ -1190,6 +1191,7 @@ const FormularioHsbc = () => {
                   </div>
                 </div>
                 <CalculoInforme
+                  tipoInforme="HSBC"
                   configuracion={configuracionHsbc}
                   superficieTerreno={formData.superficieTerreno}
                   onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
@@ -1201,6 +1203,7 @@ const FormularioHsbc = () => {
                   anioConstruccion={formData.anio}
                   deslindeFrente={formData.deslindeFrente}
                   deslindeFondo={formData.deslindeFondo}
+                  valorMetroTerrenoProp={formData.valorMetroTerreno}
                 />
               </div>
 
