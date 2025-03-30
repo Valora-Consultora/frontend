@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import ItauLogo from "../../images/logo-itau.png";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
-
+import InformeItauService from "../../api/InformeItauService";
 import { ToastContainer, toast } from "react-toastify";
 import ComparablesService from "../../api/ComparablesService";
+import CalculoInforme from "../calculo/CalculoInforme";
 
 const FormularioItau = () => {
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
+  const [getCalculoData, setGetCalculoData] = useState(null);
+  const [valorMetroTerreno, setValorMetroTerreno] = useState(0);
 
   const [formData, setFormData] = useState({
     /// INFORMACION SOBRE LA TASACION
@@ -207,6 +210,16 @@ const FormularioItau = () => {
 
     obeservacionesCondicionesMercado: "",
 
+    superficieConstruida: 0,
+    valorMetroTerreno: 0,
+    valorMercado: 0,
+    valorVentaRapida: 0,
+    valorRemate: 0,
+    valorIntrinseco: 0,
+    costoReposicion: 0,
+    deslindeFrente: 0,
+    deslindeFondo: 0,
+
     comparables: [],
   });
 
@@ -218,11 +231,38 @@ const FormularioItau = () => {
     }));
   };
 
+
+  // Manejar el cambio de valorMetroTerreno
+  const handleValorMetroTerrenoChange = (e) => {
+    const valor = parseFloat(e.target.value) || 0;
+    setValorMetroTerreno(valor);
+    setFormData({
+      ...formData,
+      valorMetroTerreno: valor
+    });
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Handle form submission
-      console.log(formData);
+      // Primero crear el informe
+      const response = await InformeItauService.createInformeItau(formData);
+
+      // Si tenemos datos de cálculo, guardarlos
+      if (getCalculoData && response && response.id) {
+        try {
+          const calculoData = getCalculoData();
+          console.log("Datos del cálculo a enviar:", calculoData);
+          await InformeItauService.saveCalculo(response.id, calculoData);
+        } catch (error) {
+          console.error("Error al guardar el cálculo:", error);
+          toast.warning("El informe se guardó, pero hubo un problema al guardar los cálculos.", {
+            position: "top-right",
+            autoClose: 5000,
+          });
+        }
+      }
+
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
         autoClose: 2500,
@@ -345,6 +385,22 @@ const FormularioItau = () => {
         draggable: true,
       });
     }
+  };
+
+  const configuracionItau = {
+    nombreBanco: 'Itaú',
+    factoresConservacion: [
+      { label: 'Excelente', factor: 1.00 },
+      { label: 'Bueno', factor: 0.95 },
+      { label: 'Medio', factor: 0.90 },
+      { label: 'Regular', factor: 0.85 },
+      { label: 'Malo', factor: 0.80 },
+    ],
+    formulaFactorEdad: (anio) => {
+      const anioActual = new Date().getFullYear();
+      const edad = anioActual - anio;
+      return Math.max(0.5, 1 - edad * 0.01);
+    },
   };
 
   const handleSelectMainComparable = (id) => {
@@ -1010,7 +1066,8 @@ const FormularioItau = () => {
                   </div>
                 </div>
               </div>
-              
+
+
               {/* Comodidades de planta industrial */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Comodidades de planta industrial</h4>
@@ -1816,6 +1873,16 @@ const FormularioItau = () => {
                 </div>
               </div>
             </div>
+
+            <CalculoInforme
+              tipoInforme="ITAU"
+              configuracion={configuracionItau}
+              superficieTerreno={parseFloat(formData.superficieTerreno) || 0}
+              onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+              comparables={formData.comparables || []}
+              estadoConservacion={formData.calidadMantenimiento}
+              anioConstruccion={formData.anioConstruccion}
+            />
             <div className="mt-4 text-center">
               <button
                 type="submit"
@@ -1827,6 +1894,17 @@ const FormularioItau = () => {
           </div>
         </form>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
