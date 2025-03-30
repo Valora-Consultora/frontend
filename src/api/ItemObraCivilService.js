@@ -4,6 +4,7 @@ import axios from "axios";
 const API_URL = process.env.REACT_APP_API_URL;
 
 const ItemObraCivilService = {
+
   createItemObraCivil: async (item, idInforme) => {
     try {
       const response = await axios.post(`${API_URL}/api/itemObraCivil/${idInforme}`, item, {
@@ -38,6 +39,8 @@ const ItemObraCivilService = {
       throw error;
     }
   },
+
+
 };
 
 export default ItemObraCivilService;
