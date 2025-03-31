@@ -18,9 +18,6 @@ const Navlinks = () => {
                 <li className="nav-item">
                     <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-300" href="/informe">Informe</a>
                 </li>
-                <li className="nav-item">
-                    <a className="text-white text-xl no-underline ml-[20px] border-none outline-none hover:!text-gray-200 hover:underline hover:underline-offset-4 transition-all duration-300" href="/">Logout</a>
-                </li>
             </ul>
         </>
     );

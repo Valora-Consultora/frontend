@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EmptyList from "../utils/EmptyList";
 
 const NotificacionesPage = () => {
   const [notificaciones, setNotificaciones] = useContext(NotificacionContext);
@@ -67,10 +68,7 @@ const NotificacionesPage = () => {
             </div>
           ) : null)
         ) : (
-          <div className="flex flex-col items-center justify-center p-4">
-            <NotificationsIcon className="text-gray-400" sx={{ fontSize: 100 }} />
-            <p className="m-0 text-gray-400">No hay notificaciones.</p>
-          </div>
+          <EmptyList message="No hay notificaciones." Icon={NotificationsIcon} />
         )}
       </div>
     </div >

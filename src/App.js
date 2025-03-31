@@ -18,6 +18,7 @@ import ReporteSeguimiento from "./components/reportes/ReporteSeguimiento";
 import ReportesLayout from "./components/reportes/ReportesLayout";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import NotificacionesPage from "./components/notificaciones/NotificacionesPage";
+import Perfil from "./components/perfil/Perfil";
 
 const WithHeader = ({ children }) => (
   <>
@@ -114,6 +115,14 @@ function App() {
                   element={
                     <WithHeader>
                       <VerInformeScotia />
+                    </WithHeader>
+                  }
+                />
+                <Route
+                  path="/Perfil/:id"
+                  element={
+                    <WithHeader>
+                      <Perfil />
                     </WithHeader>
                   }
                 />
