@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import LoginService from "../api/LoginService";
-import {setUser} from '../app/slices/userSlice';
+import { setUser } from '../app/slices/userSlice';
 import { useSelector } from "react-redux";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from 'jwt-decode';
+import { ToastContainer, toast } from "react-toastify";
 
 function Login() {
   const [info, setInfo] = useState({
@@ -15,11 +18,28 @@ function Login() {
   const state = useState();
   const usuario = useSelector(state => state.user);
 
+  const googleSuccess = async (payload) => {
+    const data = jwtDecode(payload.credential);
+    try {
+      const user = await LoginService.verifyRegisteredEmail(data.email);
+      dispatch(setUser({
+        username: user.username,
+        nombre: user.nombre,
+        tipoUsuario: user.tipoUsuario,
+        id: user.id,
+      }));
+      window.location.href = "/Home";
+    } catch (error) {
+      toast.error("El correo electrónico no está registrado en el sistema.");
+    }
+    setLoading(false);
+  }
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await LoginService(info);
+      const response = await LoginService.login(info);
 
       if (response) {
         // Guarda el usuario en el estado global
@@ -95,8 +115,24 @@ function Login() {
               </button>
             </div>
           </form>
+          <GoogleLogin
+            locale="es"
+            onSuccess={googleSuccess}
+            useOneTap
+          />
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
