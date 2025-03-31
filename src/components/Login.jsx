@@ -69,8 +69,8 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200">
-      <div className="w-full max-w-md">
+    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-gray-200">
+      <div className="w-full max-w-md flex flex-col justify-start">
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           <h2 className="text-center text-2xl font-semibold mb-6 text-green-900">
             Iniciar Sesión
@@ -115,7 +115,10 @@ function Login() {
               </button>
             </div>
           </form>
+        </div>
+        <div className="self-center">
           <GoogleLogin
+            shape="pill"
             locale="es"
             onSuccess={googleSuccess}
             useOneTap
