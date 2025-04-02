@@ -257,6 +257,83 @@ const calcularPorcentajeCuotaParte = (superficies, superficieTotalEdificio) => {
 };
 
 /**
+ * Calcula el valor de mercado por metro cuadrado para Itaú
+ * @param {number} valorTotal - Valor total en USD
+ * @param {number} totalMetrosCuadrados - Total de metros cuadrados
+ * @returns {number} - Valor por metro cuadrado
+ */
+const calcularValorMercadoPorMetroCuadradoItau = (
+  valorTotal,
+  totalMetrosCuadrados
+) => {
+  if (!valorTotal || !totalMetrosCuadrados || totalMetrosCuadrados <= 0)
+    return 0;
+  return formatearNumero(valorTotal / totalMetrosCuadrados);
+};
+
+/**
+ * Calcula el valor por metro cuadrado para Itaú (para cualquier tipo de valor)
+ * @param {number} valorTotal - Valor total en USD (mercado, QSV, remate, etc.)
+ * @param {number} totalMetrosCuadrados - Total de metros cuadrados
+ * @returns {number} - Valor por metro cuadrado
+ */
+const calcularValorPorMetroCuadradoItau = (
+  valorTotal,
+  totalMetrosCuadrados
+) => {
+  if (!valorTotal || !totalMetrosCuadrados || totalMetrosCuadrados <= 0)
+    return 0;
+  return formatearNumero(valorTotal / totalMetrosCuadrados);
+};
+
+/**
+ * Calcula el valor de venta rápida (QSV) para Itaú como promedio entre valor de mercado y valor de remate
+ * @param {number} valorMercado - Valor de mercado en USD
+ * @param {number} valorRemate - Valor de remate en USD
+ * @returns {number} - Valor de venta rápida (QSV)
+ */
+const calcularValorVentaRapidaItau = (valorMercado, valorRemate) => {
+  if (!valorMercado || !valorRemate) return 0;
+  return formatearNumero(
+    (parseFloat(valorMercado) + parseFloat(valorRemate)) / 2
+  );
+};
+
+/**
+ * Calcula el valor de remate para Itaú como el 80% del valor de mercado
+ * @param {number} valorMercado - Valor de mercado en USD
+ * @returns {number} - Valor de remate
+ */
+const calcularValorRemateItau = (valorMercado) => {
+  if (!valorMercado) return 0;
+  return formatearNumero(parseFloat(valorMercado) * 0.8);
+};
+
+/**
+ * Calcula el valor en UI basado en el valor en USD, cotización del dólar y valor de la UI
+ * @param {number} valorUSD - Valor en dólares
+ * @param {number} cotizacionDolar - Cotización del dólar
+ * @param {number} valorUI - Valor de la UI
+ * @returns {number} - Valor en UI
+ */
+/**
+ * Calcula el valor en UI basado en el valor en USD, cotización del dólar y valor de la UI
+ * @param {number} valorUSD - Valor en dólares
+ * @param {number} cotizacionDolar - Cotización del dólar
+ * @param {number} valorUI - Valor de la UI
+ * @returns {number} - Valor en UI
+ */
+const calcularValorUI = (valorUSD, cotizacionDolar, valorUI) => {
+  if (!valorUSD || !cotizacionDolar || !valorUI || valorUI <= 0) return 0;
+  
+  // Convertir USD a pesos y luego a UI
+  const valorEnPesos = parseFloat(valorUSD) * parseFloat(cotizacionDolar);
+  const valorEnUI = valorEnPesos / parseFloat(valorUI);
+  
+  return formatearNumero(valorEnUI);
+};
+
+/**
  * Calcula el valor de reposición a nuevo según la fórmula del cliente
  * @param {Array} superficies - Array de superficies cubiertas
  * @returns {number} Valor de reposición a nuevo
@@ -553,4 +630,9 @@ export {
   recalcularSuperficie,
   calcularValorCuotaParte,
   calcularPorcentajeCuotaParte,
+  calcularValorMercadoPorMetroCuadradoItau,
+  calcularValorPorMetroCuadradoItau,
+  calcularValorVentaRapidaItau,
+  calcularValorRemateItau,
+  calcularValorUI,
 };
