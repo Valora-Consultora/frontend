@@ -15,11 +15,16 @@ import {
     calcularPrecioMetroCorregido,
     calcularValorTotalSuperficie,
     verificarDiferenciaHomologacion,
-    recalcularSuperficie
+    recalcularSuperficie,
+    calcularValorPorMetroCuadradoItau,
+    calcularValorVentaRapidaItau,
+    calcularValorRemateItau,
+    calcularValorUI
 } from '../calculo/CalculoUtils';
 import ModalSuperficie from './ModalSuperficie';
 import ModalConfirmacion from './ModalConfirmacion';
 import InputNumerico from './inputNumerico';
+import TotalesItau from './TotalesItau';
 
 const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoInforme = 'default', valorMetroTerrenoProp = 0 }) => {
 
@@ -61,7 +66,8 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     const [indexToDelete, setIndexToDelete] = useState(null);
     //const [getCalculoData, setGetCalculoData] = useState(null);
 
-
+    const [dolarCotizacion, setDolarCotizacion] = useState(42.151);
+    const [valorUI, setValorUI] = useState(6.2922);
 
     const [hsbcData, setHsbcData] = useState({
         cuotaPartePorcentaje: 0,
@@ -135,6 +141,16 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                 totalSuperficieEdificio: parseFloat(totalSuperficieEdificio || 0),
                 cuotaPartePorcentaje: parseFloat(cuotaPartePorcentaje || 0),
                 cuotaParteValor: parseFloat(cuotaParteValor || 0),
+            };
+        }
+
+        if (tipoInforme === 'ITAU') {
+            return {
+                ...calculoBase,
+                dolarCotizacion: dolarCotizacion,
+                valorUI: valorUI,
+                valorMercadoUI: calcularValorUI(valorMercado, dolarCotizacion, valorUI),
+                valorRemateUI: calcularValorUI(valorRemate, dolarCotizacion, valorUI)
             };
         }
 
@@ -263,7 +279,8 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
         valorMetroTerreno, valorTerreno, valorMercado, valorVentaRapida, valorRemate,
         costoReposicion, valorIntrinseco, valorMercadoMetroCuadrado, valorVentaRapidaMetroCuadrado,
         valorRemateMetroCuadrado, costoReposicionMetroCuadrado, superficieConstruida, superficies,
-        onGetCalculoData, tipoInforme, hsbcData
+        onGetCalculoData, tipoInforme, hsbcData, dolarCotizacion, valorUI,
+        onGetCalculoData
     ]);
 
     // Función para iniciar el proceso de eliminación
@@ -288,54 +305,6 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             setFactorConservacion(factor);
         }
     }, [estadoConservacion]);
-
-    // Calcular factores promedio basados en todas las superficies
-    // Mejoremos el useEffect para calcular los valores de bienes comunes
-    // Mejoremos el useEffect para calcular los valores de bienes comunes
-    /* useEffect(() => {
-        if (bloquearRecalculoBienesComunes || superficies.length === 0) return;
-
-        if (superficies.length > 0) {
-            // Buscar si hay bienes comunes que aún no tienen valor asignado
-            const bienesComunes = superficies.filter(s =>
-                s.tipoSuperficie === 'comun' &&
-                (s.valorTotal === 0 || s.valorTotal === undefined)
-            );
-
-            if (bienesComunes.length > 0) {
-                // Calcular valor total de bienes propios
-                const bienesPropios = superficies.filter(s => s.tipoSuperficie === 'propio');
-                const valorTotalPropios = bienesPropios.reduce((total, sup) => {
-                    const valorSup = parseFloat(sup.valorTotal || 0);
-                    return total + valorSup;
-                }, 0);
-
-                // Calcular el 17% del valor total de bienes propios
-                const valorBienesComunes = formatearNumero(valorTotalPropios * 0.17);
-
-                // Actualizar solo los bienes comunes que no tengan valor manual asignado
-                const nuevasSuperficies = [...superficies];
-                let actualizado = false;
-
-                nuevasSuperficies.forEach((sup, index) => {
-                    if (sup.tipoSuperficie === 'comun' &&
-                        (sup.valorTotal === 0 || sup.valorTotal === undefined)) {
-                        nuevasSuperficies[index] = {
-                            ...sup,
-                            valorTotal: valorBienesComunes
-                        };
-                        actualizado = true;
-                    }
-                });
-
-                // Solo actualizar el estado si hubo cambios
-                if (actualizado) {
-                    setSuperficies(nuevasSuperficies);
-                }
-            }
-        }
-    }, [superficies, bloquearRecalculoBienesComunes]); */
-
 
     // Calcular valores del terreno
     useEffect(() => {
@@ -389,30 +358,24 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
         }
     }, [superficies]);
 
-    /* // Calcular valor intrínseco
-    useEffect(() => {
-        // Usar la función centralizada para calcular el valor intrínseco
-        const nuevoValorIntrinseco = calcularValorIntrinseco(valorTerreno, valorObraCivil);
-        setValorIntrinseco(nuevoValorIntrinseco);
-        setValorFinalCalculado(nuevoValorIntrinseco);
 
-        // Verificar si valor de mercado manual difiere mucho del calculado usando la función centralizada
-        if (valorMercado && nuevoValorIntrinseco) {
-            const excedeDiferencia = verificarDiferenciaHomologacion(nuevoValorIntrinseco, valorMercado);
-            setMostrarAlertaHomologacion(excedeDiferencia);
-        }
-    }, [valorTerreno, valorObraCivil, valorMercado]); */
 
-    // Actualizar valores por metro cuadrado
     useEffect(() => {
         if (superficieConstruida > 0) {
-            // Usar la función centralizada para calcular valores por metro cuadrado
-            setValorMercadoMetroCuadrado(calcularValorMetroCuadrado(valorMercado, superficieConstruida));
-            setValorVentaRapidaMetroCuadrado(calcularValorMetroCuadrado(valorVentaRapida, superficieConstruida));
-            setValorRemateMetroCuadrado(calcularValorMetroCuadrado(valorRemate, superficieConstruida));
-            setCostoReposicionMetroCuadrado(calcularValorMetroCuadrado(costoReposicion, superficieConstruida));
+            if (tipoInforme === 'ITAU') {
+                // Para Itaú, calculamos el valor por m² dividiendo el valor total entre los m² totales
+                setValorMercadoMetroCuadrado(calcularValorPorMetroCuadradoItau(valorMercado, superficieConstruida));
+                setValorVentaRapidaMetroCuadrado(calcularValorPorMetroCuadradoItau(valorVentaRapida, superficieConstruida));
+                setValorRemateMetroCuadrado(calcularValorPorMetroCuadradoItau(valorRemate, superficieConstruida));
+            } else {
+                // Para otros tipos de informe, usamos la función estándar
+                setValorMercadoMetroCuadrado(calcularValorMetroCuadrado(valorMercado, superficieConstruida));
+                setValorVentaRapidaMetroCuadrado(calcularValorMetroCuadrado(valorVentaRapida, superficieConstruida));
+                setValorRemateMetroCuadrado(calcularValorMetroCuadrado(valorRemate, superficieConstruida));
+                setCostoReposicionMetroCuadrado(calcularValorMetroCuadrado(costoReposicion, superficieConstruida));
+            }
         }
-    }, [valorMercado, valorVentaRapida, valorRemate, costoReposicion, superficieConstruida]);
+    }, [valorMercado, valorVentaRapida, valorRemate, costoReposicion, superficieConstruida, tipoInforme]);
 
 
     useEffect(() => {
@@ -956,7 +919,19 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     // Handle cambio en valor de mercado
     const handleValorMercadoChange = (valor) => {
         setValorMercado(valor);
-        // Los valores derivados se actualizarán a través de los efectos
+
+        if (tipoInforme === 'ITAU') {
+            // Recalcular Valor de Remate
+            const nuevoValorRemate = calcularValorRemateItau(valor);
+            setValorRemate(nuevoValorRemate);
+
+            // Recalcular QSV como promedio entre Valor de Mercado y nuevo Valor de Remate
+            setValorVentaRapida(calcularValorVentaRapidaItau(valor, nuevoValorRemate));
+        } else {
+            // Mantener el cálculo original para otros tipos de informe
+            setValorRemate(calcularValorRemate(valor));
+            setValorVentaRapida(calcularValorVentaRapida(valor));
+        }
     };
 
     // Manejador cuando cambia el estado de conservación
@@ -971,6 +946,26 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
         }
     };
 
+    // Actualizar valores derivados cuando cambia el valor de mercado o valor de remate
+    useEffect(() => {
+        if (valorMercado) {
+            if (tipoInforme === 'ITAU') {
+                // Para Itaú: Valor de Remate = 80% del Valor de Mercado
+                setValorRemate(calcularValorRemateItau(valorMercado));
+
+                // Si ya tenemos el valor de remate, también actualizamos el QSV
+                if (valorRemate) {
+                    setValorVentaRapida(calcularValorVentaRapidaItau(valorMercado, calcularValorRemateItau(valorMercado)));
+                }
+            } else {
+                // Para otros tipos de informe: Remate = 80% del Valor de Mercado
+                setValorRemate(calcularValorRemate(valorMercado));
+                // Venta rápida es 90% del valor de mercado para otros informes
+                setValorVentaRapida(calcularValorVentaRapida(valorMercado));
+            }
+        }
+    }, [valorMercado, tipoInforme]);
+
     // Manejador cuando cambia el valor personalizado del factor de conservación
     const handleFactorConservacionChange = (valor) => {
         setFactorConservacionValor(valor);
@@ -982,6 +977,35 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     // Manejador para el cambio del valor de remate (nuevo)
     const handleValorRemateChange = (valor) => {
         setValorRemate(valor);
+
+        // Recalcular QSV si estamos en un informe Itaú
+        if (tipoInforme === 'ITAU' && valorMercado) {
+            setValorVentaRapida(calcularValorVentaRapidaItau(valorMercado, valor));
+        }
+    };
+
+    const handleValorMercadoMetroCuadradoChange = (valor) => {
+        setValorMercadoMetroCuadrado(valor);
+        // Si cambia el valor por metro cuadrado, recalculamos el valor total
+        if (superficieConstruida > 0) {
+            setValorMercado(formatearNumero(valor * superficieConstruida));
+        }
+    };
+
+    const handleValorVentaRapidaMetroCuadradoChange = (valor) => {
+        setValorVentaRapidaMetroCuadrado(valor);
+        // Si cambia el valor por metro cuadrado, recalculamos el valor total
+        if (superficieConstruida > 0) {
+            setValorVentaRapida(formatearNumero(valor * superficieConstruida));
+        }
+    };
+
+    const handleValorRemateMetroCuadradoChange = (valor) => {
+        setValorRemateMetroCuadrado(valor);
+        // Si cambia el valor por metro cuadrado, recalculamos el valor total
+        if (superficieConstruida > 0) {
+            setValorRemate(formatearNumero(valor * superficieConstruida));
+        }
     };
 
     return (
@@ -1338,114 +1362,139 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             )}
 
             {/* Valor Intrínseco */}
-            <div className="mt-4 p-3 border rounded">
-                <h4 className="text-md font-medium text-gray-700">Valor Intrínseco</h4>
-                <p className="text-sm text-gray-500 mb-2">
-                    Suma del valor del terreno y la obra civil
-                </p>
-                <div className="flex justify-between items-center">
-                    <span className="font-bold">{formatearNumero(valorIntrinseco)} USD</span>
-                    {superficieConstruida > 0 && (
-                        <span className="text-sm">
-                            {formatearNumero(calcularValorMetroCuadrado(valorIntrinseco, superficieConstruida))} USD/m²
-                        </span>
-                    )}
+            {tipoInforme !== 'ITAU' && (
+                <div className="mt-4 p-3 border rounded">
+                    <h4 className="text-md font-medium text-gray-700">Valor Intrínseco</h4>
+                    <p className="text-sm text-gray-500 mb-2">
+                        Suma del valor del terreno y la obra civil
+                    </p>
+                    <div className="flex justify-between items-center">
+                        <span className="font-bold">{formatearNumero(valorIntrinseco)} USD</span>
+                        {superficieConstruida > 0 && (
+                            <span className="text-sm">
+                                {formatearNumero(calcularValorMetroCuadrado(valorIntrinseco, superficieConstruida))} USD/m²
+                            </span>
+                        )}
+                    </div>
                 </div>
-            </div>
-
+            )}
+            
             {/* Tabla con valores calculados y editables */}
             <div className="mt-4 p-3 border rounded">
-                <h4 className="text-md font-medium text-gray-700">Valores Estimados:</h4>
-                <table className="w-full border-collapse mt-2">
-                    <thead>
-                        <tr className="bg-gray-50">
-                            <th className="border px-4 py-2">Concepto</th>
-                            <th className="border px-4 py-2">Valor (USD)</th>
-                            <th className="border px-4 py-2">USD/m²</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de MERCADO</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={valorMercado}
-                                    onChange={handleValorMercadoChange}
-                                    className={`w-full text-center px-2 py-1 border rounded-md ${mostrarAlertaHomologacion ? 'border-red-500 bg-red-50' : ''}`}
-                                />
-                                {mostrarAlertaHomologacion && (
-                                    <p className="text-xs text-red-600 mt-1">
-                                        El valor ingresado difiere más del 20% del valor calculado ({formatearNumero(valorFinalCalculado)} USD)
-                                    </p>
-                                )}
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(valorMercadoMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de REALIZACIÓN INMEDIATA</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={valorVentaRapida}
-                                    onChange={handleValorVentaRapidaChange}
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(valorVentaRapidaMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de REMATE</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={valorRemate}
-                                    onChange={handleValorRemateChange}
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(valorRemateMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de REPOSICIÓN A NUEVO</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={costoReposicion}
-                                    onChange={setCostoReposicion}
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(costoReposicionMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                {tipoInforme === 'ITAU' ? (
+                    <TotalesItau
+                        valorMercado={valorMercado}
+                        valorVentaRapida={valorVentaRapida}
+                        valorRemate={valorRemate}
+                        valorMercadoMetroCuadrado={valorMercadoMetroCuadrado}
+                        valorVentaRapidaMetroCuadrado={valorVentaRapidaMetroCuadrado}
+                        valorRemateMetroCuadrado={valorRemateMetroCuadrado}
+                        dolarCotizacion={dolarCotizacion}
+                        valorUI={valorUI}
+                        onDolarCotizacionChange={setDolarCotizacion}
+                        onValorUIChange={setValorUI}
+                        onValorMercadoChange={handleValorMercadoChange}
+                        onValorVentaRapidaChange={handleValorVentaRapidaChange}
+                        onValorRemateChange={handleValorRemateChange}
+                        onValorMercadoMetroCuadradoChange={handleValorMercadoMetroCuadradoChange}
+                        onValorVentaRapidaMetroCuadradoChange={handleValorVentaRapidaMetroCuadradoChange}
+                        onValorRemateMetroCuadradoChange={handleValorRemateMetroCuadradoChange}
+                        formatearNumero={formatearNumero}
+                    />
+                ) : (
+                    <>
+                        <h4 className="text-md font-medium text-gray-700">Valores Estimados:</h4>
+                        <table className="w-full border-collapse mt-2">
+                            <thead>
+                                <tr className="bg-gray-50">
+                                    <th className="border px-4 py-2">Concepto</th>
+                                    <th className="border px-4 py-2">Valor (USD)</th>
+                                    <th className="border px-4 py-2">USD/m²</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de MERCADO</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={valorMercado}
+                                            onChange={handleValorMercadoChange}
+                                            className={`w-full text-center px-2 py-1 border rounded-md ${mostrarAlertaHomologacion ? 'border-red-500 bg-red-50' : ''}`}
+                                        />
+                                        {mostrarAlertaHomologacion && (
+                                            <p className="text-xs text-red-600 mt-1">
+                                                El valor ingresado difiere más del 20% del valor calculado ({formatearNumero(valorFinalCalculado)} USD)
+                                            </p>
+                                        )}
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(valorMercadoMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de REALIZACIÓN INMEDIATA</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={valorVentaRapida}
+                                            onChange={handleValorVentaRapidaChange}
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(valorVentaRapidaMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de REMATE</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={valorRemate}
+                                            onChange={handleValorRemateChange}
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(valorRemateMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de REPOSICIÓN A NUEVO</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={costoReposicion}
+                                            onChange={setCostoReposicion}
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(costoReposicionMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </>
+                )}
             </div>
-
             {/* Modal para agregar superficies */}
             <ModalSuperficie
                 isOpen={modalOpen}
