@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -15,7 +15,7 @@ const SignUpService = (user) => {
   }
 
 
-  return axios.post(url, user)
+  return apiClient.post(url, user)
     .then(response => response.data)
     .catch(error => {
       console.error('Error al crear usuario:', error);

@@ -1,13 +1,11 @@
-import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
-import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const InformeHsbcService = {
   updateInformeHsbc: async (id, informeHsbcData) => {
     try {
-      const response = await axios.put(
+      const response = await apiClient.put(
         `${API_URL}/api/informeHsbc/${id}`,
         informeHsbcData,
         {
@@ -29,7 +27,7 @@ const InformeHsbcService = {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(`${API_URL}/api/fotos`, formData, {
+      const response = await apiClient.post(`${API_URL}/api/fotos`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -94,7 +92,7 @@ const InformeHsbcService = {
       informeHsbcData.fotos = relevamientos;
       informeHsbcData.anexos = anexos;
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/create-informe-Hsbc`,
         informeHsbcData,
         {
@@ -121,7 +119,7 @@ const InformeHsbcService = {
         (comparable) => comparable.selected
       );
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/create-informe-Hsbc`,
         informeHsbcData,
         {
@@ -178,7 +176,7 @@ const InformeHsbcService = {
 
       console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeHsbc/${informeId}/calculo`,
         calculoToSend,
         {
@@ -213,7 +211,7 @@ const InformeHsbcService = {
   // Obtener el cálculo de un informe
   getCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeHsbc/${informeId}/calculo`
       );
       return response.data;
@@ -226,7 +224,7 @@ const InformeHsbcService = {
   // Obtener las superficies del cálculo
   getSuperficiesCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeHsbc/${informeId}/calculo/superficies`
       );
       return response.data;

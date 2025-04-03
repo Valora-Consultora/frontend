@@ -1,13 +1,11 @@
-import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
-import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const InformeItauService = {
   updateInformeItau: async (id, informeItauData) => {
     try {
-      const response = await axios.put(
+      const response = await apiClient.put(
         `${API_URL}/api/informeItau/${id}`,
         informeItauData,
         {
@@ -29,7 +27,7 @@ const InformeItauService = {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(`${API_URL}/api/fotos`, formData, {
+      const response = await apiClient.post(`${API_URL}/api/fotos`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -56,7 +54,7 @@ const InformeItauService = {
         );
       }
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/create-informe-itau`,
         informeItauData,
         {

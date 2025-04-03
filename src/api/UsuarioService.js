@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from "./apiClient";
 
 const API_URL = process.env.REACT_APP_API_URL; 
 
@@ -6,7 +6,7 @@ const UsuarioService = {
 
     getUsuarios: async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/usuario`);
+      const response = await apiClient.get(`${API_URL}/api/usuario`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -16,7 +16,7 @@ const UsuarioService = {
 
   getUsuarioById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/api/usuario/${parseInt(id)}`);
+      const response = await apiClient.get(`${API_URL}/api/usuario/${parseInt(id)}`);
       return response.data;
     } catch (error) {
       throw new Error('Error al obtener el usuario por ID: ' + error.message);
@@ -25,7 +25,7 @@ const UsuarioService = {
 
   deleteUsuario: async (id) => {
     try {
-      const response = await axios.delete(`${API_URL}/api/usuario/${id}`);
+      const response = await apiClient.delete(`${API_URL}/api/usuario/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error al eliminar el usuario:', error);
@@ -35,7 +35,7 @@ const UsuarioService = {
 
   createUsuario: async (usuario) => {
     try {
-      const response = await axios.post(`${API_URL}/api/create-usuario`, usuario);
+      const response = await apiClient.post(`${API_URL}/api/create-usuario`, usuario);
       return response.data;
     } catch (error) {
       console.error('Error al crear el usuario:', error);

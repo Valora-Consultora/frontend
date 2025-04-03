@@ -1,6 +1,4 @@
-import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
-import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -11,7 +9,7 @@ const InformeScotiaService = {
       console.log("id ", id);
       console.log("informeScotiaData ", informeScotiaData);
 
-      const response = await axios.put(
+      const response = await apiClient.put(
         `${API_URL}/api/informeScotia/${id}`,
         informeScotiaData,
         {
@@ -33,7 +31,7 @@ const InformeScotiaService = {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(`${API_URL}/api/fotos`, formData, {
+      const response = await apiClient.post(`${API_URL}/api/fotos`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -97,7 +95,7 @@ const InformeScotiaService = {
 
       console.log("informeScotiaData", informeScotiaData);
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/create-informe-scotia`,
         informeScotiaData,
         {
@@ -122,7 +120,7 @@ const InformeScotiaService = {
             console.log('inspeccionData', inspeccionData);
 
             
-            const response = await axios.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
+            const response = await apiClient.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -138,7 +136,7 @@ const InformeScotiaService = {
     deleteInspeccion: async (id) => {
         try {
             console.log('Llega al deleteInspeccion ')
-          const response = await axios.delete(`${API_URL}/api/inspeccion/${id}`);
+          const response = await apiClient.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {
           console.error("Error al eliminar la inspección:", error);
@@ -175,7 +173,7 @@ const InformeScotiaService = {
       
       console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
       
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeScotia/${informeId}/calculo`,
         calculoToSend,
         {
@@ -206,7 +204,7 @@ const InformeScotiaService = {
   // Obtener el cálculo de un informe
   getCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeScotia/${informeId}/calculo`
       );
       return response.data;
@@ -219,7 +217,7 @@ const InformeScotiaService = {
   // Obtener las superficies del cálculo
   getSuperficiesCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeScotia/${informeId}/calculo/superficies`
       );
       return response.data;

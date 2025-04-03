@@ -42,13 +42,17 @@ function Login() {
       const response = await LoginService.login(info);
 
       if (response) {
+        const user = response.usuario;
+
         // Guarda el usuario en el estado global
         dispatch(setUser({
-          username: response.username,
-          nombre: response.nombre,
-          tipoUsuario: response.tipoUsuario,
-          id: response.id,
+          username: user.username,
+          nombre: user.nombre,
+          tipoUsuario: user.tipoUsuario,
+          id: user.id,
         }));
+
+        localStorage.setItem("token", response.token);
 /*         console.log('usuario en login  ' , usuario)
  */
         // También puedes guardarlo en localStorage si lo necesitas

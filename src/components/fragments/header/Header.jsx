@@ -29,6 +29,12 @@ const Header = () => {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+    handleClose();
+  }
+
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
 
@@ -65,7 +71,7 @@ const Header = () => {
               <OpenInNew className="text-gray-500" />
               <span className="pointer-events-none">Ver perfil</span>
             </div>
-            <div className="my-1 py-1 px-1 mx-2 rounded-md flex flex-row space-x-2 hover:bg-gray-200" onClick={() => { window.location.href = "/"; handleClose(); }}>
+            <div className="my-1 py-1 px-1 mx-2 rounded-md flex flex-row space-x-2 hover:bg-gray-200" onClick={handleLogout}>
               <Logout className="text-gray-500" />
               <span className="pointer-events-none">Cerrar sesión</span>
             </div>

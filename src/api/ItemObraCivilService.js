@@ -1,5 +1,4 @@
 import apiClient from "./apiClient";
-import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -7,7 +6,7 @@ const ItemObraCivilService = {
 
   createItemObraCivil: async (item, idInforme) => {
     try {
-      const response = await axios.post(`${API_URL}/api/itemObraCivil/${idInforme}`, item, {
+      const response = await apiClient.post(`${API_URL}/api/itemObraCivil/${idInforme}`, item, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -20,7 +19,7 @@ const ItemObraCivilService = {
   },
   getItemsObraCivilByIdInforme: async (idInforme) => {
     try {
-      const response = await axios.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
+      const response = await apiClient.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener locales:', error);
@@ -30,7 +29,7 @@ const ItemObraCivilService = {
   updateItemObraCivil: async (id, updatedFields) => {
     try {
       console.log('updatedFields ', updatedFields);
-      const response = await axios.put(`${API_URL}/api/itemObraCivil/${id}`, updatedFields, {
+      const response = await apiClient.put(`${API_URL}/api/itemObraCivil/${id}`, updatedFields, {
         headers: { 'Content-Type': 'application/json' },
       });
       return response.data;

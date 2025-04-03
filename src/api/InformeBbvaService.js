@@ -1,13 +1,11 @@
-import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
-import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const InformeBbvaService = {
   updateInformeBbva: async (id, informeBbvaData) => {
     try {
-      const response = await axios.put(
+      const response = await apiClient.put(
         `${API_URL}/api/informeBbva/${id}`,
         informeBbvaData,
         {
@@ -29,7 +27,7 @@ const InformeBbvaService = {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeBbva/uploadFirma`,
         formData,
         {
@@ -51,7 +49,7 @@ const InformeBbvaService = {
       console.log("📤 Enviando imágenes al backend con ID:", id);
       formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeBbva/${id}/uploadPlanos`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
@@ -70,7 +68,7 @@ const InformeBbvaService = {
       console.log("📤 Enviando imágenes al backend con ID:", id);
       formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeBbva/${id}/uploadFotos`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
@@ -86,7 +84,7 @@ const InformeBbvaService = {
 
   getInformeById: async (idInforme) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/obtenerInformeBbva/${parseInt(idInforme)}`
       );
       return response.data;
@@ -98,7 +96,7 @@ const InformeBbvaService = {
 
   deletePlano: async (id, imageUrl) => {
     try {
-      const response = await axios.delete(
+      const response = await apiClient.delete(
         `${API_URL}/api/informeBbva/${id}/deletePlano`,
         { params: { imageUrl } }
       );
@@ -113,7 +111,7 @@ const InformeBbvaService = {
     try {
       console.log('Llega al getItemsObraCivilByIdInforme ')
       console.log('idInforme ', idInforme)
-      const response = await axios.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
+      const response = await apiClient.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener locales:', error);
@@ -125,7 +123,7 @@ const InformeBbvaService = {
       console.log("ingresa en el create de informeBbvaService");
       console.log("informeBbvaData", informeBbvaData);
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/create-informeBbva`,
         informeBbvaData,
         {
@@ -150,7 +148,7 @@ const InformeBbvaService = {
             console.log('inspeccionData', inspeccionData);
 
             
-            const response = await axios.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
+            const response = await apiClient.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -166,7 +164,7 @@ const InformeBbvaService = {
     deleteInspeccion: async (id) => {
         try {
             console.log('Llega al deleteInspeccion ')
-          const response = await axios.delete(`${API_URL}/api/inspeccion/${id}`);
+          const response = await apiClient.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {
           console.error("Error al eliminar la inspección:", error);
@@ -177,7 +175,7 @@ const InformeBbvaService = {
   // Obtener el cálculo de un informe
   getCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeBbva/${informeId}/calculo`
       );
       return response.data;
@@ -190,7 +188,7 @@ const InformeBbvaService = {
   // Obtener las superficies del cálculo
   getSuperficiesCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeBbva/${informeId}/calculo/superficies`
       );
       return response.data;
@@ -203,7 +201,7 @@ const InformeBbvaService = {
   // Guardar el cálculo para un informe
   saveCalculo: async (informeId, calculoData) => {
     try {
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeBbva/${informeId}/calculo`,
         calculoData
       );

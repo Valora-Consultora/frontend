@@ -19,13 +19,36 @@ import ReportesLayout from "./components/reportes/ReportesLayout";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import NotificacionesPage from "./components/notificaciones/NotificacionesPage";
 import Perfil from "./components/perfil/Perfil";
+import { jwtDecode } from "jwt-decode";
 
-const WithHeader = ({ children }) => (
-  <>
-    <Header />
-    <div className="content">{children}</div>
-  </>
-);
+const WithHeader = ({ children }) => {
+  const token = localStorage.getItem("token");
+
+  var decodedToken;
+  try {
+    decodedToken = jwtDecode(token);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    alert("Ha ocurrido un error. Por favor, inicie sesión nuevamente.");
+    window.location.href = "/";
+    localStorage.removeItem("token");
+    return;
+  }
+
+  if (decodedToken.exp < Date.now() / 1000) {
+    alert("Para asegurar la seguridad del sistema debe iniciar sesión nuevamente.");
+    window.location.href = "/";
+    localStorage.removeItem("token");
+    return;
+  }
+
+  return (
+    <>
+      <Header />
+      <div className="content">{children}</div>
+    </>
+  )
+};
 
 const WithHeaderLogin = ({ children }) => (
   <>
