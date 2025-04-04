@@ -7,7 +7,10 @@ const notificacionToMessage = (notificacion) => {
   if (tipoNotificacion === "INFORME_APROBADO") {
     return `${referencia} ha aprobado tu informe`;
   } else if (tipoNotificacion === "INFORME_CREADO") {
-    return `${referencia} ha creado un informe nuevo`;
+    const referencias = referencia.split('-');
+    const tasador = referencias[1];
+    const banco = referencias[2];
+    return `${tasador} ha creado un informe nuevo de ${normalizeText(banco)}`;
   }
 }
 

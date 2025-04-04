@@ -21,13 +21,22 @@ function Login() {
   const googleSuccess = async (payload) => {
     const data = jwtDecode(payload.credential);
     try {
-      const user = await LoginService.verifyRegisteredEmail(data.email);
-      dispatch(setUser({
-        username: user.username,
-        nombre: user.nombre,
-        tipoUsuario: user.tipoUsuario,
-        id: user.id,
-      }));
+      const response = await LoginService.verifyRegisteredEmail(data.email);
+      
+      if (response) {
+        const user = response.usuario;
+
+        // Guarda el usuario en el estado global
+        dispatch(setUser({
+          username: user.username,
+          nombre: user.nombre,
+          tipoUsuario: user.tipoUsuario,
+          id: user.id,
+        }));
+
+        localStorage.setItem("token", response.token);
+      }
+
       window.location.href = "/Home";
     } catch (error) {
       toast.error("El correo electrónico no está registrado en el sistema.");

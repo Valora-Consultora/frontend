@@ -10,6 +10,8 @@ import { useSelector } from "react-redux";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EmptyList from "../utils/EmptyList";
+import { Visibility } from "@mui/icons-material";
+import { normalizeText } from "../utils/formatters";
 
 const NotificacionesPage = () => {
   const [notificaciones, setNotificaciones] = useContext(NotificacionContext);
@@ -53,18 +55,30 @@ const NotificacionesPage = () => {
     }
   }
 
+  const ActionComponent = ({ notificacion }) => {
+    if (notificacion.tipoNotificacion === "INFORME_CREADO") {
+      const referencias = notificacion.referencia.split('-');
+      const id = referencias[0];
+      const banco = normalizeText(referencias[2]);
+      return (
+        <Visibility className="text-blue-200 cursor-pointer" onClick={() => window.open(`/Informe/${banco}/${id}`, "_blank")} />
+      );
+    }
+  }
+
   return (
     <div className="flex flex-col items-center justify-center">
       {unread > 0 ? <div onClick={markAllAsRead} className="mt-4 p-2 bg-green-200 text-green-800 rounded-2 cursor-pointer">Marcar todos como leidos</div> : null}
       <div className="bg-white shadow-md p-0 w-[480px] mx-auto mt-4 mb-4 rounded-lg">
         {notificaciones && notificaciones.length > 0 ? (
           notificaciones.map((notificacion) => !notificacion.eliminado ? (
-            <div key={notificacion.id} className={`${!notificacion.leido && "bg-gray-200"} p-4 flex flex-row items-center last:border-none border-b border-gray-300 first:rounded-t-lg last:rounded-b-lg`}>
+            <div key={notificacion.id} className={`${!notificacion.leido && "bg-gray-200"} p-4 gap-2 flex flex-row items-center last:border-none border-b border-gray-300 first:rounded-t-lg last:rounded-b-lg`}>
               <div className="flex-grow">
                 <p className="text-lg">{notificacionToMessage(notificacion)}</p>
                 <p className="text-gray-500 text-sm">{new Date(notificacion.fechaCreacion).toLocaleString()}</p>
               </div>
-              <p className="text-gray-500 text-sm">{!notificacion.leido ? <TickIcon className="text-blue-200 cursor-pointer" onClick={() => markAsRead(notificacion.id)} /> : <DeleteIcon className="text-red-200 cursor-pointer" onClick={() => deleteNotification(notificacion.id)} />}</p>
+              <ActionComponent notificacion={notificacion} />
+              {!notificacion.leido ? <TickIcon className="text-blue-200 cursor-pointer" onClick={() => markAsRead(notificacion.id)} /> : <DeleteIcon className="text-red-200 cursor-pointer" onClick={() => deleteNotification(notificacion.id)} />}
             </div>
           ) : null)
         ) : (

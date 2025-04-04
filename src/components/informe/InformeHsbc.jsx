@@ -1319,8 +1319,6 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     }
   }
 
-  console.log('Viendo comp', comparable)
-
   return <Modal
     isOpen={isModalEditOpen}
     onRequestClose={() => setIsModalEditOpen(false)}

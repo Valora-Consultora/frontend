@@ -40,6 +40,8 @@ const Notificaciones = () => {
       const data = JSON.parse(event.data);
       if (data.tipoNotificacion === "INFORME_APROBADO") {
         toast.success(notificacionToMessage(data));
+      } else if (data.tipoNotificacion === "INFORME_CREADO") {
+        toast.info(notificacionToMessage(data));
       }
       console.log(data);
       setNotificaciones((prevNotificaciones) => [...prevNotificaciones, data]);
