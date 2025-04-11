@@ -15,15 +15,19 @@ import {
     calcularPrecioMetroCorregido,
     calcularValorTotalSuperficie,
     verificarDiferenciaHomologacion,
-    recalcularSuperficie
+    recalcularSuperficie,
+    calcularValorPorMetroCuadradoItau,
+    calcularValorVentaRapidaItau,
+    calcularValorRemateItau,
+    calcularValorUI
 } from '../calculo/CalculoUtils';
 import ModalSuperficie from './ModalSuperficie';
 import ModalConfirmacion from './ModalConfirmacion';
 import InputNumerico from './inputNumerico';
-import InformeScotiaService from '../../api/InformeScotiaService'
+import TotalesItau from './TotalesItau';
 
-const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
-    // Estados para los valores calculados (valores numéricos para cálculos)
+const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoInforme = 'default', valorMetroTerrenoProp = 0 }) => {
+
     const [valorMercado, setValorMercado] = useState(0);
     const [valorVentaRapida, setValorVentaRapida] = useState(0);
     const [valorRemate, setValorRemate] = useState(0);
@@ -44,7 +48,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
     const [valorMetroTerreno, setValorMetroTerreno] = useState(0);
 
     // Estados para datos construcción
-    const [tipoPropiedad, setTipoPropiedad] = useState('casa');
+    const [tipoPropiedad, setTipoPropiedad] = useState('pc');
     const [estadoConservacion, setEstadoConservacion] = useState('Buen estado');
     const [factorConservacionValor, setFactorConservacionValor] = useState(1);
 
@@ -62,9 +66,39 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
     const [indexToDelete, setIndexToDelete] = useState(null);
     //const [getCalculoData, setGetCalculoData] = useState(null);
 
+    const [dolarCotizacion, setDolarCotizacion] = useState(42.151);
+    const [valorUI, setValorUI] = useState(6.2922);
+
+    const [hsbcData, setHsbcData] = useState({
+        cuotaPartePorcentaje: 0,
+        cuotaParteValor: 0,
+        bienesExclusivos: [],
+        murosDuctosValor: 0,
+        totalObraCivilHsbc: 0
+    });
+
+    const [totalSuperficieEdificio, setTotalSuperficieEdificio] = useState(0);
+    const [cuotaPartePorcentaje, setCuotaPartePorcentaje] = useState(0);
+    const [cuotaParteValor, setCuotaParteValor] = useState(0);
+    const [murosDuctosValor, setMurosDuctosValor] = useState(0);
+    const [totalObraCivilHsbc, setTotalObraCivilHsbc] = useState(0);
+    const [bloquearRecalculoBienesComunes, setBloquearRecalculoBienesComunes] = useState(false);
+
     const getCalculoData = () => {
-        return {
-            tipoPropiedad: tipoPropiedad.toUpperCase(),
+        // Objeto base para todos los tipos de informe (mantener como estaba)
+
+        // Mapa de conversión para tipoPropiedad
+        const tipoConversion = {
+            'pc': 'CASA',    // Cambiamos "PC" (Propiedad Común) a "CASA"
+            'ph': 'PH',      // "PH" coincide con el valor del enum
+            'terreno': 'TERRENO' // "TERRENO" coincide con el valor del enum
+        };
+
+        // Obtener el valor correcto para el tipo de propiedad usando el mapa de conversión
+        const tipoValido = tipoConversion[tipoPropiedad.toLowerCase()] || 'CASA';
+
+        const calculoBase = {
+            tipoPropiedad: tipoValido, // Usamos el valor mapeado en lugar del original
             estadoConservacion: estadoConservacion,
             factorConservacion: factorConservacionValor,
             superficieTerreno: parseFloat(superficieTerreno || 0),
@@ -100,12 +134,144 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                 valorTotalSinCorregir: parseFloat(superficie.valorTotalSinCorregir || calcularValorTotalSinCorregir(superficie.m2 || 0, superficie.precioMetro || 0))
             }))
         };
+
+        if (tipoPropiedad === 'ph') {
+            return {
+                ...calculoBase,
+                totalSuperficieEdificio: parseFloat(totalSuperficieEdificio || 0),
+                cuotaPartePorcentaje: parseFloat(cuotaPartePorcentaje || 0),
+                cuotaParteValor: parseFloat(cuotaParteValor || 0),
+            };
+        }
+
+        if (tipoInforme === 'ITAU') {
+            return {
+                ...calculoBase,
+                dolarCotizacion: dolarCotizacion,
+                valorUI: valorUI,
+                valorMercadoUI: calcularValorUI(valorMercado, dolarCotizacion, valorUI),
+                valorRemateUI: calcularValorUI(valorRemate, dolarCotizacion, valorUI)
+            };
+        }
+
+        // Por defecto, devolver calculoBase
+        return calculoBase;
+    };
+
+    const [hsbcExtensionData, setHsbcExtensionData] = useState({
+        cuotaPartePorcentaje: 0,
+        cuotaParteValor: 0,
+        murosDuctosValor: 0,
+        totalObraCivilHsbc: 0,
+        bienesExclusivos: [],
+        bienesComunes: []
+    });
+
+    const handleHsbcDataChange = (data) => {
+        setHsbcExtensionData(data);
     };
 
 
+    // Clasificar las superficies cuando hay cambios
+    useEffect(() => {
+        if (tipoInforme === 'HSBC') {
+            // Clasificar las superficies basadas en su tipo
+            const propios = superficies.filter(s => s.tipoBien === 'propio' || !s.tipoBien);
+            const exclusivos = superficies.filter(s => s.tipoBien === 'comun_exclusivo');
+            const comunes = superficies.filter(s => s.tipoBien === 'comun');
+        }
+    }, [superficies, tipoInforme]);
+
+    useEffect(() => {
+        // Solo calculamos la cuota parte si el tipo de propiedad es "ph"
+        if (tipoPropiedad === 'ph' && totalSuperficieEdificio > 0) {
+            // Calculamos la superficie total de la propiedad (suma de m² de todas las superficies propias)
+            const totalMetrosCuadrados = superficies.reduce((total, superficie) => {
+                // Solo considerar superficies que no sean de tipo "comun"
+                if (superficie.tipoSuperficie !== 'comun') {
+                    // Verificar que m2 sea un número válido
+                    const m2 = typeof superficie.m2 === 'string' ?
+                        (superficie.m2 === 'G' ? 0 : parseFloat(superficie.m2) || 0) :
+                        (parseFloat(superficie.m2) || 0);
+
+                    return total + m2;
+                }
+                return total;
+            }, 0);
+
+            console.log('PH - Total metros cuadrados propios:', totalMetrosCuadrados);
+            console.log('PH - Total superficie edificio:', totalSuperficieEdificio);
+
+            // Calculamos el porcentaje de cuota parte solo si los valores son válidos
+            if (totalMetrosCuadrados > 0 && totalSuperficieEdificio > 0) {
+                const porcentaje = (totalMetrosCuadrados / parseFloat(totalSuperficieEdificio)) * 100;
+                setCuotaPartePorcentaje(formatearNumero(porcentaje));
+
+                // Calculamos el valor en USD de la cuota parte
+                const valorCuotaParte = (porcentaje / 100) * parseFloat(valorTerreno);
+                setCuotaParteValor(formatearNumero(valorCuotaParte));
+
+                console.log('PH - Porcentaje calculado:', porcentaje);
+                console.log('PH - Valor cuota parte calculado:', valorCuotaParte);
+            }
+        } else {
+            // Si no es PH, reiniciamos los valores
+            setCuotaPartePorcentaje(0);
+            setCuotaParteValor(0);
+        }
+    }, [tipoPropiedad, superficies, totalSuperficieEdificio, valorTerreno]);
+
+    const calcularMetrosCuadradosPropios = () => {
+        return superficies
+            .filter(s => s.tipoSuperficie !== 'comun')
+            .reduce((total, sup) => {
+                const m2 = typeof sup.m2 === 'string' ?
+                    (sup.m2 === 'G' ? 0 : parseFloat(sup.m2) || 0) :
+                    (parseFloat(sup.m2) || 0);
+                return total + m2;
+            }, 0);
+    };
+
+    useEffect(() => {
+        console.log('Calculando valor intrínseco:', {
+            tipoPropiedad,
+            valorTerreno,
+            valorObraCivil,
+            cuotaParteValor
+        });
+
+        // Calcular el valor intrínseco según el tipo de propiedad
+        let nuevoValorIntrinseco;
+
+        if (tipoPropiedad === 'ph' && cuotaParteValor > 0) {
+            // Para PH, el valor intrínseco es la suma de la cuota parte y la obra civil
+            nuevoValorIntrinseco = formatearNumero(parseFloat(cuotaParteValor) + parseFloat(valorObraCivil));
+            console.log('PH - Valor intrínseco calculado:', nuevoValorIntrinseco, 'Cuota parte:', cuotaParteValor, 'Obra civil:', valorObraCivil);
+        } else {
+            // Para PC y otros tipos, el valor intrínseco es la suma del valor del terreno y la obra civil
+            nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + parseFloat(valorObraCivil));
+            console.log('PC/Otro - Valor intrínseco calculado:', nuevoValorIntrinseco, 'Terreno:', valorTerreno, 'Obra civil:', valorObraCivil);
+        }
+
+        // Solo actualizar si hay un cambio real
+        if (nuevoValorIntrinseco !== valorIntrinseco) {
+            console.log('Actualizando valor intrínseco de', valorIntrinseco, 'a', nuevoValorIntrinseco);
+            setValorIntrinseco(nuevoValorIntrinseco);
+            setValorFinalCalculado(nuevoValorIntrinseco);
+        }
+
+        // Verificar si valor de mercado manual difiere mucho del calculado
+        if (valorMercado && nuevoValorIntrinseco) {
+            const excedeDiferencia = verificarDiferenciaHomologacion(nuevoValorIntrinseco, valorMercado);
+            setMostrarAlertaHomologacion(excedeDiferencia);
+        }
+    }, [tipoPropiedad, valorTerreno, valorObraCivil, cuotaParteValor, valorMercado]);
+
+
     // Exponemos la función a través de una ref o useImperativeHandle si es necesario
-    React.useEffect(() => {
+    useEffect(() => {
         if (onGetCalculoData) {
+            console.log("CalculoInforme - Registrando función getCalculoData");
             onGetCalculoData(getCalculoData);
         }
     }, [
@@ -113,6 +279,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
         valorMetroTerreno, valorTerreno, valorMercado, valorVentaRapida, valorRemate,
         costoReposicion, valorIntrinseco, valorMercadoMetroCuadrado, valorVentaRapidaMetroCuadrado,
         valorRemateMetroCuadrado, costoReposicionMetroCuadrado, superficieConstruida, superficies,
+        onGetCalculoData, tipoInforme, hsbcData, dolarCotizacion, valorUI,
         onGetCalculoData
     ]);
 
@@ -139,15 +306,6 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
         }
     }, [estadoConservacion]);
 
-    // Calcular factores promedio basados en todas las superficies
-    useEffect(() => {
-        if (superficies.length > 0) {
-            // Usar la función centralizada para calcular el factor edad promedio
-            const promedioFactorEdad = calcularFactorEdadPromedio(superficies);
-            setFactorEdad(promedioFactorEdad);
-        }
-    }, [superficies]);
-
     // Calcular valores del terreno
     useEffect(() => {
         // Usar la función centralizada para calcular el valor del terreno
@@ -157,41 +315,129 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
 
     // Calcular obra civil y valores relacionados
     useEffect(() => {
-        // Usar funciones centralizadas para los cálculos
+        console.log('Recalculando obra civil y valores relacionados');
+
+        // Calcular superficie construida total
         const totalSuperficie = calcularSuperficieConstruidaTotal(superficies);
         setSuperficieConstruida(totalSuperficie);
 
-        const totalObraCivil = calcularValorObraCivil(superficies);
-        setValorObraCivil(totalObraCivil);
+        // Calcular valor total de obra civil incluyendo TODOS los tipos de superficies
+        const totalObraCivil = superficies.reduce((total, superficie) => {
+            // Incluir tanto bienes propios como comunes (sin filtrar por tipoSuperficie)
+            return total + parseFloat(superficie.valorTotal || 0);
+        }, 0);
 
-        const totalReposicion = calcularValorReposicionNuevo(superficies);
-        setCostoReposicion(totalReposicion);
+        console.log('Nuevo valor obra civil calculado (incluye comunes):', totalObraCivil);
+
+        // Actualizar solo si hay un cambio significativo
+        if (Math.abs(totalObraCivil - valorObraCivil) > 0.01) {
+            setValorObraCivil(formatearNumero(totalObraCivil));
+        }
+
+        // Calcular valor de reposición a nuevo incluyendo tanto bienes propios como comunes
+        const totalReposicion = superficies.reduce((total, superficie) => {
+            if (superficie.tipoSuperficie === 'comun') {
+                // Para bienes comunes, usar directamente el valorTotalSinCorregir 
+                return total + parseFloat(superficie.valorTotalSinCorregir || 0);
+            } else {
+                // Para bienes propios, calcular normalmente
+                const valorReposicion = superficie.valorTotalSinCorregir ||
+                    calcularValorTotalSinCorregir(
+                        typeof superficie.m2 === 'number' ? superficie.m2 : parseFloat(superficie.m2 || 0),
+                        typeof superficie.precioMetro === 'number' ? superficie.precioMetro : parseFloat(superficie.precioMetro || 0)
+                    );
+                return total + parseFloat(valorReposicion || 0);
+            }
+        }, 0);
+
+        console.log('Nuevo valor reposición calculado:', totalReposicion);
+
+        // Actualizar solo si hay un cambio significativo
+        if (Math.abs(totalReposicion - costoReposicion) > 0.01) {
+            setCostoReposicion(formatearNumero(totalReposicion));
+        }
     }, [superficies]);
 
-    // Calcular valor intrínseco
-    useEffect(() => {
-        // Usar la función centralizada para calcular el valor intrínseco
-        const nuevoValorIntrinseco = calcularValorIntrinseco(valorTerreno, valorObraCivil);
-        setValorIntrinseco(nuevoValorIntrinseco);
-        setValorFinalCalculado(nuevoValorIntrinseco);
 
-        // Verificar si valor de mercado manual difiere mucho del calculado usando la función centralizada
-        if (valorMercado && nuevoValorIntrinseco) {
-            const excedeDiferencia = verificarDiferenciaHomologacion(nuevoValorIntrinseco, valorMercado);
-            setMostrarAlertaHomologacion(excedeDiferencia);
-        }
-    }, [valorTerreno, valorObraCivil, valorMercado]);
 
-    // Actualizar valores por metro cuadrado
     useEffect(() => {
         if (superficieConstruida > 0) {
-            // Usar la función centralizada para calcular valores por metro cuadrado
-            setValorMercadoMetroCuadrado(calcularValorMetroCuadrado(valorMercado, superficieConstruida));
-            setValorVentaRapidaMetroCuadrado(calcularValorMetroCuadrado(valorVentaRapida, superficieConstruida));
-            setValorRemateMetroCuadrado(calcularValorMetroCuadrado(valorRemate, superficieConstruida));
-            setCostoReposicionMetroCuadrado(calcularValorMetroCuadrado(costoReposicion, superficieConstruida));
+            if (tipoInforme === 'ITAU') {
+                // Para Itaú, calculamos el valor por m² dividiendo el valor total entre los m² totales
+                setValorMercadoMetroCuadrado(calcularValorPorMetroCuadradoItau(valorMercado, superficieConstruida));
+                setValorVentaRapidaMetroCuadrado(calcularValorPorMetroCuadradoItau(valorVentaRapida, superficieConstruida));
+                setValorRemateMetroCuadrado(calcularValorPorMetroCuadradoItau(valorRemate, superficieConstruida));
+            } else {
+                // Para otros tipos de informe, usamos la función estándar
+                setValorMercadoMetroCuadrado(calcularValorMetroCuadrado(valorMercado, superficieConstruida));
+                setValorVentaRapidaMetroCuadrado(calcularValorMetroCuadrado(valorVentaRapida, superficieConstruida));
+                setValorRemateMetroCuadrado(calcularValorMetroCuadrado(valorRemate, superficieConstruida));
+                setCostoReposicionMetroCuadrado(calcularValorMetroCuadrado(costoReposicion, superficieConstruida));
+            }
         }
-    }, [valorMercado, valorVentaRapida, valorRemate, costoReposicion, superficieConstruida]);
+    }, [valorMercado, valorVentaRapida, valorRemate, costoReposicion, superficieConstruida, tipoInforme]);
+
+
+    useEffect(() => {
+        console.log('Ejecutando useEffect de actualización de valores para bienes comunes');
+
+        if (bloquearRecalculoBienesComunes || superficies.length === 0) {
+            console.log('Saliendo temprano del useEffect por bloqueo o sin superficies');
+            return;
+        }
+
+        // Buscar si hay bienes comunes
+        const bienesComunes = superficies.filter(s => s.tipoSuperficie === 'comun');
+        if (bienesComunes.length === 0) return; // No hay bienes comunes para actualizar
+
+        // Calcular valor total de bienes propios
+        const bienesPropios = superficies.filter(s => s.tipoSuperficie === 'propio');
+        const valorTotalPropios = bienesPropios.reduce((total, sup) => {
+            return total + parseFloat(sup.valorTotal || 0);
+        }, 0);
+
+        console.log('Valor total de bienes propios calculado:', valorTotalPropios);
+
+        // Actualizar el valorTotal de bienes comunes (25% del valor total de bienes propios)
+        const valorBienesComunes = formatearNumero(valorTotalPropios * 0.25);
+        console.log('Nuevo valor para bienes comunes calculado (25%):', valorBienesComunes);
+
+        // Actualizar solo si el valor ha cambiado significativamente (más de 1%)
+        const nuevasSuperficies = [...superficies];
+        let actualizado = false;
+
+        nuevasSuperficies.forEach((sup, index) => {
+            if (sup.tipoSuperficie === 'comun') {
+                // No actualizar si ha sido editado manualmente
+                if (sup.editadoManualmenteValorTotal) {
+                    console.log('Bien común saltado por edición manual del valorTotal:', sup.descripcion);
+                    return;
+                }
+
+                const valorActual = parseFloat(sup.valorTotal || 0);
+                // Solo actualizar si el cambio es significativo
+                if (Math.abs((valorBienesComunes - valorActual) / (valorActual || 1)) > 0.01) {
+                    console.log(`Actualizando bien común "${sup.descripcion}" valorTotal: ${valorActual} -> ${valorBienesComunes}`);
+                    nuevasSuperficies[index] = {
+                        ...sup,
+                        valorTotal: valorBienesComunes
+                    };
+                    actualizado = true;
+                } else {
+                    console.log(`No se actualiza bien común "${sup.descripcion}" valorTotal (cambio no significativo)`);
+                }
+            }
+        });
+
+        // Solo actualizar el estado si hubo cambios
+        if (actualizado) {
+            console.log("Actualizando estado con nuevos valores de valorTotal para bienes comunes");
+            setSuperficies(nuevasSuperficies);
+        } else {
+            console.log("No se realizaron cambios en los valorTotal de bienes comunes");
+        }
+    }, [superficies, bloquearRecalculoBienesComunes]);
+
 
     // Actualizar valores derivados cuando cambia el valor de mercado
     useEffect(() => {
@@ -223,7 +469,16 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
     };
 
     // Función para actualizar cualquier campo de una superficie
+    // Función para actualizar cualquier campo de una superficie
     const actualizarCampoSuperficie = (index, campo, valor) => {
+
+        if (campo === 'valorTotal' && superficies[index]?.tipoSuperficie === 'comun') {
+            setBloquearRecalculoBienesComunes(true);
+
+            // Desbloquear después de un tiempo para permitir recálculos futuros
+            setTimeout(() => setBloquearRecalculoBienesComunes(false), 1000);
+        }
+
         const nuevasSuperficies = [...superficies];
 
         // Actualizamos el campo específico
@@ -234,6 +489,11 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
 
         // MEJORA: Recalcular todos los valores relacionados en función del campo modificado
         switch (campo) {
+            case 'tipoBien':
+                // Si cambia el tipo de bien, simplemente actualizamos el valor
+                // No se requieren recálculos adicionales
+                break;
+
             case 'precioMetro':
                 // Si se modifica el precio por metro, recalculamos el precio corregido y valor total
                 const factorEdad = parseFloat(nuevasSuperficies[index].factorEdad) || 1;
@@ -309,8 +569,37 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                 }
                 break;
 
+            // Modifica el caso 'valorTotal' en la función actualizarCampoSuperficie
+
             case 'valorTotal':
-                // Si se modifica directamente el valor total, ajustamos el precio corregido
+                console.log('Actualizando valorTotal:', {
+                    tipoSuperficie: nuevasSuperficies[index].tipoSuperficie,
+                    indice: index,
+                    valorAnterior: nuevasSuperficies[index].valorTotal,
+                    nuevoValor: valor
+                });
+
+                // Si es un bien común, solo actualizamos el valor total sin más cálculos
+                if (nuevasSuperficies[index].tipoSuperficie === 'comun') {
+                    nuevasSuperficies[index].valorTotal = valor;
+                    // Marcar como editado manualmente para evitar actualizaciones automáticas
+                    nuevasSuperficies[index].editadoManualmenteValorTotal = true;
+
+                    // Bloquear recálculos automáticos temporalmente
+                    setBloquearRecalculoBienesComunes(true);
+                    console.log('Bloqueo de recálculo activado para bienes comunes (valorTotal)');
+
+                    setTimeout(() => {
+                        console.log('Desactivando bloqueo de recálculo para bienes comunes');
+                        setBloquearRecalculoBienesComunes(false);
+                    }, 2000);
+
+                    // Actualizar el estado y salir
+                    setSuperficies(nuevasSuperficies);
+                    return;
+                }
+
+                // Para otros tipos, continuar con la lógica existente...
                 const metros2 = parseFloat(nuevasSuperficies[index].m2) || 0;
 
                 // Evitar división por cero
@@ -329,11 +618,98 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                         // Actualizar el valor total sin corregir con el nuevo precio base
                         nuevasSuperficies[index].valorTotalSinCorregir = calcularValorTotalSinCorregir(metros2, nuevoPrecioBase);
                     }
+
+                    // Actualizar el estado de superficies
+                    setSuperficies(nuevasSuperficies);
+
+                    // Recalcular el valor de obra civil inmediatamente
+                    const nuevoValorObraCivil = nuevasSuperficies
+                        .filter(superficie => superficie.tipoSuperficie !== 'comun')
+                        .reduce((total, superficie) => {
+                            return total + parseFloat(superficie.valorTotal || 0);
+                        }, 0);
+
+                    // Actualizar el valor de la obra civil sin esperar al efecto
+                    setValorObraCivil(formatearNumero(nuevoValorObraCivil));
+
+                    // Recalcular también el valor intrínseco inmediatamente
+                    let nuevoValorIntrinseco;
+                    if (tipoPropiedad === 'ph' && cuotaParteValor > 0) {
+                        nuevoValorIntrinseco = formatearNumero(parseFloat(cuotaParteValor) + nuevoValorObraCivil);
+                    } else {
+                        nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + nuevoValorObraCivil);
+                    }
+
+                    console.log("Nuevo valor intrínseco calculado tras editar valorTotal:", nuevoValorIntrinseco);
+                    setValorIntrinseco(nuevoValorIntrinseco);
+                    setValorFinalCalculado(nuevoValorIntrinseco);
+
+                    // No necesitamos un return aquí, ya que queremos que también se aplique el recálculo general
                 }
                 break;
 
+            // Modifica la parte del caso valorTotalSinCorregir en la función actualizarCampoSuperficie
+            // para asegurarte de que el valor intrínseco se actualice correctamente:
+
             case 'valorTotalSinCorregir':
-                // Si se modifica directamente el valor total sin corregir, ajustamos el precio base
+                console.log('Actualizando valorTotalSinCorregir:', {
+                    tipoSuperficie: nuevasSuperficies[index].tipoSuperficie,
+                    indice: index,
+                    valorAnterior: nuevasSuperficies[index].valorTotalSinCorregir,
+                    nuevoValor: valor
+                });
+
+                // Si es un bien común, simplemente actualizar el valor sin recálculos
+                if (nuevasSuperficies[index].tipoSuperficie === 'comun') {
+                    nuevasSuperficies[index].valorTotalSinCorregir = valor;
+
+                    // Marcar esta superficie como editada manualmente para evitar actualizaciones automáticas
+                    nuevasSuperficies[index].editadoManualmente = true;
+
+                    // Bloquear recálculos automáticos temporalmente
+                    setBloquearRecalculoBienesComunes(true);
+                    console.log('Bloqueo de recálculo activado para bienes comunes');
+
+                    setTimeout(() => {
+                        console.log('Desactivando bloqueo de recálculo para bienes comunes');
+                        setBloquearRecalculoBienesComunes(false);
+                    }, 2000);
+
+                    // Actualizar el estado de superficies antes de recalcular otros valores
+                    setSuperficies(nuevasSuperficies);
+
+                    // Trigger inmediato del recálculo del costo de reposición total
+                    const nuevoValorReposicion = nuevasSuperficies.reduce((total, superficie) => {
+                        if (superficie.tipoSuperficie === 'comun') {
+                            // Para el bien común que estamos editando, usar el nuevo valor
+                            if (superficie === nuevasSuperficies[index]) {
+                                return total + parseFloat(valor || 0);
+                            }
+                            // Para otros bienes comunes, usar el valor existente
+                            return total + parseFloat(superficie.valorTotalSinCorregir || 0);
+                        } else {
+                            // Para bienes propios, calcular normalmente
+                            const valorReposicion = superficie.valorTotalSinCorregir ||
+                                calcularValorTotalSinCorregir(
+                                    typeof superficie.m2 === 'number' ? superficie.m2 : parseFloat(superficie.m2 || 0),
+                                    typeof superficie.precioMetro === 'number' ? superficie.precioMetro : parseFloat(superficie.precioMetro || 0)
+                                );
+                            return total + parseFloat(valorReposicion || 0);
+                        }
+                    }, 0);
+
+                    console.log("Actualizando costo de reposición después de editar bien común:", nuevoValorReposicion);
+                    setCostoReposicion(formatearNumero(nuevoValorReposicion));
+
+                    // No hay necesidad de recalcular inmediatamente el valor intrínseco aquí, 
+                    // ya que los bienes comunes no afectan al valor de obra civil (que es lo que entra
+                    // en el cálculo del valor intrínseco)
+                    return;
+                }
+
+                // Si no es bien común (es un bien propio), su valorTotalSinCorregir NO afecta directamente
+                // al valor intrínseco, pero el valorTotal sí, así que necesitamos actualizar ambos
+
                 const metrosBase = parseFloat(nuevasSuperficies[index].m2) || 0;
 
                 // Evitar división por cero
@@ -353,6 +729,31 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
 
                     nuevasSuperficies[index].precioMetroCorregido = nuevoPrecioCorregido;
                     nuevasSuperficies[index].valorTotal = calcularValorTotalSuperficie(metrosBase, nuevoPrecioCorregido);
+
+                    // Actualizar el estado de superficies
+                    setSuperficies(nuevasSuperficies);
+
+                    // Recalcular el valor de obra civil inmediatamente
+                    const nuevoValorObraCivil = nuevasSuperficies
+                        .filter(superficie => superficie.tipoSuperficie !== 'comun')
+                        .reduce((total, superficie) => {
+                            return total + parseFloat(superficie.valorTotal || 0);
+                        }, 0);
+
+                    // Actualizar el valor de la obra civil sin esperar al efecto
+                    setValorObraCivil(formatearNumero(nuevoValorObraCivil));
+
+                    // Recalcular también el valor intrínseco inmediatamente
+                    let nuevoValorIntrinseco;
+                    if (tipoPropiedad === 'ph' && cuotaParteValor > 0) {
+                        nuevoValorIntrinseco = formatearNumero(parseFloat(cuotaParteValor) + nuevoValorObraCivil);
+                    } else {
+                        nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + nuevoValorObraCivil);
+                    }
+
+                    console.log("Nuevo valor intrínseco calculado tras editar valorTotalSinCorregir:", nuevoValorIntrinseco);
+                    setValorIntrinseco(nuevoValorIntrinseco);
+                    setValorFinalCalculado(nuevoValorIntrinseco);
                 }
                 break;
 
@@ -362,21 +763,175 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
         }
 
         // MEJORA: Aplicar recálculo completo para asegurar consistencia en todos los valores
-        nuevasSuperficies[index] = recalcularSuperficie(nuevasSuperficies[index]);
-
+        if (!(campo === 'valorTotal' && nuevasSuperficies[index].tipoSuperficie === 'comun')) {
+            nuevasSuperficies[index] = recalcularSuperficie(nuevasSuperficies[index]);
+        }
         // Asegurar que siempre tengamos un valor total sin corregir
         if (nuevasSuperficies[index].valorTotalSinCorregir === undefined) {
             const m2 = parseFloat(nuevasSuperficies[index].m2) || 0;
             const precioMetro = parseFloat(nuevasSuperficies[index].precioMetro) || 0;
             nuevasSuperficies[index].valorTotalSinCorregir = calcularValorTotalSinCorregir(m2, precioMetro);
         }
+
+        // Actualizar el estado de superficies
         setSuperficies(nuevasSuperficies);
+
+        // Reclasificar las superficies si estamos en el informe HSBC
+        if (tipoInforme === 'HSBC') {
+            const propios = nuevasSuperficies.filter(s => s.tipoBien === 'propio' || !s.tipoBien);
+            const exclusivos = nuevasSuperficies.filter(s => s.tipoBien === 'comun_exclusivo');
+            const comunes = nuevasSuperficies.filter(s => s.tipoBien === 'comun');
+        }
     };
+
+    // Añade este useEffect para calcular los totales (sin modificar los valores individuales)
+    useEffect(() => {
+        // Calcular el total de todas las superficies para el valor de obra civil
+        // Incluimos TODAS las superficies en este cálculo, sin filtrar por tipoSuperficie
+        const nuevoValorObraCivil = superficies.reduce((total, superficie) => {
+            return total + parseFloat(superficie.valorTotal || 0);
+        }, 0);
+
+        // Actualizar el valor de la obra civil sin modificar las superficies individuales
+        if (nuevoValorObraCivil !== valorObraCivil) {
+            setValorObraCivil(formatearNumero(nuevoValorObraCivil));
+        }
+
+        // Calcular superficie construida total
+        const nuevaSuperficieConstruida = calcularSuperficieConstruidaTotal(superficies);
+        if (nuevaSuperficieConstruida !== superficieConstruida) {
+            setSuperficieConstruida(formatearNumero(nuevaSuperficieConstruida));
+        }
+
+        // Actualizar valor de reposición a nuevo
+        // Incluimos tanto bienes propios como comunes para este cálculo
+        const nuevoValorReposicion = superficies.reduce((total, superficie) => {
+            if (superficie.tipoSuperficie === 'comun') {
+                // Para bienes comunes, usar directamente el valorTotalSinCorregir 
+                return total + parseFloat(superficie.valorTotalSinCorregir || 0);
+            } else {
+                // Para bienes propios, calcular normalmente
+                const valorReposicion = superficie.valorTotalSinCorregir ||
+                    calcularValorTotalSinCorregir(
+                        typeof superficie.m2 === 'number' ? superficie.m2 : parseFloat(superficie.m2 || 0),
+                        typeof superficie.precioMetro === 'number' ? superficie.precioMetro : parseFloat(superficie.precioMetro || 0)
+                    );
+                return total + parseFloat(valorReposicion || 0);
+            }
+        }, 0);
+
+        if (nuevoValorReposicion !== costoReposicion) {
+            setCostoReposicion(formatearNumero(nuevoValorReposicion));
+        }
+    }, [superficies]);
+
+
+    // Modificar el useEffect que actualiza los bienes comunes automáticamente
+    useEffect(() => {
+        console.log('Ejecutando useEffect de actualización de bienes comunes:', {
+            bloqueado: bloquearRecalculoBienesComunes,
+            cantidadSuperficies: superficies.length
+        });
+
+        if (bloquearRecalculoBienesComunes || superficies.length === 0) {
+            console.log('Saliendo temprano del useEffect (bloqueado o sin superficies)');
+            return;
+        }
+
+        // Buscar si hay bienes comunes
+        const bienesComunes = superficies.filter(s => s.tipoSuperficie === 'comun');
+        console.log('Bienes comunes encontrados:', bienesComunes.length);
+
+        if (bienesComunes.length === 0) return; // No hay bienes comunes para actualizar
+
+        // Calcular valor de reposición total de bienes propios
+        const bienesPropios = superficies.filter(s => s.tipoSuperficie === 'propio');
+        const valorReposicionPropios = bienesPropios.reduce((total, sup) => {
+            const valorReposicion = parseFloat(sup.valorTotalSinCorregir ||
+                calcularValorTotalSinCorregir(
+                    typeof sup.m2 === 'number' ? sup.m2 : parseFloat(sup.m2 || 0),
+                    typeof sup.precioMetro === 'number' ? sup.precioMetro : parseFloat(sup.precioMetro || 0)
+                ));
+            return total + valorReposicion;
+        }, 0);
+
+        console.log('Valor reposición de bienes propios calculado:', valorReposicionPropios);
+
+        // Actualizar los bienes comunes con el 17% del valor
+        const valorBienesComunes = formatearNumero(valorReposicionPropios * 0.17);
+        console.log('Nuevo valor para bienes comunes calculado:', valorBienesComunes);
+
+        // Actualizar solo si el valor ha cambiado significativamente (más de 1%)
+        const nuevasSuperficies = [...superficies];
+        let actualizado = false;
+
+        nuevasSuperficies.forEach((sup, index) => {
+            if (sup.tipoSuperficie === 'comun') {
+                // No actualizar si ha sido editado manualmente
+                if (sup.editadoManualmente) {
+                    console.log('Bien común saltado por edición manual:', sup.descripcion);
+                    return;
+                }
+
+                const valorActual = parseFloat(sup.valorTotalSinCorregir || 0);
+                // Solo actualizar si el cambio es significativo
+                if (Math.abs((valorBienesComunes - valorActual) / (valorActual || 1)) > 0.01) {
+                    console.log(`Actualizando bien común "${sup.descripcion}": ${valorActual} -> ${valorBienesComunes}`);
+                    nuevasSuperficies[index] = {
+                        ...sup,
+                        valorTotalSinCorregir: valorBienesComunes,
+                        valorTotal: 0 // El valor total sigue siendo cero
+                    };
+                    actualizado = true;
+                } else {
+                    console.log(`No se actualiza bien común "${sup.descripcion}" (cambio no significativo)`);
+                }
+            }
+        });
+
+        // Solo actualizar el estado si hubo cambios
+        if (actualizado) {
+            console.log("Actualizando estado con nuevos valores de bienes comunes");
+            setSuperficies(nuevasSuperficies);
+
+            // Trigger manual para recalcular el costo de reposición total inmediatamente
+            const nuevoValorReposicion = nuevasSuperficies.reduce((total, superficie) => {
+                if (superficie.tipoSuperficie === 'comun') {
+                    return total + parseFloat(superficie.valorTotalSinCorregir || 0);
+                } else {
+                    const valorReposicion = superficie.valorTotalSinCorregir ||
+                        calcularValorTotalSinCorregir(
+                            typeof superficie.m2 === 'number' ? superficie.m2 : parseFloat(superficie.m2 || 0),
+                            typeof superficie.precioMetro === 'number' ? superficie.precioMetro : parseFloat(superficie.precioMetro || 0)
+                        );
+                    return total + parseFloat(valorReposicion || 0);
+                }
+            }, 0);
+
+            // Actualizar el costo de reposición
+            setCostoReposicion(formatearNumero(nuevoValorReposicion));
+        } else {
+            console.log("No se realizaron cambios en los bienes comunes");
+        }
+    }, [superficies, bloquearRecalculoBienesComunes]);
+
 
     // Handle cambio en valor de mercado
     const handleValorMercadoChange = (valor) => {
         setValorMercado(valor);
-        // Los valores derivados se actualizarán a través de los efectos
+
+        if (tipoInforme === 'ITAU') {
+            // Recalcular Valor de Remate
+            const nuevoValorRemate = calcularValorRemateItau(valor);
+            setValorRemate(nuevoValorRemate);
+
+            // Recalcular QSV como promedio entre Valor de Mercado y nuevo Valor de Remate
+            setValorVentaRapida(calcularValorVentaRapidaItau(valor, nuevoValorRemate));
+        } else {
+            // Mantener el cálculo original para otros tipos de informe
+            setValorRemate(calcularValorRemate(valor));
+            setValorVentaRapida(calcularValorVentaRapida(valor));
+        }
     };
 
     // Manejador cuando cambia el estado de conservación
@@ -391,6 +946,26 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
         }
     };
 
+    // Actualizar valores derivados cuando cambia el valor de mercado o valor de remate
+    useEffect(() => {
+        if (valorMercado) {
+            if (tipoInforme === 'ITAU') {
+                // Para Itaú: Valor de Remate = 80% del Valor de Mercado
+                setValorRemate(calcularValorRemateItau(valorMercado));
+
+                // Si ya tenemos el valor de remate, también actualizamos el QSV
+                if (valorRemate) {
+                    setValorVentaRapida(calcularValorVentaRapidaItau(valorMercado, calcularValorRemateItau(valorMercado)));
+                }
+            } else {
+                // Para otros tipos de informe: Remate = 80% del Valor de Mercado
+                setValorRemate(calcularValorRemate(valorMercado));
+                // Venta rápida es 90% del valor de mercado para otros informes
+                setValorVentaRapida(calcularValorVentaRapida(valorMercado));
+            }
+        }
+    }, [valorMercado, tipoInforme]);
+
     // Manejador cuando cambia el valor personalizado del factor de conservación
     const handleFactorConservacionChange = (valor) => {
         setFactorConservacionValor(valor);
@@ -402,6 +977,35 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
     // Manejador para el cambio del valor de remate (nuevo)
     const handleValorRemateChange = (valor) => {
         setValorRemate(valor);
+
+        // Recalcular QSV si estamos en un informe Itaú
+        if (tipoInforme === 'ITAU' && valorMercado) {
+            setValorVentaRapida(calcularValorVentaRapidaItau(valorMercado, valor));
+        }
+    };
+
+    const handleValorMercadoMetroCuadradoChange = (valor) => {
+        setValorMercadoMetroCuadrado(valor);
+        // Si cambia el valor por metro cuadrado, recalculamos el valor total
+        if (superficieConstruida > 0) {
+            setValorMercado(formatearNumero(valor * superficieConstruida));
+        }
+    };
+
+    const handleValorVentaRapidaMetroCuadradoChange = (valor) => {
+        setValorVentaRapidaMetroCuadrado(valor);
+        // Si cambia el valor por metro cuadrado, recalculamos el valor total
+        if (superficieConstruida > 0) {
+            setValorVentaRapida(formatearNumero(valor * superficieConstruida));
+        }
+    };
+
+    const handleValorRemateMetroCuadradoChange = (valor) => {
+        setValorRemateMetroCuadrado(valor);
+        // Si cambia el valor por metro cuadrado, recalculamos el valor total
+        if (superficieConstruida > 0) {
+            setValorRemate(formatearNumero(valor * superficieConstruida));
+        }
     };
 
     return (
@@ -416,9 +1020,8 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                     onChange={(e) => setTipoPropiedad(e.target.value)}
                     className="mt-1 block w-full px-3 py-2 border rounded-md"
                 >
-                    <option value="casa">Casa</option>
-                    <option value="departamento">Departamento</option>
-                    <option value="ph">PH</option>
+                    <option value="pc">Propiedad Común (Casa)</option>
+                    <option value="ph">Propiedad Horizontal</option>
                     <option value="terreno">Terreno</option>
                 </select>
             </div>
@@ -452,7 +1055,9 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
 
             {/* Terreno */}
             <div className="mt-4 p-3 border rounded">
-                <h4 className="text-md font-medium text-gray-700">Terreno</h4>
+                <h4 className="text-md font-medium text-gray-700">
+                    {tipoInforme === 'HSBC' ? 'Bienes Propios' : 'Obra Civil'}
+                </h4>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Superficie Total (m²)</label>
@@ -475,6 +1080,65 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                 </div>
             </div>
 
+            {/* Sección específica para Propiedad Horizontal */}
+            {tipoPropiedad === 'ph' && (
+                <div className="mt-4 p-3 border rounded">
+                    <h4 className="text-md font-medium text-gray-700">Cálculo Cuota Parte (PH)</h4>
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Superficie Total del Edificio (m²)</label>
+                            <InputNumerico
+                                value={totalSuperficieEdificio}
+                                onChange={setTotalSuperficieEdificio}
+                                className="mt-1 block w-full px-3 py-2 border rounded-md"
+                                placeholder="Superficie total de todo el edificio"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Ingrese la superficie total de todo el edificio para calcular la cuota parte
+                            </p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Superficie del PH (m²)</label>
+                            <input
+                                type="text"
+                                value={superficieConstruida ? formatearNumero(superficieConstruida) : '0.00'}
+                                className="mt-1 block w-full px-3 py-2 border rounded-md bg-gray-100"
+                                readOnly
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Suma de todas las superficies propias ingresadas (excluye bienes comunes)
+                            </p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Cuota Parte (%)</label>
+                            <InputNumerico
+                                value={cuotaPartePorcentaje}
+                                onChange={setCuotaPartePorcentaje}
+                                className="mt-1 block w-full px-3 py-2 border rounded-md"
+                                placeholder="% de participación en el terreno"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Se calcula como: (Superficie del PH / Superficie Total del Edificio) * 100
+                            </p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Valor Cuota Parte (USD)</label>
+                            <input
+                                type="text"
+                                value={formatearNumero(cuotaParteValor)}
+                                className="mt-1 block w-full px-3 py-2 border rounded-md bg-gray-100"
+                                readOnly
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Calculado como: {cuotaPartePorcentaje}% del valor del terreno (${formatearNumero(valorTerreno)})
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Botón para agregar superficie cubierta */}
             <button
                 type="button" // <-- Agregar esto
@@ -490,7 +1154,9 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
             {/* Tabla con superficies cubiertas */}
             {superficies.length > 0 && (
                 <div className="mt-4 p-3 border rounded overflow-x-auto">
-                    <h4 className="text-md font-medium text-gray-700">Obra Civil</h4>
+                    <h4 className="text-md font-medium text-gray-700">
+                        {tipoInforme === 'HSBC' ? 'Bienes Propios' : 'Obra Civil'}
+                    </h4>
                     <table className="w-full border-collapse mt-2 text-sm">
                         <thead>
                             <tr className="bg-gray-50">
@@ -507,8 +1173,10 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                             </tr>
                         </thead>
                         <tbody>
+                            {/* Filtrar las superficies según su tipo para HSBC */}
                             {superficies.map((superficie, index) => (
                                 <tr key={index}>
+                                    {/* Descripción - siempre visible */}
                                     <td className="border px-2 py-2">
                                         <input
                                             type="text"
@@ -517,62 +1185,120 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                                             className="w-full px-1 py-1 border rounded-sm"
                                         />
                                     </td>
+
+                                    {/* Promedio Edad */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.promedioEdad || ''}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'promedioEdad', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <span className="px-1 py-1">-</span>
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.promedioEdad || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'promedioEdad', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* EDAD (Factor Edad) */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.factorEdad || ''}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'factorEdad', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <span className="px-1 py-1">-</span>
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.factorEdad || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'factorEdad', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* CONSERVACIÓN */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.factorConservacion || obtenerFactorConservacion(superficie.conservacion)}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'factorConservacion', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <span className="px-1 py-1">-</span>
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.factorConservacion || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'factorConservacion', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* m² */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.m2 || ''}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'm2', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <span className="px-1 py-1">G</span>
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.m2 || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'm2', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* U$S/m² */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.precioMetro || ''}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'precioMetro', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <span className="px-1 py-1">G</span>
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.precioMetro || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'precioMetro', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* U$S/m² corregido */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.precioMetroCorregido || ''}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'precioMetroCorregido', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <span className="px-1 py-1">G</span>
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.precioMetroCorregido || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'precioMetroCorregido', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* Valor Total (USD) */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.valorTotal || ''}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'valorTotal', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <InputNumerico
+                                                value={superficie.valorTotal || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'valorTotal', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.valorTotal || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'valorTotal', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* Valor Reposicion a Nuevo (USD) */}
                                     <td className="border px-2 py-2">
-                                        <InputNumerico
-                                            value={superficie.valorTotalSinCorregir || calcularValorTotalSinCorregir(superficie.m2, superficie.precioMetro)}
-                                            onChange={(valor) => actualizarCampoSuperficie(index, 'valorTotalSinCorregir', valor)}
-                                            className="w-full px-1 py-1 border rounded-sm"
-                                        />
+                                        {superficie.tipoSuperficie === 'comun' ? (
+                                            <InputNumerico
+                                                value={superficie.valorTotalSinCorregir || ''}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'valorTotalSinCorregir', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        ) : (
+                                            <InputNumerico
+                                                value={superficie.valorTotalSinCorregir || calcularValorTotalSinCorregir(superficie.m2, superficie.precioMetro)}
+                                                onChange={(valor) => actualizarCampoSuperficie(index, 'valorTotalSinCorregir', valor)}
+                                                className="w-full px-1 py-1 border rounded-sm"
+                                            />
+                                        )}
                                     </td>
+
+                                    {/* Acciones */}
                                     <td className="border px-2 py-2">
                                         <button
                                             onClick={() => handleEliminarClick(index)}
@@ -585,19 +1311,48 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
                             ))}
                             {/* Fila de totales */}
                             <tr className="bg-gray-200">
-                                <td className="border px-2 py-2 font-bold">Total Obra civil</td>
+                                <td className="border px-2 py-2 font-bold">
+                                    {tipoInforme === 'HSBC' ? 'Total Bienes Propios' : 'Total Obra civil'}
+                                </td>
                                 <td className="border px-2 py-2"></td>
                                 <td className="border px-2 py-2"></td>
                                 <td className="border px-2 py-2"></td>
-                                <td className="border px-2 py-2 font-bold">{formatearNumero(superficieConstruida)}</td>
+                                <td className="border px-2 py-2 font-bold">
+                                    {formatearNumero(
+                                        superficies
+                                            .filter(s => s.tipoSuperficie !== 'comun') // Excluir bienes comunes del cálculo de m²
+                                            .reduce((total, sup) => {
+                                                // Asegurarse de que m2 sea un número para la suma
+                                                const m2 = typeof sup.m2 === 'string' && sup.m2 !== 'G' ?
+                                                    parseFloat(sup.m2) :
+                                                    (typeof sup.m2 === 'number' ? sup.m2 : 0);
+                                                return total + m2;
+                                            }, 0)
+                                    )}
+                                </td>
                                 <td className="border px-2 py-2"></td>
                                 <td className="border px-2 py-2"></td>
                                 <td className="border px-2 py-2 font-bold">
                                     {formatearNumero(valorObraCivil)}
                                 </td>
                                 <td className="border px-2 py-2 font-bold">
-                                    {formatearNumero(superficies.reduce((total, sup) =>
-                                        total + parseFloat(sup.valorTotalSinCorregir || calcularValorTotalSinCorregir(sup.m2, sup.precioMetro)), 0))}
+                                    {formatearNumero(
+                                        superficies.reduce((total, sup) => {
+                                            // Para bienes comunes, usar directamente el valorTotalSinCorregir
+                                            if (sup.tipoSuperficie === 'comun') {
+                                                return total + parseFloat(sup.valorTotalSinCorregir || 0);
+                                            }
+                                            // Para bienes propios, calcular normalmente
+                                            else {
+                                                const valorReposicion = sup.valorTotalSinCorregir ||
+                                                    calcularValorTotalSinCorregir(
+                                                        typeof sup.m2 === 'number' ? sup.m2 : parseFloat(sup.m2 || 0),
+                                                        typeof sup.precioMetro === 'number' ? sup.precioMetro : parseFloat(sup.precioMetro || 0)
+                                                    );
+                                                return total + parseFloat(valorReposicion || 0);
+                                            }
+                                        }, 0)
+                                    )}
                                 </td>
                                 <td className="border px-2 py-2"></td>
                             </tr>
@@ -607,134 +1362,198 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
             )}
 
             {/* Valor Intrínseco */}
-            <div className="mt-4 p-3 border rounded">
-                <h4 className="text-md font-medium text-gray-700">Valor Intrínseco</h4>
-                <p className="text-sm text-gray-500 mb-2">
-                    Suma del valor del terreno y la obra civil
-                </p>
-                <div className="flex justify-between items-center">
-                    <span className="font-bold">{formatearNumero(valorIntrinseco)} USD</span>
-                    {superficieConstruida > 0 && (
-                        <span className="text-sm">
-                            {formatearNumero(calcularValorMetroCuadrado(valorIntrinseco, superficieConstruida))} USD/m²
-                        </span>
-                    )}
+            {tipoInforme !== 'ITAU' && (
+                <div className="mt-4 p-3 border rounded">
+                    <h4 className="text-md font-medium text-gray-700">Valor Intrínseco</h4>
+                    <p className="text-sm text-gray-500 mb-2">
+                        Suma del valor del terreno y la obra civil
+                    </p>
+                    <div className="flex justify-between items-center">
+                        <span className="font-bold">{formatearNumero(valorIntrinseco)} USD</span>
+                        {superficieConstruida > 0 && (
+                            <span className="text-sm">
+                                {formatearNumero(calcularValorMetroCuadrado(valorIntrinseco, superficieConstruida))} USD/m²
+                            </span>
+                        )}
+                    </div>
                 </div>
-            </div>
-
+            )}
+            
             {/* Tabla con valores calculados y editables */}
             <div className="mt-4 p-3 border rounded">
-                <h4 className="text-md font-medium text-gray-700">Valores Estimados:</h4>
-                <table className="w-full border-collapse mt-2">
-                    <thead>
-                        <tr className="bg-gray-50">
-                            <th className="border px-4 py-2">Concepto</th>
-                            <th className="border px-4 py-2">Valor (USD)</th>
-                            <th className="border px-4 py-2">USD/m²</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de MERCADO</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={valorMercado}
-                                    onChange={handleValorMercadoChange}
-                                    className={`w-full text-center px-2 py-1 border rounded-md ${mostrarAlertaHomologacion ? 'border-red-500 bg-red-50' : ''}`}
-                                />
-                                {mostrarAlertaHomologacion && (
-                                    <p className="text-xs text-red-600 mt-1">
-                                        El valor ingresado difiere más del 20% del valor calculado ({formatearNumero(valorFinalCalculado)} USD)
-                                    </p>
-                                )}
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(valorMercadoMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de REALIZACIÓN INMEDIATA</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={valorVentaRapida}
-                                    onChange={handleValorVentaRapidaChange}
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(valorVentaRapidaMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de REMATE</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={valorRemate}
-                                    onChange={handleValorRemateChange}
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(valorRemateMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="border px-4 py-2">Precio de REPOSICIÓN A NUEVO</td>
-                            <td className="border px-4 py-2">
-                                <InputNumerico
-                                    value={costoReposicion}
-                                    onChange={setCostoReposicion}
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                            <td className="border px-4 py-2 font-bold">
-                                <input
-                                    type="text"
-                                    value={formatearNumero(costoReposicionMetroCuadrado)}
-                                    readOnly
-                                    className="w-full text-center px-2 py-1 border rounded-md"
-                                />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                {tipoInforme === 'ITAU' ? (
+                    <TotalesItau
+                        valorMercado={valorMercado}
+                        valorVentaRapida={valorVentaRapida}
+                        valorRemate={valorRemate}
+                        valorMercadoMetroCuadrado={valorMercadoMetroCuadrado}
+                        valorVentaRapidaMetroCuadrado={valorVentaRapidaMetroCuadrado}
+                        valorRemateMetroCuadrado={valorRemateMetroCuadrado}
+                        dolarCotizacion={dolarCotizacion}
+                        valorUI={valorUI}
+                        onDolarCotizacionChange={setDolarCotizacion}
+                        onValorUIChange={setValorUI}
+                        onValorMercadoChange={handleValorMercadoChange}
+                        onValorVentaRapidaChange={handleValorVentaRapidaChange}
+                        onValorRemateChange={handleValorRemateChange}
+                        onValorMercadoMetroCuadradoChange={handleValorMercadoMetroCuadradoChange}
+                        onValorVentaRapidaMetroCuadradoChange={handleValorVentaRapidaMetroCuadradoChange}
+                        onValorRemateMetroCuadradoChange={handleValorRemateMetroCuadradoChange}
+                        formatearNumero={formatearNumero}
+                    />
+                ) : (
+                    <>
+                        <h4 className="text-md font-medium text-gray-700">Valores Estimados:</h4>
+                        <table className="w-full border-collapse mt-2">
+                            <thead>
+                                <tr className="bg-gray-50">
+                                    <th className="border px-4 py-2">Concepto</th>
+                                    <th className="border px-4 py-2">Valor (USD)</th>
+                                    <th className="border px-4 py-2">USD/m²</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de MERCADO</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={valorMercado}
+                                            onChange={handleValorMercadoChange}
+                                            className={`w-full text-center px-2 py-1 border rounded-md ${mostrarAlertaHomologacion ? 'border-red-500 bg-red-50' : ''}`}
+                                        />
+                                        {mostrarAlertaHomologacion && (
+                                            <p className="text-xs text-red-600 mt-1">
+                                                El valor ingresado difiere más del 20% del valor calculado ({formatearNumero(valorFinalCalculado)} USD)
+                                            </p>
+                                        )}
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(valorMercadoMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de REALIZACIÓN INMEDIATA</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={valorVentaRapida}
+                                            onChange={handleValorVentaRapidaChange}
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(valorVentaRapidaMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de REMATE</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={valorRemate}
+                                            onChange={handleValorRemateChange}
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(valorRemateMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="border px-4 py-2">Precio de REPOSICIÓN A NUEVO</td>
+                                    <td className="border px-4 py-2">
+                                        <InputNumerico
+                                            value={costoReposicion}
+                                            onChange={setCostoReposicion}
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2 font-bold">
+                                        <input
+                                            type="text"
+                                            value={formatearNumero(costoReposicionMetroCuadrado)}
+                                            readOnly
+                                            className="w-full text-center px-2 py-1 border rounded-md"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </>
+                )}
             </div>
-
             {/* Modal para agregar superficies */}
             <ModalSuperficie
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
+                tipoInforme={tipoInforme}
                 onAddSuperficie={(nuevaSuperficie) => {
-                    // Agregar la nueva superficie al array de superficies
+                    // Calcular el valor para bienes comunes
+                    if (nuevaSuperficie.tipoSuperficie === 'comun') {
+                        // Calcular valor total de bienes propios existentes para valorTotalSinCorregir (17%)
+                        const bienesPropios = superficies.filter(s => s.tipoSuperficie === 'propio');
+                        const valorReposicionPropios = bienesPropios.reduce((total, sup) => {
+                            const valorReposicion = parseFloat(sup.valorTotalSinCorregir ||
+                                calcularValorTotalSinCorregir(
+                                    typeof sup.m2 === 'number' ? sup.m2 : parseFloat(sup.m2 || 0),
+                                    typeof sup.precioMetro === 'number' ? sup.precioMetro : parseFloat(sup.precioMetro || 0)
+                                ));
+                            return total + valorReposicion;
+                        }, 0);
+
+                        // Calcular valor total de bienes propios existentes para valorTotal (25%)
+                        const valorTotalPropios = bienesPropios.reduce((total, sup) => {
+                            return total + parseFloat(sup.valorTotal || 0);
+                        }, 0);
+
+                        // Asignar el 17% del valor de reposición como valor inicial para valorTotalSinCorregir
+                        nuevaSuperficie.valorTotalSinCorregir = formatearNumero(valorReposicionPropios * 0.17);
+                        // Asignar el 25% del valor total como valor inicial para valorTotal
+                        nuevaSuperficie.valorTotal = formatearNumero(valorTotalPropios * 0.25);
+
+                        // Marcar como no editado manualmente
+                        nuevaSuperficie.editadoManualmente = false;
+                        nuevaSuperficie.editadoManualmenteValorTotal = false;
+
+                        console.log('Nuevo bien común creado con valorTotalSinCorregir:', nuevaSuperficie.valorTotalSinCorregir);
+                        console.log('Nuevo bien común creado con valorTotal:', nuevaSuperficie.valorTotal);
+                    }
+
+                    // Agregar la nueva superficie al array - USAR SOLO UNO DE ESTOS MÉTODOS
+                    // Método 1: Especificar todos los campos individualmente
                     setSuperficies(prev => [...prev, {
-                        descripcion: nuevaSuperficie.nombre,
+                        descripcion: nuevaSuperficie.descripcion,
                         ampliaciones: nuevaSuperficie.ampliaciones,
                         promedioEdad: nuevaSuperficie.promedioEdad,
-                        m2: nuevaSuperficie.metros,
+                        m2: nuevaSuperficie.m2,
                         factorEdad: nuevaSuperficie.factorEdad,
                         conservacion: nuevaSuperficie.conservacion,
                         factorConservacion: nuevaSuperficie.factorConservacion,
                         precioMetro: nuevaSuperficie.precioMetro,
                         precioMetroCorregido: nuevaSuperficie.precioMetroCorregido,
-                        valorTotal: nuevaSuperficie.valorTotal
+                        valorTotal: nuevaSuperficie.valorTotal,
+                        tipoSuperficie: nuevaSuperficie.tipoSuperficie,
+                        valorTotalSinCorregir: nuevaSuperficie.valorTotalSinCorregir,
+                        editadoManualmente: nuevaSuperficie.editadoManualmente || false,
+                        editadoManualmenteValorTotal: nuevaSuperficie.editadoManualmenteValorTotal || false
                     }]);
+
                 }}
             />
+
 
             {/* Modal de confirmación para eliminar */}
             <ModalConfirmacion

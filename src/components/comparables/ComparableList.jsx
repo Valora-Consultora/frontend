@@ -12,6 +12,7 @@ const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, h
   comparables = comparables.filter(comparable => comparable.title && comparable.price && comparable.location && comparable.thumbnail && comparable.permalink);
   comparables = comparables.slice(0, ITEMS_PER_PAGE * page);
 
+  //console.log("viendo comparables", comparables);
   return (
     comparables?.length > 0 ? (
       <div className="grid grid-cols-12 gap-4 mt-4">

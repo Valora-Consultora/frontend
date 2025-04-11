@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import ItauLogo from "../../images/logo-itau.png";
+import Modal from "react-modal";
 import ComparableSection from "../comparables/ComparableSection";
 import ComparableList from "../comparables/ComparableList";
-
+import SelectedComparableList from "../comparables/SelectedComparableList";
+import InformeItauService from "../../api/InformeItauService";
 import { ToastContainer, toast } from "react-toastify";
 import ComparablesService from "../../api/ComparablesService";
-import InformeItauService from '../../api/InformeItauService';
+import CalculoInforme from "../calculo/CalculoInforme";
 
 const FormularioItau = () => {
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
+  const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
+
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
+  const [comparableEdit, setComparableEdit] = useState(null);
+
+  const [shownComparablesML, setShownComparablesML] = useState(true);
+  const [getCalculoData, setGetCalculoData] = useState(null);
+  const [valorMetroTerreno, setValorMetroTerreno] = useState(0);
 
   const [formData, setFormData] = useState({
     /// INFORMACION SOBRE LA TASACION
@@ -208,6 +218,16 @@ const FormularioItau = () => {
 
     obeservacionesCondicionesMercado: "",
 
+    superficieConstruida: 0,
+    valorMetroTerreno: 0,
+    valorMercado: 0,
+    valorVentaRapida: 0,
+    valorRemate: 0,
+    valorIntrinseco: 0,
+    costoReposicion: 0,
+    deslindeFrente: 0,
+    deslindeFondo: 0,
+
     comparables: [],
   });
 
@@ -219,12 +239,50 @@ const FormularioItau = () => {
     }));
   };
 
+
+  // Manejar el cambio de valorMetroTerreno
+  const handleValorMetroTerrenoChange = (e) => {
+    const valor = parseFloat(e.target.value) || 0;
+    setValorMetroTerreno(valor);
+    setFormData({
+      ...formData,
+      valorMetroTerreno: valor
+    });
+  };
+
+  const handleEditComparable = (comparable) => {
+    // const comparable = comparables.find((comparable) => comparable.id === id);
+    setComparableEdit(comparable);
+    console.log(comparableEdit);
+    setIsModalEditOpen(true);
+  };
+
+  const handleEditHomologation = (comparable) => {
+    setComparableEdit(comparable);
+    setIsModalHomologationOpen(true);
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Handle form submission
-      console.log(formData);
+      // Primero crear el informe
       const response = await InformeItauService.createInformeItau(formData);
+
+      // Si tenemos datos de cálculo, guardarlos
+      if (getCalculoData && response && response.id) {
+        try {
+          const calculoData = getCalculoData();
+          console.log("Datos del cálculo a enviar:", calculoData);
+          await InformeItauService.saveCalculo(response.id, calculoData);
+        } catch (error) {
+          console.error("Error al guardar el cálculo:", error);
+          toast.warning("El informe se guardó, pero hubo un problema al guardar los cálculos.", {
+            position: "top-right",
+            autoClose: 5000,
+          });
+        }
+      }
+
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
         autoClose: 2500,
@@ -246,17 +304,28 @@ const FormularioItau = () => {
   };
 
   const handleSelectedComparable = (id) => {
-    setComparables((prevComparables) =>
-      prevComparables.map((comparable) => {
-        if (comparable.id === id) {
-          if (comparable.main) {
-            return comparable;
-          }
-          return { ...comparable, selected: !comparable.selected };
-        }
-        return comparable;
-      })
-    );
+    const comparable = comparables.find((comparable) => comparable.id === id);
+    if (comparable.selected) {
+      setComparables((prevComparables) =>
+        prevComparables.map((comparable) =>
+          comparable.id === id ? { ...comparable, selected: false } : comparable
+        )
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: prevData.comparables.filter((comparable) => comparable.id !== id),
+      }));
+    } else {
+      setComparables((prevComparables) =>
+        prevComparables.map((comparable) =>
+          comparable.id === id ? { ...comparable, selected: true } : comparable
+        )
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: [...prevData.comparables, comparable],
+      }));
+    }
   }
 
   const handleLoadMoreComparables = () => {
@@ -349,13 +418,40 @@ const FormularioItau = () => {
     }
   };
 
-  const handleSelectMainComparable = (id) => {
-    setComparables((prevComparables) =>
-      prevComparables.map((comparable) =>
-        comparable.id === id ? { ...comparable, main: !comparable.main } : comparable
-      )
-    );
+  const configuracionItau = {
+    nombreBanco: 'Itaú',
+    factoresConservacion: [
+      { label: 'Excelente', factor: 1.00 },
+      { label: 'Bueno', factor: 0.95 },
+      { label: 'Medio', factor: 0.90 },
+      { label: 'Regular', factor: 0.85 },
+      { label: 'Malo', factor: 0.80 },
+    ],
+    formulaFactorEdad: (anio) => {
+      const anioActual = new Date().getFullYear();
+      const edad = anioActual - anio;
+      return Math.max(0.5, 1 - edad * 0.01);
+    },
   };
+
+  const handleSelectMainComparable = (id) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: prevData.comparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, main: !comparable.main } : comparable
+      ),
+    }));
+  };
+
+  const handleSaveComparable = (comparable) => {
+    console.log('Attempting to save', comparable)
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: [...prevData.comparables, comparable],
+    }));
+    console.log(formData);
+    setIsModalEditOpen(false);
+  }
 
   // Options for radio inputs (same as before)
   const options = {
@@ -1012,6 +1108,7 @@ const FormularioItau = () => {
                   </div>
                 </div>
               </div>
+
 
               {/* Comodidades de planta industrial */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
@@ -1797,8 +1894,22 @@ const FormularioItau = () => {
 
               {/* Comparable */}
               <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">Comparables</h4>
-                <div className="grid grid-cols-12 gap-4 items-center">
+                <div className="flex flex-row justify-between items-center">
+                  <h4 className="text-xl text-green-900">Comparables MercadoLibre</h4>
+                  <button
+                    type="button"
+                    onClick={() => setShownComparablesML(!shownComparablesML)}
+                    className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                  >
+                    {shownComparablesML ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
+                <div
+                  className="grid grid-cols-12 gap-4 items-center transition-all duration-500 overflow-hidden"
+                  style={{
+                    maxHeight: shownComparablesML ? `9000px` : "0px",
+                  }}
+                >
                   <div className="col-span-12">
                     <p className="text-sm text-gray-700">
                       <ComparableSection
@@ -1817,7 +1928,43 @@ const FormularioItau = () => {
                   </div>
                 </div>
               </div>
+
+              <div className="col-span-12 space-y-4 border p-3 rounded">
+                <h4 className="text-xl text-green-900">Comparables Seleccionados</h4>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12">
+                    <p className="text-sm text-gray-700">
+                      <SelectedComparableList
+                        handleEditComparable={handleEditComparable}
+                        handleEditHomologation={handleEditHomologation}
+                        handleSelectMainComparable={handleSelectMainComparable}
+                        comparables={formData.comparables}
+                      />
+                      <button
+                        type="button"
+                        className="bg-green-900 text-white px-4 py-2 mt-2 rounded-md hover:bg-green-700"
+                        onClick={() => {
+                          setIsModalEditOpen(true);
+                          setComparableEdit(null);
+                        }}
+                      >
+                        Agregar Comparable
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <CalculoInforme
+              tipoInforme="ITAU"
+              configuracion={configuracionItau}
+              superficieTerreno={parseFloat(formData.superficieTerreno) || 0}
+              onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+              comparables={formData.comparables || []}
+              estadoConservacion={formData.calidadMantenimiento}
+              anioConstruccion={formData.anioConstruccion}
+            />
             <div className="mt-4 text-center">
               <button
                 type="submit"
@@ -1829,6 +1976,8 @@ const FormularioItau = () => {
           </div>
         </form>
       </div>
+      <ModalComparable isModalEditOpen={isModalEditOpen} setIsModalEditOpen={setIsModalEditOpen} comparableEdit={comparableEdit} handleSaveComparable={handleSaveComparable} />
+      <ModalHomologacion isModalHomologationOpen={isModalHomologationOpen} setIsModalHomologationOpen={setIsModalHomologationOpen} handleInputChange={handleInputChange} />
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -1842,6 +1991,189 @@ const FormularioItau = () => {
       />
     </div>
   );
+}
+
+const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, handleSaveComparable }) => {
+  const [comparable, setComparable] = useState(comparableEdit);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'direccion') {
+      setComparable({ ...comparable, location: { ...(comparable?.location ?? {}), address_line: value } })
+    }
+    if (name === 'titulo') {
+      setComparable({ ...comparable, title: value })
+    }
+    if (name === 'precio') {
+      setComparable({ ...comparable, price: value })
+    }
+  }
+
+  console.log('Viendo comp', comparable)
+
+  return <Modal
+    isOpen={isModalEditOpen}
+    onRequestClose={() => setIsModalEditOpen(false)}
+    contentLabel="Editar comparable"
+    className="fixed inset-0 flex items-center justify-center z-50"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+  >
+    <div className="bg-gray-100 w-2/5 rounded-lg">
+      {/* Editar comparable, campos: direccion, titulo, precio */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 space-y-4 border p-3 rounded">
+            <h4 className="text-xl text-green-900">Modificar Datos de Comparable</h4>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="direccion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Dirección:
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                name="direccion"
+                value={comparable?.location?.address_line}
+                defaultValue={comparable?.location?.address_line}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="titulo"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Título:
+              </label>
+              <input
+                type="text"
+                id="titulo"
+                name="titulo"
+                value={comparable?.title}
+                defaultValue={comparable?.title}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="precio"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Precio:
+              </label>
+              <input
+                type="text"
+                id="precio"
+                name="precio"
+                value={comparable?.price}
+                defaultValue={comparable?.price}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row mt-4 justify-center space-x-2">
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                handleSaveComparable(comparable)
+              }}
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              Guardar
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalEditOpen(false)}
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Modal>
+}
+
+const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange}) => {
+  return <Modal
+    isOpen={isModalHomologationOpen}
+    onRequestClose={() => setIsModalHomologationOpen(false)}
+    contentLabel="Editar homologación"
+    className="fixed inset-0 flex items-center justify-center z-50"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+  >
+    <div className="bg-gray-100 w-2/5 rounded-lg">
+      {/* Editar homologacion, campos: piso, ubicacion */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 space-y-4 border p-3 rounded">
+            <h4 className="text-xl text-green-900">Homologación</h4>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="piso"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Piso:
+              </label>
+              <input
+                type="text"
+                id="piso"
+                name="piso"
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="ubicacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Ubicación:
+              </label>
+              <input
+                type="text"
+                id="ubicacion"
+                name="ubicacion"
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row space-x-2 justify-center mt-4">
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalHomologationOpen(false)}
+              className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              Guardar
+            </button>
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsModalHomologationOpen(false)}
+              className="bg-red-900 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </Modal>;
 }
 
 export default FormularioItau;
