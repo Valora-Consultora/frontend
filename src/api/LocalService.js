@@ -1,5 +1,4 @@
 import apiClient from "./apiClient";
-import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL; 
 
@@ -7,7 +6,7 @@ const LocalService = {
 
   createLocal: async (localData) => {
     try {
-        const response = await axios.post(`${API_URL}/api/create-local`, localData, {
+        const response = await apiClient.post(`${API_URL}/api/create-local`, localData, {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -20,7 +19,7 @@ const LocalService = {
 },
   updateLocal: async (id, localData) => {
     try {
-        const response = await axios.put(`${API_URL}/api/update-local/${parseInt(id)}`, localData, {
+        const response = await apiClient.put(`${API_URL}/api/update-local/${parseInt(id)}`, localData, {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -34,7 +33,7 @@ const LocalService = {
 
     getLocalByIdInspeccion: async (idInspeccion) => {
       try {
-        const response = await axios.get(`${API_URL}/api/locales/${parseInt(idInspeccion)}`);
+        const response = await apiClient.get(`${API_URL}/api/locales/${parseInt(idInspeccion)}`);
         return response.data;
       } catch (error) {
         console.error('Error al obtener locales:', error);
@@ -44,7 +43,7 @@ const LocalService = {
 
     deleteLocalById: async (idLocal) => {
       try {
-        const response = await axios.delete(`${API_URL}/api/local/${parseInt(idLocal)}`);
+        const response = await apiClient.delete(`${API_URL}/api/local/${parseInt(idLocal)}`);
         return response.data;
       } catch (error) {
         console.error('Error al eliminar el local:', error);

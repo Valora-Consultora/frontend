@@ -264,7 +264,7 @@ const InformeScotia = () => {
       }
 
       // Continuar con el envío del informe
-      formData.estado = borrador ? "borrador" : "enviado";
+      formData.estadoInforme = borrador ? "BORRADOR" : "PENDIENTE";
       const informe = await InformeScotiaService.createInformeScotia(provisionalInformeId, formData);
       
       toast.success("Formulario enviado exitosamente", {
@@ -941,8 +941,6 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
       setComparable({ ...comparable, price: value })
     }
   }
-
-  console.log('Viendo comp', comparable)
 
   return <Modal
     isOpen={isModalEditOpen}

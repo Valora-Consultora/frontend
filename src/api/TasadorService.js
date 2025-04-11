@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from "./apiClient";
 
 const API_URL = process.env.REACT_APP_API_URL; 
 
@@ -6,7 +6,7 @@ const TasadorService = {
 
     getTasadores: async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/tasadores`);
+      const response = await apiClient.get(`${API_URL}/api/tasadores`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener tasadores:', error);
@@ -16,7 +16,7 @@ const TasadorService = {
 
   getTasadorById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/api/tasador/${parseInt(id)}`);
+      const response = await apiClient.get(`${API_URL}/api/tasador/${parseInt(id)}`);
       return response.data;
     } catch (error) {
       throw new Error('Error al obtener el tasador por ID: ' + error.message);

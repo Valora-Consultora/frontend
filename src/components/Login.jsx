@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import LoginService from "../api/LoginService";
-import {setUser} from '../app/slices/userSlice';
+import { setUser } from '../app/slices/userSlice';
 import { useSelector } from "react-redux";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from 'jwt-decode';
+import { ToastContainer, toast } from "react-toastify";
 
 function Login() {
   const [info, setInfo] = useState({
@@ -15,20 +18,50 @@ function Login() {
   const state = useState();
   const usuario = useSelector(state => state.user);
 
+  const googleSuccess = async (payload) => {
+    const data = jwtDecode(payload.credential);
+    try {
+      const response = await LoginService.verifyRegisteredEmail(data.email);
+      
+      if (response) {
+        const user = response.usuario;
+
+        // Guarda el usuario en el estado global
+        dispatch(setUser({
+          username: user.username,
+          nombre: user.nombre,
+          tipoUsuario: user.tipoUsuario,
+          id: user.id,
+        }));
+
+        localStorage.setItem("token", response.token);
+      }
+
+      window.location.href = "/Home";
+    } catch (error) {
+      toast.error("El correo electrónico no está registrado en el sistema.");
+    }
+    setLoading(false);
+  }
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await LoginService(info);
+      const response = await LoginService.login(info);
 
       if (response) {
+        const user = response.usuario;
+
         // Guarda el usuario en el estado global
         dispatch(setUser({
-          username: response.username,
-          nombre: response.nombre,
-          tipoUsuario: response.tipoUsuario,
-          id: response.id,
+          username: user.username,
+          nombre: user.nombre,
+          tipoUsuario: user.tipoUsuario,
+          id: user.id,
         }));
+
+        localStorage.setItem("token", response.token);
 /*         console.log('usuario en login  ' , usuario)
  */
         // También puedes guardarlo en localStorage si lo necesitas
@@ -49,8 +82,8 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200">
-      <div className="w-full max-w-md">
+    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-gray-200">
+      <div className="w-full max-w-md flex flex-col justify-start">
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           <h2 className="text-center text-2xl font-semibold mb-6 text-green-900">
             Iniciar Sesión
@@ -96,7 +129,26 @@ function Login() {
             </div>
           </form>
         </div>
+        <div className="self-center">
+          <GoogleLogin
+            shape="pill"
+            locale="es"
+            onSuccess={googleSuccess}
+            useOneTap
+          />
+        </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }

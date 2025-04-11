@@ -1,11 +1,11 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const ComparablesService = {
   getComparables: async (params) => {
     try {
-      const response = await axios.get(`${API_URL}/api/comparables?${params}&limit=30`);
+      const response = await apiClient.get(`${API_URL}/api/comparables?${params}&limit=30`);
       // FIXME: BACKEND CAPAZ
       response.data.results.map((result) => {
         result.thumbnail = result.thumbnail.replace("I.jpg", "F.jpg");
@@ -20,7 +20,7 @@ const ComparablesService = {
 
   saveComparable: async (comparable) => {
     try {
-      const response = await axios.post(`${API_URL}/api/comparables`, comparable, {
+      const response = await apiClient.post(`${API_URL}/api/comparables`, comparable, {
         headers: {
           "Content-Type": "application/json",
         },
