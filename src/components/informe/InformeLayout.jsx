@@ -14,7 +14,7 @@ import FormularioParticular from "./InformeParticular";
 const InformeLayout = () => {
   const dispatch = useDispatch();
   const { banco } = useParams();
-  console.log('BANCOFIRO', banco);
+  //console.log('BANCOFIRO', banco);
   const [selectedBanco, setSelectedBanco] = useState(banco ?? "");
   const [showSelector, setShowSelector] = useState(banco ? false : true);
   const [informes, setInformes] = useState([]);
@@ -63,7 +63,7 @@ const InformeLayout = () => {
     const fetchInformes = async () => {
       try {
         const response = await InformeService.getInformesByTasador(usuario);
-        console.log(response);
+        //console.log(response);
         setInformes(response);
       } catch (error) {
         console.error("Error al obtener los informes:", error);
@@ -72,7 +72,7 @@ const InformeLayout = () => {
     fetchInformes();
   }, [usuario]);
 
-  console.log('selected', selectedBanco);
+  //console.log('selected', selectedBanco);
 
   return (
     <div>

@@ -14,6 +14,7 @@ import ItemComodidadesDescripcionModal from '../utils/ItemComodidadesDescripcion
 import ItemPlanillaDescripcionModal from '../utils/ItemPlanillaDescripcionModal'
 import CalculoInforme from '../calculo/CalculoInforme';
 
+
 const InformeBbva = () => {
   const navigate = useNavigate();
   const provisionalInformeId = useSelector(state => state.informe.provisionalInformeId);
@@ -33,6 +34,8 @@ const InformeBbva = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedFilesFotos, setSelectedFilesFotos] = useState([]);
   const [previewImagesFotos, setPreviewImagesFotos] = useState([]);
+
+  const [formikValoresInicializados, setFormikValoresInicializados] = useState(false);
 
   //Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -258,9 +261,13 @@ const InformeBbva = () => {
     }
   };
 
+  const configuracionBbva = {
+    nombreBanco: 'BBVA',
+  };
+
   const handleUploadFotos = async (id) => {
     if (!selectedFilesFotos.length) {
-      console.log("⚠️ No hay fotos para subir.");
+      //console.log("⚠️ No hay fotos para subir.");
       return;
     }
 
@@ -268,7 +275,7 @@ const InformeBbva = () => {
     selectedFilesFotos.forEach(file => formData.append("files", file));
 
     try {
-      console.log("📤 Enviando fotos a:", `http://localhost:8080/api/informeBbva/${id}/uploadFotos`);
+      //console.log("📤 Enviando fotos a:", `http://localhost:8080/api/informeBbva/${id}/uploadFotos`);
       await InformeBbvaService.uploadFotos(id, formData);
 
       toast.success("Fotos subidas correctamente");
@@ -353,18 +360,18 @@ const InformeBbva = () => {
 
   const handleUploadPlanos = async (id) => {
     if (!selectedFiles.length) {
-      console.log("⚠️ No hay archivos para subir.");
+      //console.log("⚠️ No hay archivos para subir.");
       return;
     }
 
     const formData = new FormData();
     selectedFiles.forEach(file => {
-      console.log("📂 Agregando archivo:", file.name);
+      //console.log("📂 Agregando archivo:", file.name);
       formData.append("files", file);
     });
 
     try {
-      console.log("📤 Enviando imágenes a:", `http://localhost:8080/api/informeBbva/${id}/uploadPlanos`);
+      //console.log("📤 Enviando imágenes a:", `http://localhost:8080/api/informeBbva/${id}/uploadPlanos`);
       const response = await InformeBbvaService.uploadPlanos(id, formData);
 
       toast.success("Imágenes subidas correctamente");
@@ -390,43 +397,42 @@ const InformeBbva = () => {
   };
 
   // Componente para conectar los cálculos con Formik
+  // Componente para conectar los cálculos con Formik
   const CalculoFormikConnector = ({ getCalculoData, setFieldValue }) => {
     useEffect(() => {
+      // Esta función sólo se ejecutará una vez al inicio
       const actualizarValoresFormik = () => {
         if (!getCalculoData) return;
 
         try {
           const calculoData = getCalculoData();
 
-          // Actualizamos los valores relevantes en el formulario Formik
-          setFieldValue('valorMercadoTotalResumen', calculoData.valorMercado || 0);
-          setFieldValue('valorMercadoM2Resumen', calculoData.valorMercadoMetroCuadrado || 0);
-          setFieldValue('valorRemateTotalResumen', calculoData.valorRemate || 0);
-          setFieldValue('valorRemateM2Resumen', calculoData.valorRemateMetroCuadrado || 0);
-          setFieldValue('valorTerrenoTotalResumen', calculoData.valorTerreno || 0);
-          setFieldValue('valorTerrenoM2Resumen', calculoData.valorMetroTerreno || 0);
-          setFieldValue('superficieTerrenoResumen', calculoData.superficieTerreno || 0);
-          setFieldValue('valorObraCivilTotalResumen', calculoData.valorObraCivil || 0);
-          setFieldValue('valorObraCivilM2Resumen', calculoData.costoReposicionMetroCuadrado || 0);
+          // Establece los valores solo la primera vez, sin sobrescribir cambios manuales
+          if (!formikValoresInicializados) {
+            setFieldValue('valorMercadoTotalResumen', calculoData.valorMercado || 0);
+            setFieldValue('valorMercadoM2Resumen', calculoData.valorMercadoMetroCuadrado || 0);
+            setFieldValue('valorRemateTotalResumen', calculoData.valorRemate || 0);
+            setFieldValue('valorRemateM2Resumen', calculoData.valorRemateMetroCuadrado || 0);
+            setFieldValue('valorTerrenoTotalResumen', calculoData.valorTerreno || 0);
+            setFieldValue('valorTerrenoM2Resumen', calculoData.valorMetroTerreno || 0);
+            setFieldValue('superficieTerrenoResumen', calculoData.superficieTerreno || 0);
+            setFieldValue('valorObraCivilTotalResumen', calculoData.valorObraCivil || 0);
+            setFieldValue('valorObraCivilM2Resumen', calculoData.costoReposicionMetroCuadrado || 0);
 
-          // También podemos actualizar el valor en superficieTerreno para que se refleje en el componente CalculoInforme
-          setFieldValue('superficieTerrenoCaracteristicas', calculoData.superficieTerreno || 0);
+            setFieldValue('superficieTerrenoCaracteristicas', calculoData.superficieTerreno || 0);
+
+            // Marca como inicializado
+            setFormikValoresInicializados(true);
+          }
         } catch (error) {
           console.error("Error al actualizar valores desde cálculo:", error);
         }
       };
 
-      // Ejecutar una vez inmediatamente
+      // Ejecutar una vez al inicio
       actualizarValoresFormik();
+    }, []); // Quita las dependencias para que solo se ejecute una vez
 
-      // Configuramos un intervalo para actualizar periódicamente
-      const intervalId = setInterval(actualizarValoresFormik, 2000);
-
-      // Limpiamos el intervalo cuando el componente se desmonte
-      return () => clearInterval(intervalId);
-    }, [getCalculoData, setFieldValue]);
-
-    // Este componente no renderiza nada visible
     return null;
   };
 
@@ -437,13 +443,13 @@ const InformeBbva = () => {
       if (getCalculoData) {
         try {
           const calculoData = getCalculoData();
-          console.log("Datos del cálculo a enviar:", calculoData);
+          //console.log("Datos del cálculo a enviar:", calculoData);
 
           // Si hay un ID de informe, guardar el cálculo
           if (provisionalInformeId) {
             await InformeBbvaService.saveCalculo(provisionalInformeId, calculoData);
           } else {
-            console.log("No hay ID de informe disponible para guardar el cálculo");
+            //console.log("No hay ID de informe disponible para guardar el cálculo");
           }
         } catch (error) {
           console.error("Error al obtener o guardar datos del cálculo:", error);
@@ -538,12 +544,12 @@ const InformeBbva = () => {
       const response = await InformeBbvaService.updateInformeBbva(provisionalInformeId, values);
 
       if (selectedFiles.length > 0) {
-        console.log("📤 Subiendo imágenes de planos...");
+        //console.log("📤 Subiendo imágenes de planos...");
         await handleUploadPlanos(response.id);
       }
 
       if (selectedFilesFotos.length > 0) {
-        console.log("📤 Subiendo imágenes de fotos...");
+        //console.log("📤 Subiendo imágenes de fotos...");
         await handleUploadFotos(response.id);
       }
 
@@ -594,11 +600,11 @@ const InformeBbva = () => {
   const submitHandler = async (values) => {
     try {
 
-      console.log("Valores enviados al backend: ", values); // 👈 Verifica qué se está enviando
+      //console.log("Valores enviados al backend: ", values); // 👈 Verifica qué se está enviando
 
       const updatePromises = itemsObraCivil.map(async (item) => {
 
-        console.log("item tipoAguaCalienteDescripcion ", item.tipoAguaCalienteDescripcion);
+        //console.log("item tipoAguaCalienteDescripcion ", item.tipoAguaCalienteDescripcion);
 
         const updatedFields = {
           pilotesCimentacionDescripcion: item.pilotesCimentacionDescripcion,
@@ -635,7 +641,7 @@ const InformeBbva = () => {
           otrosMurosInteriorInteriorDescripcion: item.otrosMurosInteriorInteriorDescripcion
         };
 
-        console.log("item tipoAguaCalienteDescripcion ", item.tipoAguaCalienteDescripcion);
+        //console.log("item tipoAguaCalienteDescripcion ", item.tipoAguaCalienteDescripcion);
 
         return await ItemObraCivilService.updateItemObraCivil(item.id, updatedFields);
       });
@@ -726,11 +732,11 @@ const InformeBbva = () => {
     const files = Array.from(event.target.files);
 
     if (files.length === 0) {
-      console.log("⚠️ No se seleccionaron archivos.");
+      //console.log("⚠️ No se seleccionaron archivos.");
       return;
     }
 
-    console.log("📂 Archivos seleccionados:", files.map(f => f.name));
+    //console.log("📂 Archivos seleccionados:", files.map(f => f.name));
 
     setSelectedFiles(prev => [...prev, ...files]);
     const filePreviews = files.map(file => URL.createObjectURL(file));
@@ -742,11 +748,11 @@ const InformeBbva = () => {
     const files = Array.from(event.target.files);
 
     if (files.length === 0) {
-      console.log("⚠️ No se seleccionaron fotos.");
+      //console.log("⚠️ No se seleccionaron fotos.");
       return;
     }
 
-    console.log("📂 Fotos seleccionadas:", files.map(f => f.name));
+    //console.log("📂 Fotos seleccionadas:", files.map(f => f.name));
 
     setSelectedFilesFotos(prev => [...prev, ...files]);
     const filePreviews = files.map(file => URL.createObjectURL(file));
@@ -4255,28 +4261,7 @@ const InformeBbva = () => {
                       <label className="p-2 text-gray-700 font-bold text-sm">Otros</label>
                     </div>
                   </div>
-                  <CalculoInforme
-                    configuracion={{
-                      nombreBanco: 'BBVA',
-                      factoresConservacion: [
-                        { label: 'Nuevo', factor: 1.00 },
-                        { label: 'Buen Estado', factor: 0.95 },
-                        { label: 'Necesita Mantenimiento', factor: 0.90 },
-                        { label: 'Necesita Reparaciones', factor: 0.90 },
-                      ],
-                      formulaFactorEdad: (anio) => {
-                        const anioActual = new Date().getFullYear();
-                        const edad = anioActual - anio;
-                        return Math.max(0.5, 1 - edad * 0.01);
-                      },
-                    }}
-                    /*superficieTerreno={values.superficieTerrenoCaracteristicas || 0} */
-                    onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
-                  /* estadoConservacion={values.estadoConservacionDescripcionInmueble || "Buen estado"}
-                  categoria={values.categoriaDescripcionInmueble || ""}
-                  deslindeFrente={values.frente1Caracteristicas || 0}
-                  deslindeFondo={values.fondoCaracteristicas || 0} */
-                  />
+
 
                   <div className="grid grid-cols-4 gap-4 w-full pt-5">
                     <div className="flex flex-col items-center col-span-1">
@@ -6106,6 +6091,27 @@ const InformeBbva = () => {
 
 
                   </div>
+
+                  <CalculoInforme
+                    tipoInforme="BBVA"
+                    configuracion={configuracionBbva}
+                    superficieTerreno={values.superficieTerrenoCaracteristicas || 0}
+                    //comparables={formData.comparables || []}  
+                    onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
+                    //estadoConservacion={formData.calidadMantenimiento}
+                    //anioConstruccion={formData.anioConstruccion}
+                  />
+
+                  {/*                   <CalculoInformeBbva
+                    superficieTerreno={values.superficieTerrenoCaracteristicas || 0}
+                    onGetCalculoData={(fn) => {
+                      // Solo guarda la función la primera vez o cuando realmente quieras recalcular
+                      if (!getCalculoData) {
+                        setGetCalculoData(() => fn);
+                      }
+                    }}
+                    valorMetroTerrenoProp={values.valorTerrenoM2Resumen || 0}
+                  /> */}
                 </div>
               </div>
               <div className="mt-4 text-center">

@@ -8,8 +8,8 @@ const InspeccionService = {
 
     createInspeccion: async (inspeccionData) => {
       try {
-          console.log('ingresa en el create de inspeccionService');
-          console.log('inspeccionData', inspeccionData);
+          //console.log('ingresa en el create de inspeccionService');
+          //console.log('inspeccionData', inspeccionData);
 
           const response = await axios.post(`${API_URL}/api/create-inspeccion`, inspeccionData, {
               headers: {
@@ -26,9 +26,9 @@ const InspeccionService = {
     updateInspeccion: async (id, inspeccionData) => {
         try {
 
-            console.log('ingresa en el update de inspeccionService');
-            console.log('id ', id);
-            console.log('inspeccionData ', inspeccionData);
+            //console.log('ingresa en el update de inspeccionService');
+            //console.log('id ', id);
+            //console.log('inspeccionData ', inspeccionData);
 
             
             const response = await axios.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
@@ -36,7 +36,7 @@ const InspeccionService = {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('response ' + response)
+            //console.log('response ' + response)
             return response.data;
         } catch (error) {
             console.error('Error al actualizar inspeccion:', error);
@@ -46,7 +46,7 @@ const InspeccionService = {
 
     deleteInspeccion: async (id) => {
         try {
-            console.log('Llega al deleteInspeccion ')
+            //console.log('Llega al deleteInspeccion ')
           const response = await axios.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {

@@ -21,6 +21,7 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
     const [precioMetro, setPrecioMetro] = useState(0);
     const [precioMetroCorregido, setPrecioMetroCorregido] = useState(0);
     const [tipoSuperficie, setTipoSuperficie] = useState(superficieEditar?.tipoSuperficie || 'propio');
+    const [tipoObraCivilBbva, setTipoObraCivilBbva] = useState(superficieEditar?.tipoObraCivilBbva || 'Superficie Cubierta');
 
     // Tipo de bien (para HSBC)
     /* const [tipoBien, setTipoBien] = useState('propio');
@@ -146,18 +147,14 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
         setMetros(valor);
     };
 
-    // Manejador para cuando cambia el tipo de bien
-    /*     const handleTipoBienChange = (e) => {
-            setTipoBien(e.target.value);
-        }; */
 
-    // Finalizar y agregar la superficie
-    // Modificar la función handleAdd en ModalSuperficie.jsx
-    // Modificar la función handleAdd en ModalSuperficie.jsx
+
     const handleAdd = () => {
         // Para bienes comunes de uso común solo requerimos el nombre
         if (tipoSuperficie === 'comun') {
             if (!nombre) return;
+
+            console.log("[ModalSuperficie] Agregando superficie común con tipo:", tipoObraCivilBbva);
 
             onAddSuperficie({
                 descripcion: nombre,
@@ -166,31 +163,37 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
                 precioMetro: 'G', // Mostrar "G" en precio por metro
                 precioMetroCorregido: 'G',
                 valorTotal: 0,    // Se calculará después en CalculoInforme
-                id: superficieEditar && superficieEditar.id
+                id: superficieEditar && superficieEditar.id,
+                tipoObraCivilBbva: tipoInforme === 'BBVA' ? tipoObraCivilBbva : undefined,
+                superficieDocumentadaObraCivilSeccionEDescripcionInmueble: 'G',
+                superficieVerificadaObraCivilSeccionEDescripcionInmueble: 'G'
             });
-
+    
             // Limpiar el formulario
             setNombre('');
             setTipoSuperficie('propio');
             onClose(); // Cierra el modal después de agregar
             return;
         }
-
+    
         // Para otros tipos de superficie, mantener la validación original
         if (!nombre || !metros || !precioMetro || !anioOriginal) return;
-
+    
         // El código original sigue aquí...
         // Usar la función centralizada para convertir ampliaciones a string
         const ampliacionesString = convertirAmpliacionesAString(anioOriginal, ampliaciones);
-
+    
         // Formatear todos los valores numéricos a 2 decimales
         const metrosFormateado = formatearNumero(metros);
         const precioCorregido = formatearNumero(precioMetroCorregido);
-
+    
         // Usar la función centralizada para calcular el valor total
         const valorTotal = calcularValorTotalSuperficie(metrosFormateado, precioCorregido);
+        
+        console.log("[ModalSuperficie] Creando superficie con tipo:", tipoObraCivilBbva);
 
-        onAddSuperficie({
+
+        const nuevaSuperficie = {
             descripcion: nombre,
             ampliaciones: ampliacionesString,
             promedioEdad: formatearNumero(promedioEdad) || 0,
@@ -203,9 +206,19 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
             valorTotal,
             tipoSuperficie,
             // Agregar ID si estamos editando
-            id: superficieEditar && superficieEditar.id
+            id: superficieEditar && superficieEditar.id,
+            tipoObraCivilBbva: tipoInforme === 'BBVA' ? tipoObraCivilBbva : undefined,
+            superficieDocumentadaObraCivilSeccionEDescripcionInmueble: metrosFormateado,
+            superficieVerificadaObraCivilSeccionEDescripcionInmueble: metrosFormateado
+        };
+        
+        console.log("[ModalSuperficie] Objeto superficie completo:", {
+            descripcion: nuevaSuperficie.descripcion,
+            tipoObraCivilBbva: nuevaSuperficie.tipoObraCivilBbva,
+            tipoSuperficie: nuevaSuperficie.tipoSuperficie
         });
-
+        onAddSuperficie(nuevaSuperficie);
+     
         // Limpiar el formulario
         setNombre('');
         setAnioOriginal('');
@@ -219,10 +232,16 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
         setPrecioMetroCorregido(0);
         setCalculoAutomatico(true);
         setTipoSuperficie('propio');
+        if (tipoInforme === 'BBVA') {
+            setTipoObraCivilBbva('Superficie Cubierta'); // Resetear a valor por defecto
+        }
+    
         onClose(); // Cierra el modal después de agregar
     };
 
-    // En ModalSuperficie.jsx, reemplaza todo el return por este código
+    
+
+
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -254,6 +273,21 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
                         <option value="comun">Bien Común de Uso Común</option>
                     </select>
                 </div>
+
+                {tipoInforme === 'BBVA' && (
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Tipo de Obra Civil BBVA</label>
+                        <select
+                            value={tipoObraCivilBbva}
+                            onChange={(e) => setTipoObraCivilBbva(e.target.value)}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
+                        >
+                            <option value="Superficie Cubierta">Superficie Cubierta</option>
+                            <option value="Superficie Semi Cubierta">Superficie Semi Cubierta</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                )}
 
                 {/* Mostrar campos adicionales solo si NO es bien común de uso común */}
                 {tipoSuperficie !== 'comun' && (

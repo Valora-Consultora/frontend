@@ -29,7 +29,7 @@ function Login() {
           tipoUsuario: response.tipoUsuario,
           id: response.id,
         }));
-/*         console.log('usuario en login  ' , usuario)
+/*         //console.log('usuario en login  ' , usuario)
  */
         // También puedes guardarlo en localStorage si lo necesitas
 /*         localStorage.setItem("username", response.username);
@@ -37,7 +37,7 @@ function Login() {
         localStorage.setItem("tipoUsuario", response.tipoUsuario);
         localStorage.setItem("id", response.id); */
 
-/*         console.log('usuario en login ', usuario.id)
+/*         //console.log('usuario en login ', usuario.id)
  */        window.location.href = "/Home";
       }
 

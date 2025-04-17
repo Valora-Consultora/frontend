@@ -38,29 +38,29 @@ function Inspeccion() {
 
 
     useEffect(() => {
-        console.log('llega al nuevo useEffect');
+        //console.log('llega al nuevo useEffect');
 
         // Detectar si el usuario intenta abandonar la página
         const handleBeforeUnload = (event) => {
-            console.log('llega al nuevo useEffect handleBeforeUnload');
+            //console.log('llega al nuevo useEffect handleBeforeUnload');
 
             if (provisionalId) {
-                console.log('llega al nuevo useEffect if (provisionalId)');
+                //console.log('llega al nuevo useEffect if (provisionalId)');
                 // Eliminar la inspección si no se ha completado
                 InspeccionService.deleteInspeccion(provisionalId);
-                console.log("Inspección eliminada:", provisionalId);
+                //console.log("Inspección eliminada:", provisionalId);
             }
             // No es necesario llamar a preventDefault o returnValue en algunos casos, solo para mostrar una advertencia de salida
         };
 
         // Manejar "atras" del navegador o cambios de URL
         const handlePopstate = () => {
-            console.log('llega al nuevo useEffect handlePopstate');
+            //console.log('llega al nuevo useEffect handlePopstate');
 
             if (provisionalId) {
-                console.log('llega al nuevo useEffect if (provisionalId)');
+                //console.log('llega al nuevo useEffect if (provisionalId)');
                 InspeccionService.deleteInspeccion(provisionalId);
-                console.log("Inspección eliminada (navegación atrás):", provisionalId);
+                //console.log("Inspección eliminada (navegación atrás):", provisionalId);
             }
         };
 
@@ -2831,7 +2831,7 @@ export default Inspeccion;
 
 function initialInspeccionState(usuario) {
 
-    console.log('initialInspeccionState usuario ', usuario);
+    //console.log('initialInspeccionState usuario ', usuario);
 
     return {
         avaluador: '',

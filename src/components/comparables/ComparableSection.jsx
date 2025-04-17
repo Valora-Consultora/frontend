@@ -8,11 +8,11 @@ const ComparableSection = ({ filters, modifyFilter, handleSubmit }) => {
 
   React.useEffect(() => {
 
-    console.log('useeffecting');
+    //console.log('useeffecting');
     if (state) {
-      console.log('setting state');
-      console.log(state);
-      console.log(stateFilters[state]);
+      //console.log('setting state');
+      //console.log(state);
+      //console.log(stateFilters[state]);
       const newFilters = [...availableFilters];
       newFilters.find((filter) => filter.id === 'city').values = stateFilters[state] ?? [];
       setAvailableFilters(newFilters);
@@ -53,7 +53,7 @@ const ShowFiltersButton = ({ className, shownFilters, setShownFilters }) => {
 };
 
 const Filter = ({filter, modifyFilter, filters, state, setState}) => {
-  console.log('filter', filter);
+  //console.log('filter', filter);
   return <div key={filter.id} className="col-span-6">
     <label className="block text-sm font-bold text-gray-700 mb-2">
       {filter.name}

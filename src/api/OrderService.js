@@ -6,8 +6,8 @@ const OrderService = {
 
   createOrden: async (ordenData) => {
     try {
-      console.log('llega al create orden ')
-      console.log('ordenData ', ordenData)
+      //console.log('llega al create orden ')
+      //console.log('ordenData ', ordenData)
       const response = await axios.post(`${API_URL}/api/create-orden`, ordenData, {
         headers: {
             'Content-Type': 'application/json',

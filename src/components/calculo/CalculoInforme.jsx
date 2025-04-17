@@ -6,11 +6,7 @@ import {
     obtenerFactorConservacion,
     obtenerEstadoConservacionDesdeValor,
     formatearNumero,
-    calcularFactorEdadPromedio,
     calcularValorTerreno,
-    calcularValorObraCivil,
-    calcularValorReposicionNuevo,
-    calcularValorIntrinseco,
     calcularSuperficieConstruidaTotal,
     calcularPrecioMetroCorregido,
     calcularValorTotalSuperficie,
@@ -21,10 +17,13 @@ import {
     calcularValorRemateItau,
     calcularValorUI
 } from '../calculo/CalculoUtils';
+
+import { calcularValorIntrisecoBbva, calcularValorVentaRapidaBbva, calcularValorRemateBbva } from '../calculo/BbvaCalculationUtils'
 import ModalSuperficie from './ModalSuperficie';
 import ModalConfirmacion from './ModalConfirmacion';
 import InputNumerico from './inputNumerico';
 import TotalesItau from './TotalesItau';
+import TotalesBbva from './TotalesBbva';
 
 const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoInforme = 'default', valorMetroTerrenoProp = 0 }) => {
 
@@ -43,6 +42,10 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     const [valorRemateMetroCuadrado, setValorRemateMetroCuadrado] = useState(0);
     const [costoReposicionMetroCuadrado, setCostoReposicionMetroCuadrado] = useState(0);
     const [mostrarAlertaHomologacion, setMostrarAlertaHomologacion] = useState(false);
+
+    // Estados específicos para BBVA
+    const [valorObraCivilM2, setValorObraCivilM2] = useState(0);
+    const [valorIntrisecoBbva, setValorIntrisecoBbva] = useState(0);
 
     // Estado para el valor del metro cuadrado de terreno
     const [valorMetroTerreno, setValorMetroTerreno] = useState(0);
@@ -131,9 +134,13 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                 precioMetro: parseFloat(superficie.precioMetro || 0),
                 precioMetroCorregido: parseFloat(superficie.precioMetroCorregido || 0),
                 valorTotal: parseFloat(superficie.valorTotal || 0),
-                valorTotalSinCorregir: parseFloat(superficie.valorTotalSinCorregir || calcularValorTotalSinCorregir(superficie.m2 || 0, superficie.precioMetro || 0))
+                valorTotalSinCorregir: parseFloat(superficie.valorTotalSinCorregir || calcularValorTotalSinCorregir(superficie.m2 || 0, superficie.precioMetro || 0)),
+                actualizarCampoSuperficie // Añadir la referencia a la función
+
             }))
         };
+
+        calculoBase.actualizarCampoSuperficie = actualizarCampoSuperficie;
 
         if (tipoPropiedad === 'ph') {
             return {
@@ -144,7 +151,13 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             };
         }
 
-        if (tipoInforme === 'ITAU') {
+        if (tipoInforme === 'BBVA') {
+            return {
+                ...calculoBase,
+                valorObraCivilM2,
+                valorIntrisecoBbva,
+            };
+        } else if (tipoInforme === 'ITAU') {
             return {
                 ...calculoBase,
                 dolarCotizacion: dolarCotizacion,
@@ -154,9 +167,27 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             };
         }
 
+
+
         // Por defecto, devolver calculoBase
         return calculoBase;
     };
+
+
+    // Actualizar estados específicos para BBVA cuando sea necesario
+    useEffect(() => {
+        if (tipoInforme === 'BBVA') {
+            // Calcular valores específicos de BBVA
+            if (superficieConstruida > 0 && valorObraCivil) {
+                setValorObraCivilM2(formatearNumero(valorObraCivil / superficieConstruida));
+            }
+
+            // Calcular valor intrínseco para BBVA
+            const nuevoValorIntriseco = calcularValorIntrisecoBbva(valorTerreno, valorObraCivil);
+            setValorIntrisecoBbva(nuevoValorIntriseco);
+        }
+    }, [tipoInforme, valorTerreno, valorObraCivil, superficieConstruida]);
+
 
     const [hsbcExtensionData, setHsbcExtensionData] = useState({
         cuotaPartePorcentaje: 0,
@@ -199,8 +230,8 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                 return total;
             }, 0);
 
-            console.log('PH - Total metros cuadrados propios:', totalMetrosCuadrados);
-            console.log('PH - Total superficie edificio:', totalSuperficieEdificio);
+            //console.log('PH - Total metros cuadrados propios:', totalMetrosCuadrados);
+            //console.log('PH - Total superficie edificio:', totalSuperficieEdificio);
 
             // Calculamos el porcentaje de cuota parte solo si los valores son válidos
             if (totalMetrosCuadrados > 0 && totalSuperficieEdificio > 0) {
@@ -211,8 +242,8 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                 const valorCuotaParte = (porcentaje / 100) * parseFloat(valorTerreno);
                 setCuotaParteValor(formatearNumero(valorCuotaParte));
 
-                console.log('PH - Porcentaje calculado:', porcentaje);
-                console.log('PH - Valor cuota parte calculado:', valorCuotaParte);
+                //console.log('PH - Porcentaje calculado:', porcentaje);
+                //console.log('PH - Valor cuota parte calculado:', valorCuotaParte);
             }
         } else {
             // Si no es PH, reiniciamos los valores
@@ -233,12 +264,12 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     };
 
     useEffect(() => {
-        console.log('Calculando valor intrínseco:', {
-            tipoPropiedad,
-            valorTerreno,
-            valorObraCivil,
-            cuotaParteValor
-        });
+        //console.log('Calculando valor intrínseco:', {
+        /*             tipoPropiedad,
+                    valorTerreno,
+                    valorObraCivil,
+                    cuotaParteValor
+                }); */
 
         // Calcular el valor intrínseco según el tipo de propiedad
         let nuevoValorIntrinseco;
@@ -246,16 +277,16 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
         if (tipoPropiedad === 'ph' && cuotaParteValor > 0) {
             // Para PH, el valor intrínseco es la suma de la cuota parte y la obra civil
             nuevoValorIntrinseco = formatearNumero(parseFloat(cuotaParteValor) + parseFloat(valorObraCivil));
-            console.log('PH - Valor intrínseco calculado:', nuevoValorIntrinseco, 'Cuota parte:', cuotaParteValor, 'Obra civil:', valorObraCivil);
+            //console.log('PH - Valor intrínseco calculado:', nuevoValorIntrinseco, 'Cuota parte:', cuotaParteValor, 'Obra civil:', valorObraCivil);
         } else {
             // Para PC y otros tipos, el valor intrínseco es la suma del valor del terreno y la obra civil
             nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + parseFloat(valorObraCivil));
-            console.log('PC/Otro - Valor intrínseco calculado:', nuevoValorIntrinseco, 'Terreno:', valorTerreno, 'Obra civil:', valorObraCivil);
+            //console.log('PC/Otro - Valor intrínseco calculado:', nuevoValorIntrinseco, 'Terreno:', valorTerreno, 'Obra civil:', valorObraCivil);
         }
 
         // Solo actualizar si hay un cambio real
         if (nuevoValorIntrinseco !== valorIntrinseco) {
-            console.log('Actualizando valor intrínseco de', valorIntrinseco, 'a', nuevoValorIntrinseco);
+            //console.log('Actualizando valor intrínseco de', valorIntrinseco, 'a', nuevoValorIntrinseco);
             setValorIntrinseco(nuevoValorIntrinseco);
             setValorFinalCalculado(nuevoValorIntrinseco);
         }
@@ -271,7 +302,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     // Exponemos la función a través de una ref o useImperativeHandle si es necesario
     useEffect(() => {
         if (onGetCalculoData) {
-            console.log("CalculoInforme - Registrando función getCalculoData");
+            //console.log("CalculoInforme - Registrando función getCalculoData");
             onGetCalculoData(getCalculoData);
         }
     }, [
@@ -315,7 +346,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
 
     // Calcular obra civil y valores relacionados
     useEffect(() => {
-        console.log('Recalculando obra civil y valores relacionados');
+        //console.log('Recalculando obra civil y valores relacionados');
 
         // Calcular superficie construida total
         const totalSuperficie = calcularSuperficieConstruidaTotal(superficies);
@@ -327,7 +358,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             return total + parseFloat(superficie.valorTotal || 0);
         }, 0);
 
-        console.log('Nuevo valor obra civil calculado (incluye comunes):', totalObraCivil);
+        //console.log('Nuevo valor obra civil calculado (incluye comunes):', totalObraCivil);
 
         // Actualizar solo si hay un cambio significativo
         if (Math.abs(totalObraCivil - valorObraCivil) > 0.01) {
@@ -350,7 +381,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             }
         }, 0);
 
-        console.log('Nuevo valor reposición calculado:', totalReposicion);
+        //console.log('Nuevo valor reposición calculado:', totalReposicion);
 
         // Actualizar solo si hay un cambio significativo
         if (Math.abs(totalReposicion - costoReposicion) > 0.01) {
@@ -379,10 +410,10 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
 
 
     useEffect(() => {
-        console.log('Ejecutando useEffect de actualización de valores para bienes comunes');
+        //console.log('Ejecutando useEffect de actualización de valores para bienes comunes');
 
         if (bloquearRecalculoBienesComunes || superficies.length === 0) {
-            console.log('Saliendo temprano del useEffect por bloqueo o sin superficies');
+            //console.log('Saliendo temprano del useEffect por bloqueo o sin superficies');
             return;
         }
 
@@ -396,11 +427,11 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             return total + parseFloat(sup.valorTotal || 0);
         }, 0);
 
-        console.log('Valor total de bienes propios calculado:', valorTotalPropios);
+        //console.log('Valor total de bienes propios calculado:', valorTotalPropios);
 
         // Actualizar el valorTotal de bienes comunes (25% del valor total de bienes propios)
         const valorBienesComunes = formatearNumero(valorTotalPropios * 0.25);
-        console.log('Nuevo valor para bienes comunes calculado (25%):', valorBienesComunes);
+        //console.log('Nuevo valor para bienes comunes calculado (25%):', valorBienesComunes);
 
         // Actualizar solo si el valor ha cambiado significativamente (más de 1%)
         const nuevasSuperficies = [...superficies];
@@ -410,31 +441,31 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             if (sup.tipoSuperficie === 'comun') {
                 // No actualizar si ha sido editado manualmente
                 if (sup.editadoManualmenteValorTotal) {
-                    console.log('Bien común saltado por edición manual del valorTotal:', sup.descripcion);
+                    //console.log('Bien común saltado por edición manual del valorTotal:', sup.descripcion);
                     return;
                 }
 
                 const valorActual = parseFloat(sup.valorTotal || 0);
                 // Solo actualizar si el cambio es significativo
                 if (Math.abs((valorBienesComunes - valorActual) / (valorActual || 1)) > 0.01) {
-                    console.log(`Actualizando bien común "${sup.descripcion}" valorTotal: ${valorActual} -> ${valorBienesComunes}`);
+                    //console.log(`Actualizando bien común "${sup.descripcion}" valorTotal: ${valorActual} -> ${valorBienesComunes}`);
                     nuevasSuperficies[index] = {
                         ...sup,
                         valorTotal: valorBienesComunes
                     };
                     actualizado = true;
                 } else {
-                    console.log(`No se actualiza bien común "${sup.descripcion}" valorTotal (cambio no significativo)`);
+                    //console.log(`No se actualiza bien común "${sup.descripcion}" valorTotal (cambio no significativo)`);
                 }
             }
         });
 
         // Solo actualizar el estado si hubo cambios
         if (actualizado) {
-            console.log("Actualizando estado con nuevos valores de valorTotal para bienes comunes");
+            //console.log("Actualizando estado con nuevos valores de valorTotal para bienes comunes");
             setSuperficies(nuevasSuperficies);
         } else {
-            console.log("No se realizaron cambios en los valorTotal de bienes comunes");
+            //console.log("No se realizaron cambios en los valorTotal de bienes comunes");
         }
     }, [superficies, bloquearRecalculoBienesComunes]);
 
@@ -455,6 +486,11 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     // Manejador para el cambio del valor de venta rápida
     const handleValorVentaRapidaChange = (valor) => {
         setValorVentaRapida(valor);
+
+        // Actualizar valor por m²
+        if (superficieConstruida > 0) {
+            setValorVentaRapidaMetroCuadrado(calcularValorMetroCuadrado(valor, superficieConstruida));
+        }
     };
 
     // Función para calcular el valor total sin corregir (metros cuadrados * precio sin corregir)
@@ -572,12 +608,12 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             // Modifica el caso 'valorTotal' en la función actualizarCampoSuperficie
 
             case 'valorTotal':
-                console.log('Actualizando valorTotal:', {
-                    tipoSuperficie: nuevasSuperficies[index].tipoSuperficie,
-                    indice: index,
-                    valorAnterior: nuevasSuperficies[index].valorTotal,
-                    nuevoValor: valor
-                });
+                /*                //console.log('Actualizando valorTotal:', {
+                                   tipoSuperficie: nuevasSuperficies[index].tipoSuperficie,
+                                   indice: index,
+                                   valorAnterior: nuevasSuperficies[index].valorTotal,
+                                   nuevoValor: valor
+                               }); */
 
                 // Si es un bien común, solo actualizamos el valor total sin más cálculos
                 if (nuevasSuperficies[index].tipoSuperficie === 'comun') {
@@ -587,10 +623,10 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
 
                     // Bloquear recálculos automáticos temporalmente
                     setBloquearRecalculoBienesComunes(true);
-                    console.log('Bloqueo de recálculo activado para bienes comunes (valorTotal)');
+                    //console.log('Bloqueo de recálculo activado para bienes comunes (valorTotal)');
 
                     setTimeout(() => {
-                        console.log('Desactivando bloqueo de recálculo para bienes comunes');
+                        //console.log('Desactivando bloqueo de recálculo para bienes comunes');
                         setBloquearRecalculoBienesComunes(false);
                     }, 2000);
 
@@ -640,7 +676,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                         nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + nuevoValorObraCivil);
                     }
 
-                    console.log("Nuevo valor intrínseco calculado tras editar valorTotal:", nuevoValorIntrinseco);
+                    //console.log("Nuevo valor intrínseco calculado tras editar valorTotal:", nuevoValorIntrinseco);
                     setValorIntrinseco(nuevoValorIntrinseco);
                     setValorFinalCalculado(nuevoValorIntrinseco);
 
@@ -652,12 +688,12 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             // para asegurarte de que el valor intrínseco se actualice correctamente:
 
             case 'valorTotalSinCorregir':
-                console.log('Actualizando valorTotalSinCorregir:', {
-                    tipoSuperficie: nuevasSuperficies[index].tipoSuperficie,
-                    indice: index,
-                    valorAnterior: nuevasSuperficies[index].valorTotalSinCorregir,
-                    nuevoValor: valor
-                });
+                //console.log('Actualizando valorTotalSinCorregir:', {
+                /*                     tipoSuperficie: nuevasSuperficies[index].tipoSuperficie,
+                                    indice: index,
+                                    valorAnterior: nuevasSuperficies[index].valorTotalSinCorregir,
+                                    nuevoValor: valor
+                                }); */
 
                 // Si es un bien común, simplemente actualizar el valor sin recálculos
                 if (nuevasSuperficies[index].tipoSuperficie === 'comun') {
@@ -668,10 +704,10 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
 
                     // Bloquear recálculos automáticos temporalmente
                     setBloquearRecalculoBienesComunes(true);
-                    console.log('Bloqueo de recálculo activado para bienes comunes');
+                    //console.log('Bloqueo de recálculo activado para bienes comunes');
 
                     setTimeout(() => {
-                        console.log('Desactivando bloqueo de recálculo para bienes comunes');
+                        //console.log('Desactivando bloqueo de recálculo para bienes comunes');
                         setBloquearRecalculoBienesComunes(false);
                     }, 2000);
 
@@ -698,7 +734,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                         }
                     }, 0);
 
-                    console.log("Actualizando costo de reposición después de editar bien común:", nuevoValorReposicion);
+                    //console.log("Actualizando costo de reposición después de editar bien común:", nuevoValorReposicion);
                     setCostoReposicion(formatearNumero(nuevoValorReposicion));
 
                     // No hay necesidad de recalcular inmediatamente el valor intrínseco aquí, 
@@ -751,7 +787,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                         nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + nuevoValorObraCivil);
                     }
 
-                    console.log("Nuevo valor intrínseco calculado tras editar valorTotalSinCorregir:", nuevoValorIntrinseco);
+                    //console.log("Nuevo valor intrínseco calculado tras editar valorTotalSinCorregir:", nuevoValorIntrinseco);
                     setValorIntrinseco(nuevoValorIntrinseco);
                     setValorFinalCalculado(nuevoValorIntrinseco);
                 }
@@ -828,19 +864,19 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
 
     // Modificar el useEffect que actualiza los bienes comunes automáticamente
     useEffect(() => {
-        console.log('Ejecutando useEffect de actualización de bienes comunes:', {
-            bloqueado: bloquearRecalculoBienesComunes,
-            cantidadSuperficies: superficies.length
-        });
+        //console.log('Ejecutando useEffect de actualización de bienes comunes:', {
+        /*             bloqueado: bloquearRecalculoBienesComunes,
+                    cantidadSuperficies: superficies.length
+                }); */
 
         if (bloquearRecalculoBienesComunes || superficies.length === 0) {
-            console.log('Saliendo temprano del useEffect (bloqueado o sin superficies)');
+            //console.log('Saliendo temprano del useEffect (bloqueado o sin superficies)');
             return;
         }
 
         // Buscar si hay bienes comunes
         const bienesComunes = superficies.filter(s => s.tipoSuperficie === 'comun');
-        console.log('Bienes comunes encontrados:', bienesComunes.length);
+        //console.log('Bienes comunes encontrados:', bienesComunes.length);
 
         if (bienesComunes.length === 0) return; // No hay bienes comunes para actualizar
 
@@ -855,11 +891,11 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             return total + valorReposicion;
         }, 0);
 
-        console.log('Valor reposición de bienes propios calculado:', valorReposicionPropios);
+        //console.log('Valor reposición de bienes propios calculado:', valorReposicionPropios);
 
         // Actualizar los bienes comunes con el 17% del valor
         const valorBienesComunes = formatearNumero(valorReposicionPropios * 0.17);
-        console.log('Nuevo valor para bienes comunes calculado:', valorBienesComunes);
+        //console.log('Nuevo valor para bienes comunes calculado:', valorBienesComunes);
 
         // Actualizar solo si el valor ha cambiado significativamente (más de 1%)
         const nuevasSuperficies = [...superficies];
@@ -869,14 +905,14 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             if (sup.tipoSuperficie === 'comun') {
                 // No actualizar si ha sido editado manualmente
                 if (sup.editadoManualmente) {
-                    console.log('Bien común saltado por edición manual:', sup.descripcion);
+                    //console.log('Bien común saltado por edición manual:', sup.descripcion);
                     return;
                 }
 
                 const valorActual = parseFloat(sup.valorTotalSinCorregir || 0);
                 // Solo actualizar si el cambio es significativo
                 if (Math.abs((valorBienesComunes - valorActual) / (valorActual || 1)) > 0.01) {
-                    console.log(`Actualizando bien común "${sup.descripcion}": ${valorActual} -> ${valorBienesComunes}`);
+                    //console.log(`Actualizando bien común "${sup.descripcion}": ${valorActual} -> ${valorBienesComunes}`);
                     nuevasSuperficies[index] = {
                         ...sup,
                         valorTotalSinCorregir: valorBienesComunes,
@@ -884,14 +920,14 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                     };
                     actualizado = true;
                 } else {
-                    console.log(`No se actualiza bien común "${sup.descripcion}" (cambio no significativo)`);
+                    //console.log(`No se actualiza bien común "${sup.descripcion}" (cambio no significativo)`);
                 }
             }
         });
 
         // Solo actualizar el estado si hubo cambios
         if (actualizado) {
-            console.log("Actualizando estado con nuevos valores de bienes comunes");
+            //console.log("Actualizando estado con nuevos valores de bienes comunes");
             setSuperficies(nuevasSuperficies);
 
             // Trigger manual para recalcular el costo de reposición total inmediatamente
@@ -911,7 +947,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             // Actualizar el costo de reposición
             setCostoReposicion(formatearNumero(nuevoValorReposicion));
         } else {
-            console.log("No se realizaron cambios en los bienes comunes");
+            //console.log("No se realizaron cambios en los bienes comunes");
         }
     }, [superficies, bloquearRecalculoBienesComunes]);
 
@@ -920,18 +956,133 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     const handleValorMercadoChange = (valor) => {
         setValorMercado(valor);
 
-        if (tipoInforme === 'ITAU') {
-            // Recalcular Valor de Remate
+        if (tipoInforme === 'BBVA') {
+            const nuevoValorVentaRapida = calcularValorVentaRapidaBbva(valor);
+            const nuevoValorRemate = calcularValorRemateBbva(valor);
+            setValorVentaRapida(nuevoValorVentaRapida);
+            setValorRemate(nuevoValorRemate);
+        } else if (tipoInforme === 'ITAU') {
+            // Código existente para ITAU
             const nuevoValorRemate = calcularValorRemateItau(valor);
             setValorRemate(nuevoValorRemate);
-
-            // Recalcular QSV como promedio entre Valor de Mercado y nuevo Valor de Remate
             setValorVentaRapida(calcularValorVentaRapidaItau(valor, nuevoValorRemate));
         } else {
-            // Mantener el cálculo original para otros tipos de informe
+            // Código existente para otros tipos
             setValorRemate(calcularValorRemate(valor));
             setValorVentaRapida(calcularValorVentaRapida(valor));
         }
+    };
+
+    // Handlers específicos para BBVA
+    const handleSuperficieTerrenoChangeBbva = (valor) => {
+        // Lógica específica para BBVA...
+        const nuevoValorTerreno = formatearNumero(valorMetroTerreno * valor);
+        setValorTerreno(nuevoValorTerreno);
+    };
+
+    const handleValorMetroTerrenoChangeBbva = (valor) => {
+        // Lógica específica para BBVA...
+        setValorMetroTerreno(valor);
+        const nuevoValorTerreno = formatearNumero(valor * superficieTerreno);
+        setValorTerreno(nuevoValorTerreno);
+    };
+
+
+    const handleUpdateSuperficieBbva = (index, campo, valor) => {
+        // Crear copia del array para mantener la inmutabilidad
+        const nuevasSuperficies = [...superficies];
+
+        // Verificar que el índice es válido
+        if (index < 0 || index >= nuevasSuperficies.length) return;
+
+        // Actualizar el campo específico
+        nuevasSuperficies[index] = {
+            ...nuevasSuperficies[index],
+            [campo]: valor
+        };
+
+        // Actualizar campos relacionados (como ya estabas haciendo)
+        if (campo === 'superficieDocumentadaObraCivilSeccionEDescripcionInmueble' ||
+            campo === 'superficieVerificadaObraCivilSeccionEDescripcionInmueble') {
+            nuevasSuperficies[index].m2 = valor;
+        }
+
+        if (campo === 'precioMetroCorregido') {
+            const m2 = parseFloat(nuevasSuperficies[index].m2) || 0;
+            if (m2 > 0) {
+                const nuevoValorTotal = formatearNumero(valor * m2);
+                nuevasSuperficies[index].valorTotal = nuevoValorTotal;
+            }
+        }
+
+        if (campo === 'valorTotal') {
+            const m2 = parseFloat(nuevasSuperficies[index].m2) || 0;
+            if (m2 > 0) {
+                const nuevoPrecioM2 = formatearNumero(valor / m2);
+                nuevasSuperficies[index].precioMetroCorregido = nuevoPrecioM2;
+            }
+        }
+
+        // IMPORTANTE: Forzar actualización completa del estado
+        setSuperficies([...nuevasSuperficies]);
+    };
+
+
+    const handleSuperficieObraCivilChange = (valor) => {
+        setSuperficieConstruida(valor);
+        
+        // Recalcular valores dependientes
+        if (valor > 0) {
+            // Recalcular valor por m²
+            setValorObraCivilM2(formatearNumero(valorObraCivil / valor));
+            setValorMercadoMetroCuadrado(formatearNumero(valorMercado / valor));
+            setValorVentaRapidaMetroCuadrado(formatearNumero(valorVentaRapida / valor));
+            setValorRemateMetroCuadrado(formatearNumero(valorRemate / valor));
+        }
+    };
+
+    const handleValorObraCivilChange = (valor) => {
+        setValorObraCivil(valor);
+        // Recalcular valor por m²
+
+/*         if (tipoInforme === 'BBVA') {
+            const nuevoValorIntriseco = calcularValorIntrisecoBbva(valorTerreno, valor);
+            setValorIntrisecoBbva(nuevoValorIntriseco);
+        } */
+        if (superficieConstruida > 0) {
+            setValorObraCivilM2(formatearNumero(valor / superficieConstruida));
+        }
+        // Recalcular valor intrínseco
+        if (tipoPropiedad === 'ph' && cuotaParteValor > 0) {
+            const nuevoValorIntrinseco = formatearNumero(parseFloat(cuotaParteValor) + parseFloat(valor));
+            setValorIntrinseco(nuevoValorIntrinseco);
+        } else {
+            const nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + parseFloat(valor));
+            setValorIntrinseco(nuevoValorIntrinseco);
+        }
+    };
+
+    const handleValorObraCivilM2Change = (valor) => {
+        setValorObraCivilM2(valor);
+        // Recalcular valor total
+        if (superficieConstruida > 0) {
+            const nuevoValorObraCivil = formatearNumero(valor * superficieConstruida);
+            setValorObraCivil(nuevoValorObraCivil);
+
+            // Recalcular valor intrínseco
+            if (tipoPropiedad === 'ph' && cuotaParteValor > 0) {
+                const nuevoValorIntrinseco = formatearNumero(parseFloat(cuotaParteValor) + parseFloat(nuevoValorObraCivil));
+                setValorIntrinseco(nuevoValorIntrinseco);
+            } else {
+                const nuevoValorIntrinseco = formatearNumero(parseFloat(valorTerreno) + parseFloat(nuevoValorObraCivil));
+                setValorIntrinseco(nuevoValorIntrinseco);
+            }
+        }
+    };
+
+    const handleValorIntrinsecoChange = (valor) => {
+        setValorIntrinseco(valor);
+        // Otros cálculos derivados que puedan depender del valor intrínseco
     };
 
     // Manejador cuando cambia el estado de conservación
@@ -966,6 +1117,8 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
         }
     }, [valorMercado, tipoInforme]);
 
+
+
     // Manejador cuando cambia el valor personalizado del factor de conservación
     const handleFactorConservacionChange = (valor) => {
         setFactorConservacionValor(valor);
@@ -978,7 +1131,12 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
     const handleValorRemateChange = (valor) => {
         setValorRemate(valor);
 
-        // Recalcular QSV si estamos en un informe Itaú
+        // Actualizar valor por m²
+        if (superficieConstruida > 0) {
+            setValorRemateMetroCuadrado(calcularValorMetroCuadrado(valor, superficieConstruida));
+        }
+
+        // Si estamos en un informe Itaú, actualizar QSV 
         if (tipoInforme === 'ITAU' && valorMercado) {
             setValorVentaRapida(calcularValorVentaRapidaItau(valorMercado, valor));
         }
@@ -1140,16 +1298,32 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             )}
 
             {/* Botón para agregar superficie cubierta */}
-            <button
-                type="button" // <-- Agregar esto
-                onClick={(e) => {
-                    e.preventDefault(); // <-- También agregar esto
-                    setModalOpen(true);
-                }}
-                className="mt-4 bg-green-900 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-                Agregar Superficie Cubierta
-            </button>
+            
+                <button
+                    type="button" // <-- Agregar esto
+                    onClick={(e) => {
+                        e.preventDefault(); // <-- También agregar esto
+                        setModalOpen(true);
+                    }}
+                    className="mt-4 bg-green-900 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                    Agregar Superficie Cubierta
+                </button>
+          
+
+            {/* Botón específico para BBVA */}
+            {/* {tipoInforme === 'BBVA' && (
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        setModalOpen(true);
+                    }}
+                    className="mt-4 bg-green-900 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                    Agregar Superficie BBVA
+                </button>
+            )} */}
 
             {/* Tabla con superficies cubiertas */}
             {superficies.length > 0 && (
@@ -1362,7 +1536,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
             )}
 
             {/* Valor Intrínseco */}
-            {tipoInforme !== 'ITAU' && (
+            {tipoInforme !== 'ITAU' && tipoInforme !== 'BBVA' && (
                 <div className="mt-4 p-3 border rounded">
                     <h4 className="text-md font-medium text-gray-700">Valor Intrínseco</h4>
                     <p className="text-sm text-gray-500 mb-2">
@@ -1378,7 +1552,7 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                     </div>
                 </div>
             )}
-            
+
             {/* Tabla con valores calculados y editables */}
             <div className="mt-4 p-3 border rounded">
                 {tipoInforme === 'ITAU' ? (
@@ -1400,6 +1574,44 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                         onValorVentaRapidaMetroCuadradoChange={handleValorVentaRapidaMetroCuadradoChange}
                         onValorRemateMetroCuadradoChange={handleValorRemateMetroCuadradoChange}
                         formatearNumero={formatearNumero}
+                    />
+                ) : tipoInforme === 'BBVA' ? (
+                    <TotalesBbva
+                        // Valores principales
+                        valorMercado={valorMercado}
+                        valorVentaRapida={valorVentaRapida}
+                        valorRemate={valorRemate}
+                        valorTerreno={valorTerreno}
+                        valorObraCivil={valorObraCivil}
+                        valorIntrinseco={valorIntrisecoBbva}
+
+                        // Superficies
+                        superficieTerreno={superficieTerreno}
+                        superficieObraCivil={superficieConstruida}
+
+                        // Valores por m²
+                        valorMetroTerreno={valorMetroTerreno}
+                        valorObraCivilM2={valorObraCivilM2}
+                        valorMercadoM2={valorMercadoMetroCuadrado}
+
+                        // Superficies para BBVA
+                        superficies={superficies}
+
+                        // Funciones de actualización existentes
+                        onValorMercadoChange={handleValorMercadoChange}
+                        onValorVentaRapidaChange={handleValorVentaRapidaChange}
+                        onValorRemateChange={handleValorRemateChange}
+                        onValorTerrenoChange={setValorTerreno}
+                        onValorMetroTerrenoChange={handleValorMetroTerrenoChangeBbva}
+                        onSuperficieTerrenoChange={handleSuperficieTerrenoChangeBbva}
+                        onUpdateSuperficie={handleUpdateSuperficieBbva}
+
+                        // Nuevas funciones de actualización
+                        onValorObraCivilChange={handleValorObraCivilChange}
+                        onValorObraCivilM2Change={handleValorObraCivilM2Change}
+                        onValorIntrinsecoChange={handleValorIntrinsecoChange}
+                        onSuperficieObraCivilChange={handleSuperficieObraCivilChange}
+
                     />
                 ) : (
                     <>
@@ -1501,6 +1713,12 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                 onClose={() => setModalOpen(false)}
                 tipoInforme={tipoInforme}
                 onAddSuperficie={(nuevaSuperficie) => {
+
+                    console.log("[CalculoInforme] Recibida nueva superficie:", {
+                        descripcion: nuevaSuperficie.descripcion,
+                        tipoObraCivilBbva: nuevaSuperficie.tipoObraCivilBbva
+                    });
+
                     // Calcular el valor para bienes comunes
                     if (nuevaSuperficie.tipoSuperficie === 'comun') {
                         // Calcular valor total de bienes propios existentes para valorTotalSinCorregir (17%)
@@ -1528,12 +1746,14 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                         nuevaSuperficie.editadoManualmente = false;
                         nuevaSuperficie.editadoManualmenteValorTotal = false;
 
-                        console.log('Nuevo bien común creado con valorTotalSinCorregir:', nuevaSuperficie.valorTotalSinCorregir);
-                        console.log('Nuevo bien común creado con valorTotal:', nuevaSuperficie.valorTotal);
+                        //console.log('Nuevo bien común creado con valorTotalSinCorregir:', nuevaSuperficie.valorTotalSinCorregir);
+                        //console.log('Nuevo bien común creado con valorTotal:', nuevaSuperficie.valorTotal);
                     }
-
                     // Agregar la nueva superficie al array - USAR SOLO UNO DE ESTOS MÉTODOS
                     // Método 1: Especificar todos los campos individualmente
+
+                    console.log("[CalculoInforme] Agregando al estado superficie con tipoObraCivilBbva:", nuevaSuperficie.tipoObraCivilBbva);
+
                     setSuperficies(prev => [...prev, {
                         descripcion: nuevaSuperficie.descripcion,
                         ampliaciones: nuevaSuperficie.ampliaciones,
@@ -1548,9 +1768,20 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null, tipoIn
                         tipoSuperficie: nuevaSuperficie.tipoSuperficie,
                         valorTotalSinCorregir: nuevaSuperficie.valorTotalSinCorregir,
                         editadoManualmente: nuevaSuperficie.editadoManualmente || false,
-                        editadoManualmenteValorTotal: nuevaSuperficie.editadoManualmenteValorTotal || false
+                        editadoManualmenteValorTotal: nuevaSuperficie.editadoManualmenteValorTotal || false,
+                        tipoObraCivilBbva: nuevaSuperficie.tipoObraCivilBbva,
+                        superficieDocumentadaObraCivilSeccionEDescripcionInmueble: nuevaSuperficie.m2,
+                        superficieVerificadaObraCivilSeccionEDescripcionInmueble: nuevaSuperficie.m2,
                     }]);
 
+                    setTimeout(() => {
+                        console.log("[CalculoInforme] Estado de superficies después de actualizar:",
+                            superficies.map(s => ({
+                                descripcion: s.descripcion,
+                                tipoObraCivilBbva: s.tipoObraCivilBbva
+                            }))
+                        );
+                    }, 100);
                 }}
             />
 

@@ -44,26 +44,26 @@ const InformeHsbcService = {
 
   createInformeHsbc: async (informeHsbcData) => {
     try {
-      console.log(
-        "InformeHsbcService - Iniciando creación de informe HSBC",
+      //console.log(
+/*         "InformeHsbcService - Iniciando creación de informe HSBC",
         JSON.stringify(informeHsbcData, null, 2)
-      );
+      ); */
 
       // Si hay comparables, filtrar solo los seleccionados
       if (informeHsbcData.comparables) {
-        console.log("InformeHsbcService - Filtrando comparables seleccionados");
+        //console.log("InformeHsbcService - Filtrando comparables seleccionados");
         informeHsbcData.comparables = informeHsbcData.comparables.filter(
           (comparable) => comparable.selected
         );
-        console.log(
+/*         //console.log(
           "InformeHsbcService - Comparables después del filtrado:",
           informeHsbcData.comparables.length
-        );
+        ); */
       }
 
       // Procesar fotos y anexos si existen
       async function obtenerDatosFotoRelevamiento(foto) {
-        console.log("InformeHsbcService - Procesando foto de relevamiento");
+        //console.log("InformeHsbcService - Procesando foto de relevamiento");
         const url = await InformeHsbcService.uploadFoto(foto);
         return {
           url: url,
@@ -72,7 +72,7 @@ const InformeHsbcService = {
       }
 
       async function obtenerDatosFotoAnexo(foto) {
-        console.log("InformeHsbcService - Procesando foto de anexo");
+        //console.log("InformeHsbcService - Procesando foto de anexo");
         const url = await InformeHsbcService.uploadFoto(foto);
         return {
           url: url,
@@ -85,26 +85,26 @@ const InformeHsbcService = {
       let anexosPromises = [];
 
       if (informeHsbcData.fotos && informeHsbcData.fotos.length > 0) {
-        console.log(
-          "InformeHsbcService - Procesando array de fotos:",
+        //console.log(
+/*           "InformeHsbcService - Procesando array de fotos:",
           informeHsbcData.fotos.length
-        );
+        ); */
         fotosPromises = informeHsbcData.fotos.map((foto) =>
           obtenerDatosFotoRelevamiento(foto)
         );
       }
 
       if (informeHsbcData.anexos && informeHsbcData.anexos.length > 0) {
-        console.log(
-          "InformeHsbcService - Procesando array de anexos:",
+        //console.log(
+/*           "InformeHsbcService - Procesando array de anexos:",
           informeHsbcData.anexos.length
-        );
+        ); */
         anexosPromises = informeHsbcData.anexos.map((foto) =>
           obtenerDatosFotoAnexo(foto)
         );
       }
 
-      console.log("InformeHsbcService - Esperando resultados de uploads");
+      //console.log("InformeHsbcService - Esperando resultados de uploads");
       const [relevamientos, anexos] = await Promise.all([
         Promise.all(fotosPromises),
         Promise.all(anexosPromises),
@@ -113,10 +113,10 @@ const InformeHsbcService = {
       informeHsbcData.fotos = relevamientos;
       informeHsbcData.anexos = anexos;
 
-      console.log(
-        "InformeHsbcService - Enviando datos al backend",
+      //console.log(
+/*         "InformeHsbcService - Enviando datos al backend",
         JSON.stringify(informeHsbcData, null, 2)
-      );
+      ); */
 
       const response = await axios.post(
         `${API_URL}/api/create-informe-Hsbc`,
@@ -128,7 +128,7 @@ const InformeHsbcService = {
         }
       );
 
-      console.log("InformeHsbcService - Respuesta recibida:", response.data);
+      //console.log("InformeHsbcService - Respuesta recibida:", response.data);
       return response.data;
     } catch (error) {
       console.error(
@@ -154,7 +154,7 @@ const InformeHsbcService = {
   
   createInformeHsbc: async (informeHsbcData) => {
     try {
-      console.log("Ingreso a crear informe HSBC", informeHsbcData);
+      //console.log("Ingreso a crear informe HSBC", informeHsbcData);
 
       informeHsbcData.comparables = informeHsbcData.comparables.filter(
         (comparable) => comparable.selected
@@ -187,7 +187,7 @@ const InformeHsbcService = {
         throw new Error("ID de informe no válido para guardar el cálculo");
       }
 
-      console.log("Iniciando saveCalculo con informeId:", informeId);
+      //console.log("Iniciando saveCalculo con informeId:", informeId);
 
       // Clonar el objeto para evitar modificar el original
       const calculoToSend = JSON.parse(JSON.stringify(calculoData));
@@ -265,11 +265,11 @@ const InformeHsbcService = {
         calculoToSend.superficies &&
         Array.isArray(calculoToSend.superficies)
       ) {
-        console.log(
-          "Procesando array de superficies:",
+        //console.log(
+/*           "Procesando array de superficies:",
           calculoToSend.superficies.length
         );
-
+ */
         // Procesar cada superficie para asegurar tipos de datos correctos
         calculoToSend.superficies = calculoToSend.superficies.map(
           (superficie) => {
@@ -314,7 +314,7 @@ const InformeHsbcService = {
         );
       }
 
-      console.log("Enviando cálculo a nuevo endpoint:", informeId);
+      //console.log("Enviando cálculo a nuevo endpoint:", informeId);
 
       // Usar el nuevo endpoint con nuestro nuevo CalculoHsbcController
       const response = await axios.post(
@@ -328,14 +328,14 @@ const InformeHsbcService = {
         }
       );
 
-      console.log("Respuesta del servidor:", response.data);
+      //console.log("Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error al guardar el cálculo:", error);
 
       // Intentar con el endpoint antiguo si el nuevo falla
       try {
-        console.log("Intentando con endpoint antiguo...");
+        //console.log("Intentando con endpoint antiguo...");
         const calculoToSend = JSON.parse(JSON.stringify(calculoData));
         // Asegurarnos de que tipoPropiedad siga siendo válido
         calculoToSend.tipoPropiedad = "CASA";
@@ -351,10 +351,10 @@ const InformeHsbcService = {
           }
         );
 
-        console.log(
-          "Respuesta del servidor (endpoint antiguo):",
+        //console.log(
+/*           "Respuesta del servidor (endpoint antiguo):",
           response.data
-        );
+        ); */
         return response.data;
       } catch (secondError) {
         console.error("Error también con el endpoint antiguo:", secondError);
