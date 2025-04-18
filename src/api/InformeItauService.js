@@ -42,7 +42,7 @@ const InformeItauService = {
 
   createInformeItau: async (informeItauData) => {
     try {
-      console.log("Ingreso a crear informe ITAU", informeItauData);
+      //console.log("Ingreso a crear informe ITAU", informeItauData);
   
       // Crear una copia para no modificar el original
       const informeData = { ...informeItauData };
@@ -72,7 +72,7 @@ const InformeItauService = {
         );
       }
   
-      console.log("Datos a enviar:", JSON.stringify(informeData, null, 2));
+      //console.log("Datos a enviar:", JSON.stringify(informeData, null, 2));
   
       const response = await apiClient.post(
         `${API_URL}/api/create-informe-itau`,
@@ -120,7 +120,7 @@ const InformeItauService = {
         }));
       }
       
-      console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
+      //console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
       
       const response = await axios.post(
         `${API_URL}/api/informeItau/${informeId}/calculo`,
@@ -133,7 +133,7 @@ const InformeItauService = {
         }
       );
       
-      console.log("Respuesta del servidor:", response.data);
+      //console.log("Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error al guardar el cálculo:", error);

@@ -253,7 +253,7 @@ const FormularioItau = () => {
   const handleEditComparable = (comparable) => {
     // const comparable = comparables.find((comparable) => comparable.id === id);
     setComparableEdit(comparable);
-    console.log(comparableEdit);
+    //console.log(comparableEdit);
     setIsModalEditOpen(true);
   };
 
@@ -272,7 +272,7 @@ const FormularioItau = () => {
       if (getCalculoData && response && response.id) {
         try {
           const calculoData = getCalculoData();
-          console.log("Datos del cálculo a enviar:", calculoData);
+          //console.log("Datos del cálculo a enviar:", calculoData);
           await InformeItauService.saveCalculo(response.id, calculoData);
         } catch (error) {
           console.error("Error al guardar el cálculo:", error);
@@ -350,7 +350,7 @@ const FormularioItau = () => {
   /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
   /// devolveria (*m²-200m²]
   const parseRange = (key, object) => {
-    console.log(object);
+    //console.log(object);
     var value = object.value;
     var value2 = object.value2;
     var subtype = object.subtype ?? "";
@@ -374,7 +374,7 @@ const FormularioItau = () => {
   /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
   /// formato que pueda ser utilizado en la URL y lo setea en el estado
   const modifyFilter = (id, value, opts) => {
-    console.log('Modificando filtro:', id, value, opts)
+    //console.log('Modificando filtro:', id, value, opts)
     var newFilter = {};
 
     if (opts?.range !== undefined) {
@@ -391,14 +391,14 @@ const FormularioItau = () => {
       newFilter.subtype = opts.subtype;
     }
 
-    console.log('Seteando filtro:', newFilter);
+    //console.log('Seteando filtro:', newFilter);
 
     setComparableFilters((prevFilters) => ({
       ...prevFilters,
       [id]: { ...prevFilters[id], ...newFilter },
     }));
 
-    console.log(filterToUrlParams(comparableFilters));
+    //console.log(filterToUrlParams(comparableFilters));
   };
 
   const handleComparableSubmit = async () => {
@@ -444,12 +444,12 @@ const FormularioItau = () => {
   };
 
   const handleSaveComparable = (comparable) => {
-    console.log('Attempting to save', comparable)
+    //console.log('Attempting to save', comparable)
     setFormData((prevData) => ({
       ...prevData,
       comparables: [...prevData.comparables, comparable],
     }));
-    console.log(formData);
+    //console.log(formData);
     setIsModalEditOpen(false);
   }
 
@@ -1958,7 +1958,7 @@ const FormularioItau = () => {
 
             <CalculoInforme
               tipoInforme="ITAU"
-              configuracion={configuracionItau}
+              configuracion={configuracionItau} 
               superficieTerreno={parseFloat(formData.superficieTerreno) || 0}
               onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
               comparables={formData.comparables || []}
@@ -2010,7 +2010,7 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     }
   }
 
-  console.log('Viendo comp', comparable)
+  //console.log('Viendo comp', comparable)
 
   return <Modal
     isOpen={isModalEditOpen}

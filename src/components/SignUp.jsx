@@ -17,10 +17,10 @@ const SignUp = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      console.log("info")
-      console.log(info)
+      //console.log("info")
+      //console.log(info)
       const response = await SignUpService(info); // Llama al servicio SignUpService con los datos del usuario
-      console.log(response.data); // Muestra la respuesta del backend en la consola
+      //console.log(response.data); // Muestra la respuesta del backend en la consola
       // Aquí podrías agregar lógica adicional, como redirigir al usuario a otra página o mostrar un mensaje de éxito
     } catch (error) {
       console.error('Error al crear usuario:', error);

@@ -141,7 +141,7 @@ const FormularioParticular = () => {
   /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
   /// devolveria (*m²-200m²]
   const parseRange = (key, object) => {
-    console.log(object);
+    //console.log(object);
     var value = object.value;
     var value2 = object.value2;
     var subtype = object.subtype ?? "";
@@ -165,7 +165,7 @@ const FormularioParticular = () => {
   /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
   /// formato que pueda ser utilizado en la URL y lo setea en el estado
   const modifyFilter = (id, value, opts) => {
-    console.log('Modificando filtro:', id, value, opts)
+    //console.log('Modificando filtro:', id, value, opts)
     var newFilter = {};
 
     if (opts?.range !== undefined) {
@@ -182,14 +182,14 @@ const FormularioParticular = () => {
       newFilter.subtype = opts.subtype;
     }
 
-    console.log('Seteando filtro:', newFilter);
+    //console.log('Seteando filtro:', newFilter);
 
     setComparableFilters((prevFilters) => ({
       ...prevFilters,
       [id]: { ...prevFilters[id], ...newFilter },
     }));
 
-    console.log(filterToUrlParams(comparableFilters));
+    //console.log(filterToUrlParams(comparableFilters));
   };
 
   const handleComparableSubmit = async () => {
@@ -227,7 +227,7 @@ const FormularioParticular = () => {
       // Simulando una llamada a API
       const informe = await InformeHsbcService.createInformeHsbc(formData);
       // Aquí iría la lógica real para enviar los datos a una API
-      console.log("Form Data:", formData);
+      //console.log("Form Data:", formData);
 
       toast.success("Formulario enviado exitosamente", {
         position: "top-right",
