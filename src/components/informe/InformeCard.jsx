@@ -11,7 +11,7 @@ export const InformeCard = ({ informe, handleCardSelect }) => {
       className={`${classNames[informe.estado]} flex flex-col items-start shadow-lg rounded-xl p-3 mb-6`}
       onClick={() => handleCardSelect(informe)}
     >
-      <h3 className="text-xl text-green-900 font-light">{new Date(informe.fecha).toLocaleString()}</h3>
+      <h3 className="text-xl text-green-900 font-light">{new Date(informe.fechaInicio).toLocaleString()}</h3>
       <div className="flex flex-row items-center space-x-4 w-full">
         <img src={'/logo-' + informe.banco + '.png'} alt={informe.banco} className="self-end my-auto max-w-60 ml-2" />
         <div className="flex flex-col items-start w-full">

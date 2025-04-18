@@ -374,8 +374,6 @@ const exportToExactExcelTemplateExcelJS = (formData, templateFileName) => {
             // descripcion: '',
           };
 
-          debugger
-
           // Fill in the cells while preserving original formatting
           Object.entries(cellMappings).forEach(([key, cellAddress]) => {
             if (checkBoxes.includes(key)) {

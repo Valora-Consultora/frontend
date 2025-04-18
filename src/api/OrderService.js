@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from "./apiClient";
 
 const API_URL = process.env.REACT_APP_API_URL; 
 
@@ -8,12 +8,12 @@ const OrderService = {
     try {
       //console.log('llega al create orden ')
       //console.log('ordenData ', ordenData)
-      const response = await axios.post(`${API_URL}/api/create-orden`, ordenData, {
+      const response = await apiClient.post(`${API_URL}/api/create-orden`, ordenData, {
         headers: {
             'Content-Type': 'application/json',
         },
     });
-/*       const response = await axios.post(`${API_URL}/api/create-orden`, ordenData);
+/*       const response = await apiClient.post(`${API_URL}/api/create-orden`, ordenData);
  */      return response.data;
     } catch (error) {
       console.error('Error al crear orden:', error);
@@ -23,7 +23,7 @@ const OrderService = {
 
   getTasadores: async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/tasadores`);
+      const response = await apiClient.get(`${API_URL}/api/tasadores`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener tasadores:', error);
@@ -33,7 +33,7 @@ const OrderService = {
 
   getTasadorById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/api/tasador/${parseInt(id)}`);
+      const response = await apiClient.get(`${API_URL}/api/tasador/${parseInt(id)}`);
       return response.data;
     } catch (error) {
       throw new Error('Error al obtener el tasador por ID: ' + error.message);
@@ -42,7 +42,7 @@ const OrderService = {
 
   getBancoById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/api/banco/${parseInt(id)}`);
+      const response = await apiClient.get(`${API_URL}/api/banco/${parseInt(id)}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener bancos:', error);
@@ -52,7 +52,7 @@ const OrderService = {
 
   getBancos: async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/bancos`);
+      const response = await apiClient.get(`${API_URL}/api/bancos`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener bancos:', error);
@@ -62,7 +62,7 @@ const OrderService = {
 
   getDepartamentoById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/api/departamento/${parseInt(id)}`);
+      const response = await apiClient.get(`${API_URL}/api/departamento/${parseInt(id)}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener departamento:', error);
@@ -72,7 +72,7 @@ const OrderService = {
 
   getDepartamentos: async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/departamento`);
+      const response = await apiClient.get(`${API_URL}/api/departamento`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener departamentos:', error);
