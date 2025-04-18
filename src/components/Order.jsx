@@ -182,7 +182,7 @@ function Order() {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log('info de la orden ', info);
+      //console.log('info de la orden ', info);
 
       const response = await OrderService.createOrden(info);
 

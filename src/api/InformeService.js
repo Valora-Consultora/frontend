@@ -61,7 +61,7 @@ const InformeService = {
     getInformeById: async (id) => {
         try {
             const response = await apiClient.get(`${API_URL}/api/informe/${id}`);
-            console.log('obtained', response);
+            //console.log('obtained', response);
             return response.data;
         } catch (error) {
             console.error('Error al obtener el informe:', error);
@@ -72,8 +72,8 @@ const InformeService = {
    /*  updateInspeccion: async (id, inspeccionData) => {
         try {
 
-            console.log('ingresa en el update de inspeccionService');
-            console.log('inspeccionData', inspeccionData);
+            //console.log('ingresa en el update de inspeccionService');
+            //console.log('inspeccionData', inspeccionData);
 
             
             const response = await apiClient.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
@@ -81,7 +81,7 @@ const InformeService = {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('response ' + response)
+            //console.log('response ' + response)
             return response.data;
         } catch (error) {
             console.error('Error al actualizar inspeccion:', error);
@@ -91,7 +91,7 @@ const InformeService = {
 
     deleteInspeccion: async (id) => {
         try {
-            console.log('Llega al deleteInspeccion ')
+            //console.log('Llega al deleteInspeccion ')
           const response = await apiClient.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {

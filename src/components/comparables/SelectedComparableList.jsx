@@ -11,7 +11,7 @@ import { spaceNumber } from '../utils/formatters';
 const SelectedComparableList = ({ handleEditHomologation, handleEditComparable, handleSelectMainComparable, comparables }) => {
   comparables = comparables.filter(comparable => comparable.title && comparable.price && comparable.location);
 
-  //console.log("viendo comparables", comparables);
+  ////console.log("viendo comparables", comparables);
   return (
     comparables?.length > 0 ? (
       <div className="grid grid-cols-12 gap-4 mt-4">

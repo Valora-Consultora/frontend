@@ -61,7 +61,7 @@ const ItemPlanillaDescripcionModal = ({ isOpen, onRequestClose, idInforme }) => 
 
             formattedValues.totalPlanillaDescripcion = parseFloat(values.totalPlanillaDescripcion || 0.0);
 
-            console.log("Valores formateados para enviar al backend:", formattedValues);
+            //console.log("Valores formateados para enviar al backend:", formattedValues);
             await ItemObraCivilService.updateItemObraCivil(selectedItemId, formattedValues);
 
             toast.success("Datos guardados correctamente.");

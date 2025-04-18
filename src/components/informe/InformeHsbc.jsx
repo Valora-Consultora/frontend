@@ -171,7 +171,7 @@ const FormularioHsbc = () => {
   /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
   /// devolveria (*m²-200m²]
   const parseRange = (key, object) => {
-    //console.log(object);
+    ////console.log(object);
     var value = object.value;
     var value2 = object.value2;
     var subtype = object.subtype ?? "";
@@ -195,7 +195,7 @@ const FormularioHsbc = () => {
   /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
   /// formato que pueda ser utilizado en la URL y lo setea en el estado
   const modifyFilter = (id, value, opts) => {
-    //console.log('Modificando filtro:', id, value, opts)
+    ////console.log('Modificando filtro:', id, value, opts)
     var newFilter = {};
 
     if (opts?.range !== undefined) {
@@ -212,14 +212,14 @@ const FormularioHsbc = () => {
       newFilter.subtype = opts.subtype;
     }
 
-    //console.log('Seteando filtro:', newFilter);
+    ////console.log('Seteando filtro:', newFilter);
 
     setComparableFilters((prevFilters) => ({
       ...prevFilters,
       [id]: { ...prevFilters[id], ...newFilter },
     }));
 
-    //console.log(filterToUrlParams(comparableFilters));
+    ////console.log(filterToUrlParams(comparableFilters));
   };
 
   const handleComparableSubmit = async () => {
@@ -270,7 +270,7 @@ const FormularioHsbc = () => {
   const handleEditComparable = (comparable) => {
     // const comparable = comparables.find((comparable) => comparable.id === id);
     setComparableEdit(comparable);
-    //console.log(comparableEdit);
+    ////console.log(comparableEdit);
     setIsModalEditOpen(true);
   };
 
@@ -284,7 +284,7 @@ const FormularioHsbc = () => {
   const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
     try {
-      console.log("Iniciando submitHandler con borrador:", borrador);
+      //console.log("Iniciando submitHandler con borrador:", borrador);
 
       // Establecer estado del formulario según si es borrador o no
       const dataToSend = {
@@ -292,16 +292,16 @@ const FormularioHsbc = () => {
         estado: borrador ? "borrador" : "enviado"
       };
 
-      console.log("Datos a enviar para crear informe:", dataToSend);
+      //console.log("Datos a enviar para crear informe:", dataToSend);
 
       // 1. Primero crear el informe para obtener el ID
       const informe = await InformeHsbcService.createInformeHsbc(dataToSend);
-      console.log("Informe creado:", informe);
+      //console.log("Informe creado:", informe);
 
       // 2. Ahora que tenemos el ID del informe, podemos guardar el cálculo
       if (getCalculoData && !borrador && informe && informe.id) {
         try {
-          console.log("Obteniendo datos del cálculo para guardar con ID:", informe.id);
+          //console.log("Obteniendo datos del cálculo para guardar con ID:", informe.id);
           const calculoData = getCalculoData();
 
           // Mostrar notificación de proceso en curso
@@ -311,7 +311,7 @@ const FormularioHsbc = () => {
           });
 
           await InformeHsbcService.saveCalculo(informe.id, calculoData);
-          console.log("Cálculo guardado exitosamente");
+          //console.log("Cálculo guardado exitosamente");
 
           // Mostrar notificación de éxito específica para el cálculo
           toast.success("Cálculos guardados correctamente", {
@@ -361,12 +361,12 @@ const FormularioHsbc = () => {
   };
 
   const handleSaveComparable = (comparable) => {
-    //console.log('Attempting to save', comparable)
+    ////console.log('Attempting to save', comparable)
     setFormData((prevData) => ({
       ...prevData,
       comparables: [...prevData.comparables, comparable],
     }));
-    //console.log(formData);
+    ////console.log(formData);
     setIsModalEditOpen(false);
   }
 
@@ -1327,7 +1327,7 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     }
   }
 
-  //console.log('Viendo comp', comparable)
+  ////console.log('Viendo comp', comparable)
 
   return <Modal
     isOpen={isModalEditOpen}

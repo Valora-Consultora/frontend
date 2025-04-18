@@ -60,9 +60,9 @@ function Login() {
           tipoUsuario: user.tipoUsuario,
           id: user.id,
         }));
-
+        
         localStorage.setItem("token", response.token);
-/*         console.log('usuario en login  ' , usuario)
+/*         //console.log('usuario en login  ' , usuario)
  */
         // También puedes guardarlo en localStorage si lo necesitas
 /*         localStorage.setItem("username", response.username);
@@ -70,7 +70,7 @@ function Login() {
         localStorage.setItem("tipoUsuario", response.tipoUsuario);
         localStorage.setItem("id", response.id); */
 
-/*         console.log('usuario en login ', usuario.id)
+/*         //console.log('usuario en login ', usuario.id)
  */        window.location.href = "/Home";
       }
 

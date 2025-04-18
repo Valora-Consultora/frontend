@@ -101,7 +101,7 @@ const ReporteSeguimiento = () => {
     };
 
     const downloadPDF = (id) => {
-        console.log(`Descargando informe con ID: ${id}`);
+        //console.log(`Descargando informe con ID: ${id}`);
     };
 
     const getEstadoChipProps = (estado) => {
