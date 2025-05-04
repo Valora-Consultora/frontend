@@ -49,153 +49,115 @@ const TotalesBbva = ({
     const handleSuperficieFieldChange = (tipoObraCivil, index, campo, valor) => {
         if (!onUpdateSuperficie) return;
 
-        // Obtener las superficies filtradas por tipo
+        // Primero encontrar todas las superficies del tipo indicado
         const superficiesFiltradas = superficies.filter(s =>
             (s.tipoObraCivilBbva || "Superficie Cubierta") === tipoObraCivil);
 
-        // Verificar que el índice es válido
+        // Validar índice
         if (index >= 0 && index < superficiesFiltradas.length) {
-            // Obtener la superficie específica
             const superficie = superficiesFiltradas[index];
-
-            // Encontrar su índice en el array original de superficies
             const indiceGlobal = superficies.findIndex(s => s === superficie);
 
             if (indiceGlobal >= 0) {
-                // Guardar una copia del valor anterior para comparación
-                const valorAnterior = superficies[indiceGlobal][campo];
-
-                // Actualizar el campo específico en la superficie
+                // Actualizar directamente sin setTimeout
                 onUpdateSuperficie(indiceGlobal, campo, valor);
-
-                // Si el valor ha cambiado, forzar un recálculo inmediato
-                if (valorAnterior !== valor) {
-                    // Usar setTimeout para asegurar que se procese después de que React actualice el estado
-                    setTimeout(() => {
-                        console.log(`Campo ${campo} cambió de ${valorAnterior} a ${valor}, recalculando totales...`);
-                        recalcularTotales();
-                    }, 0);
-                }
+                // El recálculo de totales se manejará en el efecto que depende de superficies
             }
         }
     };
 
-    // Forzar recálculo de totales cada vez que se renderiza
     React.useEffect(() => {
-        console.log("Forzando recálculo en renderizado");
         recalcularTotales();
-    });
+    }, [superficies, onUpdateSuperficie]);
 
-    const getTotalesSuperficiePorTipo = (tipo) => {
-        // Filtramos asumiendo que superficies sin tipoObraCivilBbva son "Superficie Cubierta"
-        const superficiesFiltradas = superficies.filter(s => {
-            // Comprobación más estricta
-            const tipoSuperficie = s.tipoObraCivilBbva === undefined ? "Superficie Cubierta" : s.tipoObraCivilBbva;
-            return tipoSuperficie === tipo;
-        });
-
-        // Cálculo para valor documentada
-        const documentada = formatearNumero(superficiesFiltradas.reduce((total, s) => {
-            // Usar m2 como fallback si no existe superficieDocumentadaObraCivilSeccionEDescripcionInmueble
-            const valor = s.superficieDocumentadaObraCivilSeccionEDescripcionInmueble ||
-                (s.m2 !== 'G' ? s.m2 : 0) || 0;
-            return total + parseFloat(valor);
-        }, 0));
-
-        // Cálculo para valor verificada
-        const verificada = formatearNumero(superficiesFiltradas.reduce((total, s) => {
-            // Usar m2 como fallback si no existe superficieVerificadaObraCivilSeccionEDescripcionInmueble
-            const valor = s.superficieVerificadaObraCivilSeccionEDescripcionInmueble ||
-                (s.m2 !== 'G' ? s.m2 : 0) || 0;
-            return total + parseFloat(valor);
-        }, 0));
-
-        // Cálculo para valor total
-        const valorTotal = formatearNumero(superficiesFiltradas.reduce((total, s) =>
-            total + parseFloat(s.valorTotal || 0), 0));
-
-        return { documentada, verificada, valorTotal };
-    };
-
-    const recalcularTotales = () => {
-        console.log("Ejecutando recalcularTotales");
-
-        // Calcular totales para cada tipo
-        const nuevoTotalCubierta = calcularTotalesPorTipo("Superficie Cubierta");
-        const nuevoTotalSemiCubierta = calcularTotalesPorTipo("Superficie Semi Cubierta");
-        const nuevoTotalOtros = calcularTotalesPorTipo("Otros");
-
-        // Actualizar los estados con los valores sin formatear
-        setTotalCubierta(nuevoTotalCubierta);
-        setTotalSemiCubierta(nuevoTotalSemiCubierta);
-        setTotalOtros(nuevoTotalOtros);
-
-        // Calcular el total general como suma de los valores numéricos
-        const nuevoTotalGeneral = {
-            documentada: (parseFloat(nuevoTotalCubierta.documentada) +
-                parseFloat(nuevoTotalSemiCubierta.documentada) +
-                parseFloat(nuevoTotalOtros.documentada)).toString(),
-
-            verificada: (parseFloat(nuevoTotalCubierta.verificada) +
-                parseFloat(nuevoTotalSemiCubierta.verificada) +
-                parseFloat(nuevoTotalOtros.verificada)).toString(),
-
-            valorTotal: (parseFloat(nuevoTotalCubierta.valorTotal) +
-                parseFloat(nuevoTotalSemiCubierta.valorTotal) +
-                parseFloat(nuevoTotalOtros.valorTotal)).toString()
-        };
-
-        setTotalGeneral(nuevoTotalGeneral);
-        console.log("Nuevos totales generales:", nuevoTotalGeneral);
-    };
-
-    // Función auxiliar para calcular totales por tipo
     const calcularTotalesPorTipo = (tipo) => {
-        console.log(`Calculando totales para tipo: ${tipo}`);
-
-        // Filtrar superficies por tipo
         const superficiesFiltradas = superficies.filter(s => {
             const tipoSuperficie = s.tipoObraCivilBbva === undefined ?
                 "Superficie Cubierta" : s.tipoObraCivilBbva;
             return tipoSuperficie === tipo;
         });
 
-        console.log(`Encontradas ${superficiesFiltradas.length} superficies del tipo ${tipo}`);
+        // Calcular las sumas con un solo reduce para mayor claridad
+        const totales = superficiesFiltradas.reduce((acum, s) => {
+            const docValue = parseFloat(s.superficieDocumentadaObraCivilSeccionEDescripcionInmueble ||
+                (s.m2 !== 'G' ? s.m2 : 0) || 0);
+            const verValue = parseFloat(s.superficieVerificadaObraCivilSeccionEDescripcionInmueble ||
+                (s.m2 !== 'G' ? s.m2 : 0) || 0);
+            const totalValue = parseFloat(s.valorTotal || 0);
 
-        // Inicializar totales
-        let sumDocumentada = 0;
-        let sumVerificada = 0;
-        let sumValorTotal = 0;
+            return {
+                documentada: acum.documentada + docValue,
+                verificada: acum.verificada + verValue,
+                valorTotal: acum.valorTotal + totalValue
+            };
+        }, { documentada: 0, verificada: 0, valorTotal: 0 });
 
-        // Sumar los valores manualmente para cada superficie
-        superficiesFiltradas.forEach((s, idx) => {
-            // Documentada
-            const valorDocumentada = s.superficieDocumentadaObraCivilSeccionEDescripcionInmueble ||
-                (s.m2 !== 'G' ? s.m2 : 0);
-            const numDocumentada = parseFloat(valorDocumentada) || 0;
-            sumDocumentada += numDocumentada;
-
-            // Verificada
-            const valorVerificada = s.superficieVerificadaObraCivilSeccionEDescripcionInmueble ||
-                (s.m2 !== 'G' ? s.m2 : 0);
-            const numVerificada = parseFloat(valorVerificada) || 0;
-            sumVerificada += numVerificada;
-
-            // Valor Total
-            const valorTotal = s.valorTotal || 0;
-            const numValorTotal = parseFloat(valorTotal) || 0;
-            sumValorTotal += numValorTotal;
-
-            console.log(`Superficie ${idx} (${s.descripcion}): Doc=${numDocumentada}, Ver=${numVerificada}, Total=${numValorTotal}`);
-        });
-
-        console.log(`Totales calculados para ${tipo}: Doc=${sumDocumentada}, Ver=${sumVerificada}, Total=${sumValorTotal}`);
-
+        // Convertir números a strings formateados
         return {
-            documentada: sumDocumentada.toString(),
-            verificada: sumVerificada.toString(),
-            valorTotal: sumValorTotal.toString()
+            documentada: totales.documentada.toString(),
+            verificada: totales.verificada.toString(),
+            valorTotal: totales.valorTotal.toString()
         };
+    };
+
+    const recalcularTotales = () => {
+        // Hacer un solo recorrido de las superficies para calcular todos los totales
+        const totales = {
+            cubierta: { documentada: 0, verificada: 0, valorTotal: 0 },
+            semiCubierta: { documentada: 0, verificada: 0, valorTotal: 0 },
+            otros: { documentada: 0, verificada: 0, valorTotal: 0 },
+        };
+        
+        // Acumular totales en una sola pasada
+        superficies.forEach(s => {
+            const tipo = s.tipoObraCivilBbva || "Superficie Cubierta";
+            const categoria = tipo === "Superficie Cubierta" ? "cubierta" : 
+                              tipo === "Superficie Semi Cubierta" ? "semiCubierta" : "otros";
+            
+            const docValue = parseFloat(s.superficieDocumentadaObraCivilSeccionEDescripcionInmueble || 
+                                 (s.m2 !== 'G' ? s.m2 : 0) || 0);
+            const verValue = parseFloat(s.superficieVerificadaObraCivilSeccionEDescripcionInmueble || 
+                                 (s.m2 !== 'G' ? s.m2 : 0) || 0);
+            const totalValue = parseFloat(s.valorTotal || 0);
+            
+            totales[categoria].documentada += docValue;
+            totales[categoria].verificada += verValue;
+            totales[categoria].valorTotal += totalValue;
+        });
+        
+        // Actualizar estados con formato adecuado
+        setTotalCubierta({
+            documentada: totales.cubierta.documentada.toString(),
+            verificada: totales.cubierta.verificada.toString(),
+            valorTotal: totales.cubierta.valorTotal.toString()
+        });
+        
+        setTotalSemiCubierta({
+            documentada: totales.semiCubierta.documentada.toString(),
+            verificada: totales.semiCubierta.verificada.toString(),
+            valorTotal: totales.semiCubierta.valorTotal.toString()
+        });
+        
+        setTotalOtros({
+            documentada: totales.otros.documentada.toString(),
+            verificada: totales.otros.verificada.toString(),
+            valorTotal: totales.otros.valorTotal.toString()
+        });
+        
+        // Calcular el total general
+        const totalGeneral = {
+            documentada: (totales.cubierta.documentada + 
+                          totales.semiCubierta.documentada + 
+                          totales.otros.documentada).toString(),
+            verificada: (totales.cubierta.verificada + 
+                         totales.semiCubierta.verificada + 
+                         totales.otros.verificada).toString(),
+            valorTotal: (totales.cubierta.valorTotal + 
+                         totales.semiCubierta.valorTotal + 
+                         totales.otros.valorTotal).toString()
+        };
+        
+        setTotalGeneral(totalGeneral);
     };
 
 
@@ -775,36 +737,6 @@ const TotalesBbva = ({
                     />
                 </div>
             </div>
-
-            {/* Valor de Realización Inmediata - CONVERTIDO A EDITABLE */}
-            {/* <div className="grid grid-cols-12 border border-t-0">
-                <div className="col-span-4 p-2 text-right">
-                    Valor de Realización Inmediata
-                </div>
-                <div className="col-span-3 p-2 border-l text-center">
-                    <div className="mb-1 text-sm font-bold bg-gray-100 py-1">U$S/m²</div>
-                    <InputNumerico
-                        value={valorVentaRapida && superficieObraCivil ? formatearNumero(valorVentaRapida / superficieObraCivil) : 0}
-                        onChange={(valor) => {
-                            if (superficieObraCivil > 0) {
-                                // Actualizar el valor total multiplicando por la superficie
-                                onValorVentaRapidaChange(valor * superficieObraCivil);
-                            }
-                        }}
-                        className="w-full text-center"
-                    />
-                </div>
-                <div className="col-span-5 p-2 border-l text-center">
-                    <div className="mb-1 text-sm font-bold bg-gray-100 py-1">Total U$S</div>
-                    <InputNumerico
-                        value={valorVentaRapida}
-                        onChange={(valor) => {
-                            onValorVentaRapidaChange(valor);
-                        }}
-                        className="w-full text-center"
-                    />
-                </div>
-            </div> */}
 
             {/* Valor de Remate - CONVERTIDO A EDITABLE */}
             <div className="grid grid-cols-12 border border-t-0">
