@@ -6,6 +6,12 @@ const FACTORES_CONSERVACION = {
   "Necesita Reparaciones": 0.85,
 };
 
+const TIPOS_INFORME = {
+  DEFAULT: "default",
+  BBVA: "BBVA",
+  ITAU: "ITAU",
+};
+
 /**
  * Formatea un número a 2 decimales
  * @param {number} valor - Valor a formatear
@@ -188,22 +194,25 @@ const calcularFactorEdadPromedio = (superficies) => {
 };
 
 /**
- * Calcula el valor intrínseco según el tipo de propiedad
+ * Calcula el valor intrínseco según el tipo de propiedad y tipo de informe
  * @param {number} valorTerreno - Valor del terreno o cuota parte para PH
  * @param {number} valorObraCivil - Valor de la obra civil (suma de superficies cubiertas)
  * @param {string} tipoPropiedad - Tipo de propiedad ('pc', 'ph', 'terreno')
+ * @param {string} tipoInforme - Tipo de informe ('default', 'BBVA', 'ITAU')
  * @returns {number} Valor intrínseco
  */
 const calcularValorIntrinseco = (
   valorTerreno,
   valorObraCivil,
-  tipoPropiedad = "pc"
+  tipoPropiedad = "pc",
+  tipoInforme = "default"
 ) => {
-  // Para cualquier tipo de propiedad, el valor intrínseco es la suma del valor del terreno (o cuota parte)
-  // y el valor de la obra civil
-  return formatearNumero(parseFloat(valorTerreno) + parseFloat(valorObraCivil));
-};
+  const terreno = parseFloat(valorTerreno) || 0;
+  const obraCivil = parseFloat(valorObraCivil) || 0;
 
+  // Para cualquier tipo de propiedad y de informe, el valor intrínseco es la suma
+  return formatearNumero(terreno + obraCivil);
+};
 /**
  * Calcula la cuota parte en valor monetario
  * @param {number} valorTerreno - Valor total del terreno
@@ -287,16 +296,45 @@ const calcularValorPorMetroCuadradoItau = (
 };
 
 /**
- * Calcula el valor de venta rápida (QSV) para Itaú como promedio entre valor de mercado y valor de remate
+ * Calcula el valor de venta rápida según el tipo de informe
  * @param {number} valorMercado - Valor de mercado en USD
- * @param {number} valorRemate - Valor de remate en USD
- * @returns {number} - Valor de venta rápida (QSV)
+ * @param {number} valorRemate - Valor de remate en USD (solo usado en algunos informes)
+ * @param {string} tipoInforme - Tipo de informe ('default', 'BBVA', 'ITAU')
+ * @returns {number} - Valor de venta rápida
  */
-const calcularValorVentaRapidaItau = (valorMercado, valorRemate) => {
-  if (!valorMercado || !valorRemate) return 0;
-  return formatearNumero(
-    (parseFloat(valorMercado) + parseFloat(valorRemate)) / 2
-  );
+const calcularValorVentaRapida = (
+  valorMercado,
+  valorRemate = 0,
+  tipoInforme = "default"
+) => {
+  if (!valorMercado) return 0;
+
+  switch (tipoInforme) {
+    case TIPOS_INFORME.ITAU:
+      return formatearNumero(
+        (parseFloat(valorMercado) + parseFloat(valorRemate)) / 2
+      );
+    case TIPOS_INFORME.BBVA:
+    case TIPOS_INFORME.DEFAULT:
+    default:
+      return formatearNumero(parseFloat(valorMercado) * 0.9);
+  }
+};
+
+/**
+ * Calcula el valor por metro cuadrado para cualquier tipo de informe
+ * @param {number} valor - Valor total
+ * @param {number} superficie - Superficie en metros cuadrados
+ * @param {string} tipoInforme - Tipo de informe ('default', 'BBVA', 'ITAU')
+ * @returns {number} - Valor por metro cuadrado
+ */
+const calcularValorPorMetroCuadrado = (
+  valor,
+  superficie,
+  tipoInforme = "default"
+) => {
+  if (!valor || !superficie || superficie <= 0) return 0;
+  return formatearNumero(valor / superficie);
 };
 
 /**
@@ -325,11 +363,11 @@ const calcularValorRemateItau = (valorMercado) => {
  */
 const calcularValorUI = (valorUSD, cotizacionDolar, valorUI) => {
   if (!valorUSD || !cotizacionDolar || !valorUI || valorUI <= 0) return 0;
-  
+
   // Convertir USD a pesos y luego a UI
   const valorEnPesos = parseFloat(valorUSD) * parseFloat(cotizacionDolar);
   const valorEnUI = valorEnPesos / parseFloat(valorUI);
-  
+
   return formatearNumero(valorEnUI);
 };
 
@@ -391,17 +429,26 @@ const calcularValorTotalSuperficie = (metros, precioCorregido) => {
  * @param {number} valorMercado - Valor de mercado del inmueble
  * @returns {number} Valor de venta rápida
  */
-const calcularValorVentaRapida = (valorMercado) =>
-  formatearNumero(parseFloat(valorMercado) * 0.9);
 
 /**
- * Calcula el valor de remate (80% del valor de mercado)
- * @param {number} valorMercado - Valor de mercado del inmueble
- * @returns {number} Valor de remate
+ * Calcula el valor de remate según el tipo de informe
+ * @param {number} valorMercado - Valor de mercado
+ * @param {string} tipoInforme - Tipo de informe ('default', 'BBVA', 'ITAU')
+ * @returns {number} - Valor de remate
  */
-const calcularValorRemate = (valorMercado) =>
-  formatearNumero(parseFloat(valorMercado) * 0.8);
+const calcularValorRemate = (valorMercado, tipoInforme = "default") => {
+  if (!valorMercado) return 0;
 
+  // Por ahora todos usan el mismo cálculo (80% del valor de mercado)
+  // pero dejamos la estructura preparada para variantes futuras
+  switch (tipoInforme) {
+    case TIPOS_INFORME.BBVA:
+    case TIPOS_INFORME.ITAU:
+    case TIPOS_INFORME.DEFAULT:
+    default:
+      return formatearNumero(parseFloat(valorMercado) * 0.8);
+  }
+};
 /**
  * Calcula el valor final de un inmueble según su tipo
  * @param {Object} params - Parámetros para el cálculo
@@ -592,7 +639,135 @@ const recalcularSuperficie = (superficie) => {
   return resultado;
 };
 
+/**
+ * Prepara el objeto de datos de cálculo según el tipo de informe
+ * @param {Object} calculoData - Datos base del cálculo
+ * @param {string} tipoInforme - Tipo de informe
+ * @returns {Object} - Datos de cálculo formateados según el tipo
+ */
+/**
+ * Prepara el objeto de datos de cálculo según el tipo de informe
+ * @param {Object} calculoData - Datos base del cálculo
+ * @param {string} tipoInforme - Tipo de informe ('default', 'BBVA', 'ITAU')
+ * @returns {Object} - Datos de cálculo formateados según el tipo
+ */
+const prepararDatosCalculo = (calculoData, tipoInforme = "default") => {
+  if (!calculoData) return {};
+
+  // Extraer valores relevantes del objeto de cálculo base
+  const {
+    tipoPropiedad,
+    estadoConservacion,
+    factorConservacion,
+    superficieTerreno,
+    valorMetroTerreno,
+    valorTerreno,
+    valorObraCivil,
+    valorMercado,
+    valorVentaRapida,
+    valorRemate,
+    valorIntrinseco,
+    superficieConstruidaTotal,
+    superficies = [],
+    valorUI,
+    cotizacionDolar,
+    // Otros campos generales que puedas necesitar
+  } = calculoData;
+
+  // Preparar datos comunes para todos los tipos
+  const datosComunes = {
+    tipoPropiedad,
+    estadoConservacion,
+    factorConservacion,
+    superficieTerreno: parseFloat(superficieTerreno || 0),
+    valorMetroTerreno,
+    valorTerreno,
+    valorObraCivil,
+    valorMercado,
+    valorVentaRapida,
+    valorRemate,
+    valorIntrinseco,
+    superficieConstruidaTotal,
+    superficies: superficies.map((superficie) => ({
+      descripcion: superficie.descripcion,
+      m2: parseFloat(superficie.m2 || 0),
+      ampliaciones: superficie.ampliaciones || "",
+      promedioEdad: parseFloat(superficie.promedioEdad || 0),
+      factorEdad: parseFloat(superficie.factorEdad || 0),
+      conservacion: superficie.conservacion || "",
+      factorConservacion: parseFloat(superficie.factorConservacion || 0),
+      precioMetro: parseFloat(superficie.precioMetro || 0),
+      precioMetroCorregido: parseFloat(superficie.precioMetroCorregido || 0),
+      valorTotal: parseFloat(superficie.valorTotal || 0),
+      valorTotalSinCorregir: parseFloat(superficie.valorTotalSinCorregir || 0),
+      tipoSuperficie: superficie.tipoSuperficie || "propio",
+    })),
+  };
+
+  // Datos específicos según el tipo de informe
+  switch (tipoInforme) {
+    case TIPOS_INFORME.BBVA:
+      // Calcular valores específicos para BBVA
+      const valorObraCivilM2 =
+        superficieConstruidaTotal && valorObraCivil
+          ? formatearNumero(valorObraCivil / superficieConstruidaTotal)
+          : 0;
+
+      const valorIntrisecoM2 =
+        superficieConstruidaTotal && valorIntrinseco
+          ? formatearNumero(valorIntrinseco / superficieConstruidaTotal)
+          : 0;
+
+      return {
+        ...datosComunes,
+        valorObraCivilM2,
+        valorIntrisecoM2,
+        superficies: datosComunes.superficies.map((sup) => ({
+          ...sup,
+          superficieDocumentadaObraCivilSeccionEDescripcionInmueble: parseFloat(
+            sup.superficieDocumentadaObraCivilSeccionEDescripcionInmueble || 0
+          ),
+          superficieVerificadaObraCivilSeccionEDescripcionInmueble: parseFloat(
+            sup.superficieVerificadaObraCivilSeccionEDescripcionInmueble || 0
+          ),
+        })),
+        tipoInforme: TIPOS_INFORME.BBVA,
+      };
+
+    case TIPOS_INFORME.ITAU:
+      // Calcular valores específicos para ITAU
+      const valorMercadoPorM2 = calcularValorMercadoPorMetroCuadradoItau(
+        valorMercado,
+        superficieConstruidaTotal
+      );
+
+      const valorUI_Calculado = calcularValorUI(
+        valorMercado,
+        cotizacionDolar,
+        valorUI
+      );
+
+      return {
+        ...datosComunes,
+        valorMercadoPorM2,
+        valorUI: valorUI_Calculado,
+        tipoInforme: TIPOS_INFORME.ITAU,
+      };
+
+    default:
+      // Retornar datos sin modificaciones específicas
+      return {
+        ...datosComunes,
+        tipoInforme: TIPOS_INFORME.DEFAULT,
+      };
+  }
+};
+
 export {
+  // Constantes
+  FACTORES_CONSERVACION,
+  TIPOS_INFORME,
+
   // Funciones de formateo y conversión
   formatearNumero,
   parseStringAmpliaciones,
@@ -617,6 +792,7 @@ export {
   calcularValorRemate,
   calcularValorFinal,
   calcularValorMetroCuadrado,
+  calcularValorPorMetroCuadrado,
 
   // Funciones para cálculos globales
   calcularValorIntrinseco,
@@ -630,9 +806,11 @@ export {
   recalcularSuperficie,
   calcularValorCuotaParte,
   calcularPorcentajeCuotaParte,
+
+  // Funciones específicas por tipo de informe
   calcularValorMercadoPorMetroCuadradoItau,
   calcularValorPorMetroCuadradoItau,
-  calcularValorVentaRapidaItau,
   calcularValorRemateItau,
   calcularValorUI,
+  prepararDatosCalculo,
 };
