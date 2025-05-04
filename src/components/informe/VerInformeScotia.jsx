@@ -38,14 +38,14 @@ const VerInformeScotia = () => {
   const handleApprove = () => {
     InformeService.approveInforme(id).then(() => {
       toast.success("Informe aprobado correctamente");
-      setInforme({...informe, estado: 'aprobado'});
+      setInforme({...informe, estadoInforme: 'APROBADO'});
     })
   }
   
   const handleDisapprove = () => {
     InformeService.disapproveInforme(id).then(() => {
       toast.success("Aprobación cancelada correctamente");
-      setInforme({...informe, estado: 'enviado'});
+      setInforme({...informe, estadoInforme: 'PENDIENTE'});
     })
   }
 
@@ -337,7 +337,7 @@ const VerInformeScotia = () => {
         </div>
         <div className="mt-4 text-center">
           <div className="space-x-2">
-            {informe.estado === "enviado" &&
+            {informe.estadoInforme === "PENDIENTE" &&
               <button
                 type="button"
                 className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/4 "
@@ -346,7 +346,7 @@ const VerInformeScotia = () => {
                 Aprobar Informe
               </button>
             }
-            {informe.estado === "aprobado" &&
+            {informe.estadoInforme === "APROBADO" &&
               <button
                 type="button"
                 className="bg-yellow-900 text-white px-4 py-2 rounded-md hover:bg-yellow-700 w-1/4 "

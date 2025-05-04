@@ -10,6 +10,7 @@ import InformeService from "../../api/InformeService";
 import { InformeCard } from "./InformeCard";
 import { useParams } from "react-router-dom";
 import FormularioParticular from "./InformeParticular";
+import InformeList from "./InformeList";
 
 const InformeLayout = () => {
   const dispatch = useDispatch();
@@ -121,10 +122,7 @@ const InformeLayout = () => {
               INFORMES CREADOS POR {usuario.username.toUpperCase()}
             </h2>
             <div className="text-center my-2">
-              {informes && informes.length > 0 ? informes.map((informe) => (
-                <InformeCard key={informe.id} informe={informe} handleCardSelect={handleCardSelect} />
-              )) :
-                <h3 className="text-xl text-green-900 font-light">Todavía no creaste informes, {usuario.nombre}</h3>}
+              <InformeList informes={informes} onCardSelect={handleCardSelect} />
             </div>
           </div>
         }

@@ -1,6 +1,4 @@
-import { combineSlices } from "@reduxjs/toolkit";
 import apiClient from "./apiClient";
-import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL; 
 
@@ -11,7 +9,7 @@ const InspeccionService = {
           //console.log('ingresa en el create de inspeccionService');
           //console.log('inspeccionData', inspeccionData);
 
-          const response = await axios.post(`${API_URL}/api/create-inspeccion`, inspeccionData, {
+          const response = await apiClient.post(`${API_URL}/api/create-inspeccion`, inspeccionData, {
               headers: {
                   'Content-Type': 'application/json',
               },
@@ -31,7 +29,7 @@ const InspeccionService = {
             //console.log('inspeccionData ', inspeccionData);
 
             
-            const response = await axios.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
+            const response = await apiClient.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -47,7 +45,7 @@ const InspeccionService = {
     deleteInspeccion: async (id) => {
         try {
             //console.log('Llega al deleteInspeccion ')
-          const response = await axios.delete(`${API_URL}/api/inspeccion/${id}`);
+          const response = await apiClient.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {
           console.error("Error al eliminar la inspección:", error);
