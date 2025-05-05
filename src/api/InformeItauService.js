@@ -122,7 +122,7 @@ const InformeItauService = {
       
       //console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
       
-      const response = await axios.post(
+      const response = await apiClient.post(
         `${API_URL}/api/informeItau/${informeId}/calculo`,
         calculoToSend,
         {
@@ -153,7 +153,7 @@ const InformeItauService = {
   // Obtener el cálculo de un informe
   getCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeItau/${informeId}/calculo`
       );
       return response.data;
@@ -166,7 +166,7 @@ const InformeItauService = {
   // Obtener las superficies del cálculo
   getSuperficiesCalculo: async (informeId) => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `${API_URL}/api/informeItau/${informeId}/calculo/superficies`
       );
       return response.data;
