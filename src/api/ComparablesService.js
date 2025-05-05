@@ -31,6 +31,22 @@ const ComparablesService = {
       throw error;
     }
   },
+
+  uploadThumbnail: async (file, id) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await apiClient.post(`${API_URL}/api/comparables/${id}/thumbnail`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al subir la miniatura:", error);
+      throw error;
+    }
+  }
 };
 
 export default ComparablesService;

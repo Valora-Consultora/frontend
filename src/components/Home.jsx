@@ -5,8 +5,11 @@ import InformeService from '../api/InformeService';
 import { useNavigate } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
 import { setProvisionalInformeId } from '../app/slices/informeSlice';
-import { Visibility, CheckCircle, Description, Assessment, Search, Feed } from '@mui/icons-material';
+import { Visibility, CheckCircle, Description, Assessment, Search, Feed, Done } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
+import UsuarioService from '../api/UsuarioService';
+import { CircularProgress } from '@mui/material';
+import EmptyList from './utils/EmptyList';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -241,21 +244,149 @@ const Home = () => {
   return (
     <div className="bg-gray-100 min-h-screen relative">
       {/* Etiqueta de tipo de usuario en la esquina superior izquierda */}
-{/*       <span className="absolute top-4 left-4 bg-green-100 text-black text-sm font-medium px-3 py-1 rounded-md shadow-md">
+      {/*       <span className="absolute top-4 left-4 bg-green-100 text-black text-sm font-medium px-3 py-1 rounded-md shadow-md">
         {tipoUsuario}
       </span> */}
-  
+
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-5xl text-green-900 font-light my-10">
           ¡HOLA {nombre}!
         </h1>
         <div className={`grid ${gridClass} gap-6 w-4/5`}>{opciones}</div>
+        <TaskDashboard />
       </div>
     </div>
   );
-  
 
 
+
+};
+
+const TaskDashboard = () => {
+  const usuario = useSelector(state => state.user);
+  const [taskList, setTaskList] = useState();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async function getTaskList() {
+      const taskListResponse = await UsuarioService.getTaskListByUserId(usuario.id);
+
+      setTaskList(taskListResponse);
+      setLoading(false);
+    })();
+  }, []);
+
+  const renderTaskList = () => {
+    if (!taskList) {
+      return <div className="text-gray-500 text-center mt-4">No hay tareas disponibles</div>;
+    }
+
+    if (taskList.totalTasks === 0) {
+      return <EmptyList Icon={Done} message={"Estas al día mano, bien ahí"} />
+    }
+
+    return <>
+      {taskList.informes && taskList.informes.length > 0 && <>
+        <div className="mt-4">
+          <IconTitleBadge
+            icon={<Description className="text-blue-500" />}
+            title="Informes pendientes"
+            badgeText={taskList.informes.length}
+            foregroundColor="text-blue-500"
+            backgroundColor="bg-blue-100"
+          />
+        </div>
+        {taskList.informes.map((informe) => (
+          <div key={informe.id} className="ml-4 mt-2 flex items-center space-x-2">
+            <span className="text-md font-semibold flex-grow">{informe.localidad}</span>
+            <button
+              className="text-blue-500 hover:underline"
+              onClick={() => {}}
+            >
+              Ver Informe
+            </button>
+          </div>
+        ))}
+      </>}
+      {taskList.ordenes && taskList.ordenes.length > 0 && <>
+        <div className="mt-4">
+          <IconTitleBadge
+            icon={<Assessment className="text-green-500" />}
+            title="Ordenes asignadas"
+            badgeText={taskList.ordenes.length}
+            foregroundColor="text-green-500"
+            backgroundColor="bg-green-100"
+          />
+        </div>
+        {taskList.ordenes.map((orden) => (
+          <div key={orden.id} className="ml-4 mt-2 flex items-center space-x-2">
+            <span className="text-md font-semibold flex-grow">{orden.localidad}</span>
+            {/* <button
+              className="text-blue-500 hover:underline"
+              onClick={() => {}}
+            > */}
+            <a href={`/Inspeccion/Orden/${orden.id}`}>
+              Crear inspección
+            </a>
+            {/* </button> */}
+          </div>
+        ))}
+      </>}
+      {taskList.inspecciones && taskList.inspecciones.length > 0 && <>
+        <div className="mt-4">
+          <IconTitleBadge
+            icon={<Visibility className="text-red-500" />}
+            title="Inspecciones pendientes"
+            badgeText={taskList.inspecciones.length}
+            foregroundColor="text-red-500"
+            backgroundColor="bg-red-100"
+          />
+        </div>
+        {taskList.inspecciones.map((inspeccion) => (
+          <div key={inspeccion.id} className="ml-4 mt-2 flex items-center space-x-2">
+            <span className="text-md font-semibold flex-grow">{inspeccion.localidad}</span>
+            {/* <button
+              className="text-blue-500 hover:underline"
+              onClick={() => {}}
+            > */}
+            <a href={`/Informe/Inspeccion/${inspeccion.id}`}>
+              Crear informe
+            </a>
+            {/* </button> */}
+          </div>
+        ))}
+      </>}
+    </>;
+
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-8 mt-10 w-1/5">
+      <div className="flex flex-row items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Tus Tareas</h2>
+        <span className={`text-sm ring-1 ring-gray-200 font-medium px-[.75rem] rounded-full`}>
+          {taskList && taskList.totalTasks}
+        </span>
+      </div>
+      {loading ? <CircularProgress /> : renderTaskList()}
+    </div>
+  );
+}
+
+const IconTitleBadge = ({ icon, title, badgeText, foregroundColor, backgroundColor }) => {
+  return (
+    <div className="flex items-center space-x-2">
+      {icon}
+      <span className="text-md font-semibold flex-grow">{title}</span>
+      {badgeText && (
+        <span
+          className={`text-sm ring-1 ring-gray-200 font-medium px-[.75rem] rounded-full ${foregroundColor} ${backgroundColor}`}
+        >
+          {badgeText}
+        </span>
+      )}
+    </div>
+  );
 };
 
 export default Home;

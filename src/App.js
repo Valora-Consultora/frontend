@@ -20,6 +20,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import NotificacionesPage from "./components/notificaciones/NotificacionesPage";
 import Perfil from "./components/perfil/Perfil";
 import { jwtDecode } from "jwt-decode";
+import OrdenesList from "./components/orden/OrdenesList";
+import InspeccionesList from "./components/inspeccion/InspeccionesList";
 
 const WithHeader = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -97,12 +99,20 @@ function App() {
                   path="/Orden"
                   element={
                     <WithHeader>
-                      <Order />
+                      <OrdenesList />
                     </WithHeader>
                   }
                 />
                 <Route
                   path="/Inspeccion"
+                  element={
+                    <WithHeader>
+                      <InspeccionesList />
+                    </WithHeader>
+                  }
+                />
+                <Route
+                  path="/Inspeccion/Orden/:ordenId"
                   element={
                     <WithHeader>
                       <Inspeccion />
@@ -127,6 +137,14 @@ function App() {
                 />
                 <Route
                   path="/Informe/:banco"
+                  element={
+                    <WithHeader>
+                      <InformeLayout />
+                    </WithHeader>
+                  }
+                />
+                <Route
+                  path="/Informe/Inspeccion/:inspeccionId"
                   element={
                     <WithHeader>
                       <InformeLayout />

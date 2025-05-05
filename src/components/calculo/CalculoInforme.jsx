@@ -104,17 +104,18 @@ const CalculoInforme = ({ superficieTerreno = 0, onGetCalculoData = null }) => {
 
 
     // Exponemos la función a través de una ref o useImperativeHandle si es necesario
-    React.useEffect(() => {
-        if (onGetCalculoData) {
-            onGetCalculoData(getCalculoData);
-        }
-    }, [
-        tipoPropiedad, estadoConservacion, factorConservacionValor, superficieTerreno,
-        valorMetroTerreno, valorTerreno, valorMercado, valorVentaRapida, valorRemate,
-        costoReposicion, valorIntrinseco, valorMercadoMetroCuadrado, valorVentaRapidaMetroCuadrado,
-        valorRemateMetroCuadrado, costoReposicionMetroCuadrado, superficieConstruida, superficies,
-        onGetCalculoData
-    ]);
+    // React.useEffect(() => {
+    //     console.log('BLAMED');
+    //     if (onGetCalculoData) {
+    //         onGetCalculoData(getCalculoData);
+    //     }
+    // }, [
+    //     tipoPropiedad, estadoConservacion, factorConservacionValor, superficieTerreno,
+    //     valorMetroTerreno, valorTerreno, valorMercado, valorVentaRapida, valorRemate,
+    //     costoReposicion, valorIntrinseco, valorMercadoMetroCuadrado, valorVentaRapidaMetroCuadrado,
+    //     valorRemateMetroCuadrado, costoReposicionMetroCuadrado, superficieConstruida, superficies,
+    //     onGetCalculoData
+    // ]);
 
     // Función para iniciar el proceso de eliminación
     const handleEliminarClick = (index) => {

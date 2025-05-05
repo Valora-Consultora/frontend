@@ -7,13 +7,46 @@ import LocalService from "../api/LocalService";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import InspeccionService from "../api/InspeccionService";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
 import OrderService from '../api/OrderService';
 import { setUser } from '../app/slices/userSlice';
 
 function Inspeccion() {
+    const { ordenId } = useParams();
+    const usuario = useSelector(state => state.user);
 
+    useEffect(() => {
+        if (ordenId) {
+            (async function fetchOrden() {
+                try {
+                    const orden = await OrderService.getOrdenById(ordenId);
+                    const banco = await OrderService.getBancoById(orden.bancoId);
+                    const nombreBanco = banco.nombre.toLowerCase();
+
+                    const prefill = {
+                        solicitante: orden.nombreSolicitante,
+                        calle: orden.calle,
+                        nro: orden.nroPuerta,
+                        esquina: orden.esquina,
+                        unidad: orden.unidad,
+                        departamento: orden.departamento,
+                        localidad: orden.localidad,
+                        banco: nombreBanco,
+                        ordenId: orden.id,
+                        tasadorId: usuario.id
+                    };
+
+                    console.log('prefill', prefill);
+                    
+                    setInspeccion((prev) => ({ ...prev, ...prefill }));
+                    console.log('insp.', inspeccion);
+                } catch (error) {
+                    console.error("Error al obtener la orden:", error);
+                }
+            })();
+        }
+    }, [ordenId]);
 
     const [inspeccion, setInspeccion] = useState(() => initialInspeccionState({}));
     const [locales, setLocales] = useState([]);
@@ -34,7 +67,6 @@ function Inspeccion() {
     const { provisionalId } = location.state || {};
     const selectedBancoId = inspeccion.banco ? inspeccion.banco.id : "";
     const selectedDepartamentoId = inspeccion.departamento ? inspeccion.departamento.id : "";
-    const usuario = useSelector(state => state.user);
 
 
     useEffect(() => {
@@ -74,14 +106,14 @@ function Inspeccion() {
         };
     }, [provisionalId]);
 
-    useEffect(() => {
-        if (usuario && usuario.nombre) {
-            setInspeccion(prevState => ({
-                ...prevState,
-                tasador: usuario,
-            }));
-        }
-    }, [usuario]);
+    // useEffect(() => {
+    //     if (usuario && usuario.nombre) {
+    //         setInspeccion(prevState => ({
+    //             ...prevState,
+    //             tasador: usuario,
+    //         }));
+    //     }
+    // }, [usuario]);
 
 
     useEffect(() => {
@@ -355,6 +387,7 @@ function Inspeccion() {
                                     type="text"
                                     id="solicitante"
                                     name="solicitante"
+                                    value={inspeccion.solicitante}
                                     onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -397,6 +430,7 @@ function Inspeccion() {
                                     type="text"
                                     id="localidad"
                                     name="localidad"
+                                    value={inspeccion.localidad}
                                     onChange={handleInputChange}
                                     className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -451,6 +485,7 @@ function Inspeccion() {
                                     type="number"
                                     id="nro"
                                     name="nro"
+                                    value={inspeccion.nro}
                                     onChange={handleInputChange}
                                     className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -465,6 +500,7 @@ function Inspeccion() {
                                     type="number"
                                     id="unidad"
                                     name="unidad"
+                                    value={inspeccion.unidad}
                                     onChange={handleInputChange}
                                     className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -521,6 +557,7 @@ function Inspeccion() {
                                     type="text"
                                     id="esquina"
                                     name="esquina"
+                                    value={inspeccion.esquina}
                                     onChange={handleInputChange}
                                     className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />

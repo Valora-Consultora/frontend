@@ -63,7 +63,7 @@ const Perfil = () => {
           <h2 className="text-2xl font-bold mb-2">{usuario.nombre}</h2>
           <p className="text-gray-600 mb-2">{normalizeText(usuario.tipoUsuario)}</p>
         </div>
-        <div className="min-w-96 bg-white shadow-md rounded-lg flex flex-col items-center justify-center p-4 m-4">
+        <div className="w-128 bg-white shadow-md rounded-lg flex flex-col items-center justify-center p-4 m-4">
           <InformeList emptyListMessage={`${usuario.nombre} aún no tiene informes.`} informes={informes} onCardSelect={(_) => { }} />
         </div>
       </div>

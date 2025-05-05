@@ -3,6 +3,15 @@ import apiClient from "./apiClient";
 const API_URL = process.env.REACT_APP_API_URL; 
 
 const OrderService = {
+  getOrdenById: async (id) => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/orden/${parseInt(id)}`);
+      return response.data;
+      } catch (error) {
+        console.error('Error al obtener orden por ID:', error);
+        throw error;
+      }
+  },
 
   createOrden: async (ordenData) => {
     try {
@@ -17,6 +26,16 @@ const OrderService = {
  */      return response.data;
     } catch (error) {
       console.error('Error al crear orden:', error);
+      throw error;
+    }
+  },
+
+  getOrdenesByTasadorId: async (id) => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/orden/tasador/${parseInt(id)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener ordenes por tasador ID:', error);
       throw error;
     }
   },

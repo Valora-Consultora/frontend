@@ -3,12 +3,16 @@ import Payments from '../../images/icons/payments.svg';
 import Map from '../../images/icons/map.svg';
 import Link from '../../images/icons/link.svg';
 import Edit from '../../images/icons/edit.svg';
+import { Edit as EditMui } from "@mui/icons-material";
 import CompareArrows from '../../images/icons/compare_arrows.svg';
 import HousePlaceholder from '../../images/house-placeholder.png';
+import { useRef } from 'react';
 
 import { spaceNumber } from '../utils/formatters';
+import ComparablesService from '../../api/ComparablesService';
 
-const SelectedComparableList = ({ handleEditHomologation, handleEditComparable, handleSelectMainComparable, comparables }) => {
+const SelectedComparableList = ({ handleEditHomologation, handleEditComparable, handleSelectMainComparable, comparables, handleThumbnailChange }) => {
+  const fileRef = useRef(null);
   comparables = comparables.filter(comparable => comparable.title && comparable.price && comparable.location);
 
   return (
@@ -43,8 +47,31 @@ const SelectedComparableList = ({ handleEditHomologation, handleEditComparable, 
                 {comparable.main ? "Desmarcar como principal" : "Marcar como principal"}
               </button>
             </div>
-            <div className="flex flex-row space-x-4">
-              <img src={comparable.thumbnail ?? HousePlaceholder} alt={comparable.title} className="max-w-64 max-h-64 ring-4 rounded ring-gray-300" />
+            <div className="flex flex-row">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden w-0 h-0"
+                id={`file-input-${index}`}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    handleThumbnailChange(url, comparable.id);
+                  }
+                }}
+              />
+              <div className="relative group cursor-pointer mr-4" onClick={() => fileRef.current?.click()}>
+                <img 
+                  src={comparable.thumbnail ?? HousePlaceholder}
+                  alt={comparable.title}
+                  className="group-hover:blur-sm peer max-w-64 max-h-64 ring-4 rounded ring-gray-300 transition"
+                />
+                <div className="-translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 group-hover:block bg-black rounded-2 hidden absolute text-green-500 text-lg font-bold px-2 py-1">
+                  <EditMui className={`text-gray-500`} />
+                </div>
+              </div>
               <div className="flex flex-col space-y-4 flex-grow">
                 <div className="flex flex-row space-x-2 items-center">
                   <img src={Payments} />

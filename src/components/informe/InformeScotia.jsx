@@ -234,6 +234,7 @@ const InformeScotia = () => {
 
   const handleEditComparable = (comparable) => {
     // const comparable = comparables.find((comparable) => comparable.id === id);
+    console.log('Editando comparable:', comparable);
     setComparableEdit(comparable);
     console.log(comparableEdit);
     setIsModalEditOpen(true);
@@ -242,6 +243,15 @@ const InformeScotia = () => {
   const handleEditHomologation = (comparable) => {
     setComparableEdit(comparable);
     setIsModalHomologationOpen(true);
+  };
+
+  const handleThumbnailChange = (url, id) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: prevData.comparables.map((comparable) =>
+        comparable.id === id ? { ...comparable, thumbnail: url } : comparable
+      ),
+    }));
   };
 
   const submitHandler = async (e, borrador = false) => {
@@ -334,11 +344,21 @@ const InformeScotia = () => {
 
   const handleSaveComparable = (comparable) => {
     console.log('Attempting to save', comparable)
-    setFormData((prevData) => ({
-      ...prevData,
-      comparables: [...prevData.comparables, comparable],
-    }));
-    console.log(formData);
+    if (comparableEdit) {
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: prevData.comparables.map((comp) =>
+          comp.id === comparableEdit.id ? { ...comp, ...comparable } : comp
+        ),
+      }));
+    } else {
+      comparable.id = crypto.randomUUID();
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: [...prevData.comparables, comparable],
+      }));
+    }
+    setComparableEdit(null);
     setIsModalEditOpen(false);
   }
 
@@ -737,6 +757,7 @@ const InformeScotia = () => {
                         handleEditComparable={handleEditComparable}
                         handleEditHomologation={handleEditHomologation}
                         handleSelectMainComparable={handleSelectMainComparable}
+                        handleThumbnailChange={handleThumbnailChange}
                         comparables={formData.comparables}
                       />
                       <button
@@ -934,12 +955,15 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     if (name === 'direccion') {
       setComparable({ ...comparable, location: { ...(comparable?.location ?? {}), address_line: value } })
     }
-    if (name === 'titulo') {
+    else if (name === 'titulo') {
       setComparable({ ...comparable, title: value })
     }
-    if (name === 'precio') {
+    else if (name === 'precio') {
       setComparable({ ...comparable, price: value })
+    } else {
+      setComparable({...comparable, [name]: value })
     }
+    
   }
 
   return <Modal
@@ -950,7 +974,6 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     overlayClassName="fixed inset-0 bg-black bg-opacity-50"
   >
     <div className="bg-gray-100 w-2/5 rounded-lg">
-      {/* Editar comparable, campos: direccion, titulo, precio */}
       <div className="bg-white shadow-lg rounded-xl p-6">
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-12 space-y-4 border p-3 rounded">
@@ -1002,6 +1025,227 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
                 name="precio"
                 value={comparable?.price}
                 defaultValue={comparable?.price}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="proximo"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Proximo:
+              </label>
+              <input
+                type="text"
+                id="proximo"
+                name="proximo"
+                value={comparable?.proximo}
+                defaultValue={comparable?.proximo}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="casi"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Casi:
+              </label>
+              <input
+                type="text"
+                id="casi"
+                name="casi"
+                value={comparable?.casi}
+                defaultValue={comparable?.casi}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="localidad"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Localidad:
+              </label>
+              <input
+                type="text"
+                id="localidad"
+                name="localidad"
+                value={comparable?.localidad}
+                defaultValue={comparable?.localidad}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="departamento"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Departamento:
+              </label>
+              <input
+                type="text"
+                id="departamento"
+                name="departamento"
+                value={comparable?.departamento}
+                defaultValue={comparable?.departamento}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="dato"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Dato:
+              </label>
+              <input
+                type="text"
+                id="dato"
+                name="dato"
+                value={comparable?.dato}
+                defaultValue={comparable?.dato}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="ubicacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Ubicación:
+              </label>
+              <input
+                type="text"
+                id="ubicacion"
+                name="ubicacion"
+                value={comparable?.ubicacion}
+                defaultValue={comparable?.ubicacion}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="comodidades"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Comodidades:
+              </label>
+              <input
+                type="text"
+                id="comodidades"
+                name="comodidades"
+                value={comparable?.comodidades}
+                defaultValue={comparable?.comodidades}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="estado"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Estado:
+              </label>
+              <input
+                type="text"
+                id="estado"
+                name="estado"
+                value={comparable?.estado}
+                defaultValue={comparable?.estado}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="fecha"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Fecha:
+              </label>
+              <input
+                type="text"
+                id="fecha"
+                name="fecha"
+                value={comparable?.fecha}
+                defaultValue={comparable?.fecha}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="dolarPorMetrosCuadrados"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Dólar por m²:
+              </label>
+              <input
+                type="text"
+                id="dolarPorMetrosCuadrados"
+                name="dolarPorMetrosCuadrados"
+                value={comparable?.dolarPorMetrosCuadrados}
+                defaultValue={comparable?.dolarPorMetrosCuadrados}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="superficieTerreno"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Superficie Terreno:
+              </label>
+              <input
+                type="text"
+                id="superficieTerreno"
+                name="superficieTerreno"
+                value={comparable?.superficieTerreno}
+                defaultValue={comparable?.superficieTerreno}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="superficieEdificada"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Superficie Edificada:
+              </label>
+              <input
+                type="text"
+                id="superficieEdificada"
+                name="superficieEdificada"
+                value={comparable?.superficieEdificada}
+                defaultValue={comparable?.superficieEdificada}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="observaciones"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Observaciones:
+              </label>
+              <input
+                type="text"
+                id="observaciones"
+                name="observaciones"
+                value={comparable?.observaciones}
+                defaultValue={comparable?.observaciones}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
               />
