@@ -11,15 +11,47 @@ import { InformeCard } from "./InformeCard";
 import { useParams } from "react-router-dom";
 import FormularioParticular from "./InformeParticular";
 import InformeList from "./InformeList";
+import InspeccionService from "../../api/InspeccionService";
+import OrderService from "../../api/OrderService";
 
 const InformeLayout = () => {
   const dispatch = useDispatch();
-  const { banco } = useParams();
-  //console.log('BANCOFIRO', banco);
+  const { banco, inspeccionId } = useParams();
   const [selectedBanco, setSelectedBanco] = useState(banco ?? "");
   const [showSelector, setShowSelector] = useState(banco ? false : true);
   const [informes, setInformes] = useState([]);
   const usuario = useSelector(state => state.user);
+
+  useEffect(() => {
+    if (inspeccionId) {
+      (async function fetchInspeccion() {
+        try {
+          const response = await InspeccionService.getInspeccionById(inspeccionId);
+          const banco = await OrderService.getBancoById(response.orden.bancoId);
+          const nombreBanco = banco.nombre.toLowerCase();
+          if (nombreBanco === "scotia") {
+            dispatch(setGlobalInforme({
+              direccion: response.calle + " " + response.nroPuerta + " esq. " + response.esquina, 
+              banco: "scotia",
+              localidad: response.localidad,
+              inspeccionId: response.id,
+              tasadorId: usuario.id
+            }));
+          }
+          setSelectedBanco(nombreBanco);
+          setShowSelector(false);
+          
+          // setGlobalInforme(response);
+        } catch (error) {
+          console.error("Error al obtener el informe:", error);
+        }
+      })();
+    }
+    console.log('inspeccionId', inspeccionId);
+  }, [inspeccionId]);
+
+  const informePreload = useSelector(state => state.informe.informe);
+  console.log('informePreload', informePreload);
 
   const [informe, setInforme] = useState({
     tasador: usuario,

@@ -23,6 +23,16 @@ const UsuarioService = {
     }
   },
 
+  getTaskListByUserId: async (id) => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/usuario/${id}/tasklist`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener la lista de tareas del usuario:', error);
+      throw error;
+    }
+  },
+
   deleteUsuario: async (id) => {
     try {
       const response = await apiClient.delete(`${API_URL}/api/usuario/${id}`);

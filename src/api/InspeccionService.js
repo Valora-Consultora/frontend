@@ -4,6 +4,26 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 const InspeccionService = {
 
+    getInspeccionesByTasadorId: async (id) => {
+        try {
+          const response = await apiClient.get(`${API_URL}/api/inspeccion/tasador/${parseInt(id)}`);
+          return response.data;
+        } catch (error) {
+          console.error('Error al obtener ordenes por tasador ID:', error);
+          throw error;
+        }
+      },
+
+    getInspeccionById: async (id) => {
+        try {
+          const response = await apiClient.get(`${API_URL}/api/inspeccion/${id}`);
+          return response.data;
+        } catch (error) {
+          console.error('Error al obtener orden por ID:', error);
+          throw error;
+        }
+      },
+
     createInspeccion: async (inspeccionData) => {
       try {
           //console.log('ingresa en el create de inspeccionService');
