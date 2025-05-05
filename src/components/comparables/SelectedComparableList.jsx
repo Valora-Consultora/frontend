@@ -15,6 +15,7 @@ const SelectedComparableList = ({ handleEditHomologation, handleEditComparable, 
   const fileRef = useRef(null);
   comparables = comparables.filter(comparable => comparable.title && comparable.price && comparable.location);
 
+  ////console.log("viendo comparables", comparables);
   return (
     comparables?.length > 0 ? (
       <div className="grid grid-cols-12 gap-4 mt-4">

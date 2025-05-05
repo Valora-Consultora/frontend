@@ -5,9 +5,9 @@ const API_URL = process.env.REACT_APP_API_URL;
 const InformeScotiaService = {
   updateInformeScotia: async (id, informeScotiaData) => {
     try {
-      console.log("ingresa en el update de InformeScotiaService");
-      console.log("id ", id);
-      console.log("informeScotiaData ", informeScotiaData);
+      //console.log("ingresa en el update de InformeScotiaService");
+      //console.log("id ", id);
+      //console.log("informeScotiaData ", informeScotiaData);
 
       const response = await apiClient.put(
         `${API_URL}/api/informeScotia/${id}`,
@@ -18,7 +18,7 @@ const InformeScotiaService = {
           },
         }
       );
-      console.log("response " + response);
+      //console.log("response " + response);
       return response.data;
     } catch (error) {
       console.error("Error al actualizar informe:", error);
@@ -46,7 +46,7 @@ const InformeScotiaService = {
 
   createInformeScotia: async (id, informeScotiaData) => {
     try {
-      console.log("ingresa en el create de InformeScotiaService");
+      //console.log("ingresa en el create de InformeScotiaService");
       informeScotiaData.id = id;
 
       async function obtenerDatosFotoRelevamiento(foto) {
@@ -93,7 +93,7 @@ const InformeScotiaService = {
 
       informeScotiaData.comparables = normalizedComparables;
 
-      console.log("informeScotiaData", informeScotiaData);
+      //console.log("informeScotiaData", informeScotiaData);
 
       const response = await apiClient.post(
         `${API_URL}/api/create-informe-scotia`,
@@ -104,7 +104,7 @@ const InformeScotiaService = {
           },
         }
       );
-      console.log("response " + response);
+      //console.log("response " + response);
 
       return response.data;
     } catch (error) {
@@ -116,8 +116,8 @@ const InformeScotiaService = {
   /*  updateInspeccion: async (id, inspeccionData) => {
         try {
 
-            console.log('ingresa en el update de inspeccionService');
-            console.log('inspeccionData', inspeccionData);
+            //console.log('ingresa en el update de inspeccionService');
+            //console.log('inspeccionData', inspeccionData);
 
             
             const response = await apiClient.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
@@ -125,7 +125,7 @@ const InformeScotiaService = {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('response ' + response)
+            //console.log('response ' + response)
             return response.data;
         } catch (error) {
             console.error('Error al actualizar inspeccion:', error);
@@ -135,7 +135,7 @@ const InformeScotiaService = {
 
     deleteInspeccion: async (id) => {
         try {
-            console.log('Llega al deleteInspeccion ')
+            //console.log('Llega al deleteInspeccion ')
           const response = await apiClient.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {
@@ -171,7 +171,7 @@ const InformeScotiaService = {
         }));
       }
       
-      console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
+      //console.log("Enviando cálculo:", JSON.stringify(calculoToSend, null, 2));
       
       const response = await apiClient.post(
         `${API_URL}/api/informeScotia/${informeId}/calculo`,
@@ -184,7 +184,7 @@ const InformeScotiaService = {
         }
       );
       
-      console.log("Respuesta del servidor:", response.data);
+      //console.log("Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error al guardar el cálculo:", error);

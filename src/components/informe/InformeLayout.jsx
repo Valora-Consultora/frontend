@@ -96,7 +96,7 @@ const InformeLayout = () => {
     const fetchInformes = async () => {
       try {
         const response = await InformeService.getInformesByTasador(usuario);
-        console.log(response);
+        //console.log(response);
         setInformes(response);
       } catch (error) {
         console.error("Error al obtener los informes:", error);
@@ -105,7 +105,7 @@ const InformeLayout = () => {
     fetchInformes();
   }, [usuario]);
 
-  console.log('selected', selectedBanco);
+  //console.log('selected', selectedBanco);
 
   return (
     <div>

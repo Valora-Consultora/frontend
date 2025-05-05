@@ -63,6 +63,12 @@ const VerInformeScotia = () => {
     return <div>Cargando...</div>;
   }
 
+  //console.log('usuario', usuario);
+  //console.log('informe', informe);
+  //console.log('tipo', usuario.tipoUsuario);
+  //console.log('id', usuario.id);
+  //console.log('true or not', !usuario.tipoUsuario === "ADMINISTRADOR")
+  //console.log('true or not', usuario.id !== 2)
   if (!(usuario.tipoUsuario === "ADMINISTRADOR") && usuario.id !== 2) {
     return <div className="w-full h-screen"><ErrorScreen error={{ message: "No tienes permisos para ver este informe", icon: Summarize }} /></div>;
   }

@@ -14,7 +14,7 @@ const InformeBbvaService = {
           },
         }
       );
-      //console.log("response " + response);
+      ////console.log("response " + response);
       return response.data;
     } catch (error) {
       console.error("Error al actualizar informe:", error);
@@ -46,7 +46,7 @@ const InformeBbvaService = {
 
   uploadPlanos: async (id, formData) => {
     try {
-      console.log("📤 Enviando imágenes al backend con ID:", id);
+      //console.log("📤 Enviando imágenes al backend con ID:", id);
       formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
 
       const response = await apiClient.post(
@@ -55,7 +55,7 @@ const InformeBbvaService = {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      console.log("✅ Respuesta del servidor:", response.data);
+      //console.log("✅ Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
       console.error("❌ Error al subir imágenes:", error);
@@ -65,7 +65,7 @@ const InformeBbvaService = {
 
   uploadFotos: async (id, formData) => {
     try {
-      console.log("📤 Enviando imágenes al backend con ID:", id);
+      //console.log("📤 Enviando imágenes al backend con ID:", id);
       formData.forEach((file) => console.log("Archivo enviado:", file.name)); // 🔥 DEBUG
 
       const response = await apiClient.post(
@@ -74,7 +74,7 @@ const InformeBbvaService = {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      console.log("✅ Respuesta del servidor:", response.data);
+      //console.log("✅ Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
       console.error("❌ Error al subir imágenes:", error);
@@ -109,8 +109,8 @@ const InformeBbvaService = {
 
   /*   getItemsObraCivilByIdInforme: async (idInforme) => {
     try {
-      console.log('Llega al getItemsObraCivilByIdInforme ')
-      console.log('idInforme ', idInforme)
+      //console.log('Llega al getItemsObraCivilByIdInforme ')
+      //console.log('idInforme ', idInforme)
       const response = await apiClient.get(`${API_URL}/api/obtenerItemsObraCivil/${parseInt(idInforme)}`);
       return response.data;
     } catch (error) {
@@ -120,8 +120,8 @@ const InformeBbvaService = {
   }, */
   /* createInformeBbva: async (id,informeBbvaData) => {
     try {
-      console.log("ingresa en el create de informeBbvaService");
-      console.log("informeBbvaData", informeBbvaData);
+      //console.log("ingresa en el create de informeBbvaService");
+      //console.log("informeBbvaData", informeBbvaData);
 
       const response = await apiClient.post(
         `${API_URL}/api/create-informeBbva`,
@@ -132,7 +132,7 @@ const InformeBbvaService = {
           },
         }
       );
-      console.log("response " + response);
+      //console.log("response " + response);
 
       return response.data;
     } catch (error) {
@@ -144,8 +144,8 @@ const InformeBbvaService = {
   /*  updateInspeccion: async (id, inspeccionData) => {
         try {
 
-            console.log('ingresa en el update de inspeccionService');
-            console.log('inspeccionData', inspeccionData);
+            //console.log('ingresa en el update de inspeccionService');
+            //console.log('inspeccionData', inspeccionData);
 
             
             const response = await apiClient.put(`${API_URL}/api/inspecciones/${id}`, inspeccionData, {
@@ -153,7 +153,7 @@ const InformeBbvaService = {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('response ' + response)
+            //console.log('response ' + response)
             return response.data;
         } catch (error) {
             console.error('Error al actualizar inspeccion:', error);
@@ -163,7 +163,7 @@ const InformeBbvaService = {
 
     deleteInspeccion: async (id) => {
         try {
-            console.log('Llega al deleteInspeccion ')
+            //console.log('Llega al deleteInspeccion ')
           const response = await apiClient.delete(`${API_URL}/api/inspeccion/${id}`);
           return response.data;
         } catch (error) {
@@ -199,15 +199,85 @@ const InformeBbvaService = {
   },
 
   // Guardar el cálculo para un informe
+  // Guardar el cálculo para un informe BBVA
   saveCalculo: async (informeId, calculoData) => {
     try {
+      // Clonar el objeto para evitar modificar el original
+      const calculoToSend = JSON.parse(JSON.stringify(calculoData));
+
+      // Asegurarse de que las superficies estén en el formato correcto
+      if (
+        calculoToSend.superficies &&
+        Array.isArray(calculoToSend.superficies)
+      ) {
+        // Eliminar cualquier referencia circular o innecesaria
+        calculoToSend.superficies = calculoToSend.superficies.map(
+          (superficie) => ({
+            descripcion: superficie.descripcion,
+            m2: parseFloat(superficie.m2) || 0,
+            ampliaciones: superficie.ampliaciones || "",
+            promedioEdad: parseFloat(superficie.promedioEdad) || 0,
+            factorEdad: parseFloat(superficie.factorEdad) || 0,
+            conservacion: superficie.conservacion || "",
+            factorConservacion: parseFloat(superficie.factorConservacion) || 0,
+            precioMetro: parseFloat(superficie.precioMetro) || 0,
+            precioMetroCorregido:
+              parseFloat(superficie.precioMetroCorregido) || 0,
+            valorTotal: parseFloat(superficie.valorTotal) || 0,
+            valorTotalSinCorregir:
+              parseFloat(superficie.valorTotalSinCorregir) || 0,
+            tipoSuperficie: superficie.tipoSuperficie || "propio",
+            tipoObraCivilBbva:
+              superficie.tipoObraCivilBbva || "Superficie Cubierta",
+            superficieDocumentadaObraCivilSeccionEDescripcionInmueble:
+              parseFloat(
+                superficie.superficieDocumentadaObraCivilSeccionEDescripcionInmueble
+              ) ||
+              parseFloat(superficie.m2) ||
+              0,
+            superficieVerificadaObraCivilSeccionEDescripcionInmueble:
+              parseFloat(
+                superficie.superficieVerificadaObraCivilSeccionEDescripcionInmueble
+              ) ||
+              parseFloat(superficie.m2) ||
+              0,
+          })
+        );
+      }
+
+      console.log(
+        "Enviando cálculo BBVA:",
+        JSON.stringify(calculoToSend, null, 2)
+      );
+
       const response = await apiClient.post(
         `${API_URL}/api/informeBbva/${informeId}/calculo`,
-        calculoData
+        calculoToSend,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 30000, // 30 segundos
+        }
       );
+
+      console.log("Respuesta del servidor:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error al guardar el cálculo:", error);
+      console.error("Error al guardar el cálculo BBVA:", error);
+
+      if (error.response) {
+        console.error(
+          "Detalles del error:",
+          error.response.status,
+          error.response.data
+        );
+      } else if (error.request) {
+        console.error("No se recibió respuesta del servidor");
+      } else {
+        console.error("Error al configurar la solicitud:", error.message);
+      }
+
       throw error;
     }
   },

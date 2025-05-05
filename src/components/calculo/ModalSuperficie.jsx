@@ -12,7 +12,7 @@ import {
     convertirAmpliacionesAString
 } from '../calculo/CalculoUtils';
 
-const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = null }) => {
+const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = null, tipoInforme = 'default' }) => {
     // Datos básicos de la superficie
     const [nombre, setNombre] = useState('');
     const [metros, setMetros] = useState(0);
@@ -20,7 +20,12 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
     const [factorConservacionValor, setFactorConservacionValor] = useState(1);
     const [precioMetro, setPrecioMetro] = useState(0);
     const [precioMetroCorregido, setPrecioMetroCorregido] = useState(0);
+    const [tipoSuperficie, setTipoSuperficie] = useState(superficieEditar?.tipoSuperficie || 'propio');
+    const [tipoObraCivilBbva, setTipoObraCivilBbva] = useState(superficieEditar?.tipoObraCivilBbva || 'Superficie Cubierta');
 
+    // Tipo de bien (para HSBC)
+    /* const [tipoBien, setTipoBien] = useState('propio');
+ */
     // Datos para el cálculo de la edad
     const [anioOriginal, setAnioOriginal] = useState('');
     const [ampliaciones, setAmpliaciones] = useState([]);
@@ -33,6 +38,7 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
         if (superficieEditar) {
             setNombre(superficieEditar.descripcion || '');
             setMetros(superficieEditar.m2 || 0);
+            //            setTipoBien(superficieEditar.tipoBien || 'propio');
 
             // Para el estado de conservación, usar la función centralizada
             const factorConservacionEditar = parseFloat(superficieEditar.factorConservacion) || 1;
@@ -141,35 +147,78 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
         setMetros(valor);
     };
 
-    // Finalizar y agregar la superficie
-    const handleAdd = () => {
-        if (!nombre || !metros || !precioMetro || !anioOriginal) return;
 
+
+    const handleAdd = () => {
+        // Para bienes comunes de uso común solo requerimos el nombre
+        if (tipoSuperficie === 'comun') {
+            if (!nombre) return;
+
+            console.log("[ModalSuperficie] Agregando superficie común con tipo:", tipoObraCivilBbva);
+
+            onAddSuperficie({
+                descripcion: nombre,
+                tipoSuperficie: 'comun',
+                m2: 'G',          // Mostrar "G" en metros cuadrados
+                precioMetro: 'G', // Mostrar "G" en precio por metro
+                precioMetroCorregido: 'G',
+                valorTotal: 0,    // Se calculará después en CalculoInforme
+                id: superficieEditar && superficieEditar.id,
+                tipoObraCivilBbva: tipoInforme === 'BBVA' ? tipoObraCivilBbva : undefined,
+                superficieDocumentadaObraCivilSeccionEDescripcionInmueble: 'G',
+                superficieVerificadaObraCivilSeccionEDescripcionInmueble: 'G'
+            });
+    
+            // Limpiar el formulario
+            setNombre('');
+            setTipoSuperficie('propio');
+            onClose(); // Cierra el modal después de agregar
+            return;
+        }
+    
+        // Para otros tipos de superficie, mantener la validación original
+        if (!nombre || !metros || !precioMetro || !anioOriginal) return;
+    
+        // El código original sigue aquí...
         // Usar la función centralizada para convertir ampliaciones a string
         const ampliacionesString = convertirAmpliacionesAString(anioOriginal, ampliaciones);
-
+    
         // Formatear todos los valores numéricos a 2 decimales
         const metrosFormateado = formatearNumero(metros);
         const precioCorregido = formatearNumero(precioMetroCorregido);
-
+    
         // Usar la función centralizada para calcular el valor total
         const valorTotal = calcularValorTotalSuperficie(metrosFormateado, precioCorregido);
+        
+        console.log("[ModalSuperficie] Creando superficie con tipo:", tipoObraCivilBbva);
 
-        onAddSuperficie({
-            nombre,
+
+        const nuevaSuperficie = {
+            descripcion: nombre,
             ampliaciones: ampliacionesString,
             promedioEdad: formatearNumero(promedioEdad) || 0,
-            metros: metrosFormateado,
+            m2: metrosFormateado,
             factorEdad: formatearNumero(factorEdad) || 0,
             conservacion,
             factorConservacion: formatearNumero(factorConservacionValor),
             precioMetro: formatearNumero(precioMetro) || 0,
             precioMetroCorregido: precioCorregido,
             valorTotal,
+            tipoSuperficie,
             // Agregar ID si estamos editando
-            id: superficieEditar && superficieEditar.id
+            id: superficieEditar && superficieEditar.id,
+            tipoObraCivilBbva: tipoInforme === 'BBVA' ? tipoObraCivilBbva : undefined,
+            superficieDocumentadaObraCivilSeccionEDescripcionInmueble: metrosFormateado,
+            superficieVerificadaObraCivilSeccionEDescripcionInmueble: metrosFormateado
+        };
+        
+        console.log("[ModalSuperficie] Objeto superficie completo:", {
+            descripcion: nuevaSuperficie.descripcion,
+            tipoObraCivilBbva: nuevaSuperficie.tipoObraCivilBbva,
+            tipoSuperficie: nuevaSuperficie.tipoSuperficie
         });
-
+        onAddSuperficie(nuevaSuperficie);
+     
         // Limpiar el formulario
         setNombre('');
         setAnioOriginal('');
@@ -182,8 +231,17 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
         setPrecioMetro(0);
         setPrecioMetroCorregido(0);
         setCalculoAutomatico(true);
+        setTipoSuperficie('propio');
+        if (tipoInforme === 'BBVA') {
+            setTipoObraCivilBbva('Superficie Cubierta'); // Resetear a valor por defecto
+        }
+    
         onClose(); // Cierra el modal después de agregar
     };
+
+    
+
+
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -202,143 +260,188 @@ const ModalSuperficie = ({ isOpen, onClose, onAddSuperficie, superficieEditar = 
                     placeholder="Ej: Vivienda Cub. Losa HA"
                 />
 
-                <label className="block mt-4">Metros Cuadrados</label>
-                <InputNumerico
-                    value={metros}
-                    onChange={handleMetrosChange}
-                    className="w-full px-3 py-2 border rounded-md"
-                    placeholder="Ej: 120.50"
-                />
+                {/* Tipo de superficie */}
+                <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700">Tipo de Superficie</label>
+                    <select
+                        value={tipoSuperficie}
+                        onChange={(e) => setTipoSuperficie(e.target.value)}
+                        className="mt-1 block w-full px-3 py-2 border rounded-md"
+                    >
+                        <option value="propio">Bien Propio</option>
+                        <option value="comun_exclusivo">Bien Común de Uso Exclusivo</option>
+                        <option value="comun">Bien Común de Uso Común</option>
+                    </select>
+                </div>
 
-                {/* Sección de años y ampliaciones */}
-                <div className="mt-4 p-2 border rounded-md bg-gray-50">
-                    <div className="flex justify-between items-center">
-                        <h4 className="text-sm font-medium text-gray-700">Años de Construcción</h4>
-                        <button
-                            type="button"
-                            onClick={agregarAmpliacion}
-                            className="bg-green-900 text-white px-2 py-1 rounded text-xs hover:bg-green-800"
+                {tipoInforme === 'BBVA' && (
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Tipo de Obra Civil BBVA</label>
+                        <select
+                            value={tipoObraCivilBbva}
+                            onChange={(e) => setTipoObraCivilBbva(e.target.value)}
+                            className="mt-1 block w-full px-3 py-2 border rounded-md"
                         >
-                            + Ampliación
-                        </button>
+                            <option value="Superficie Cubierta">Superficie Cubierta</option>
+                            <option value="Superficie Semi Cubierta">Superficie Semi Cubierta</option>
+                            <option value="Otros">Otros</option>
+                        </select>
                     </div>
+                )}
 
-                    <div className="mt-2">
-                        <label className="block text-xs font-medium text-gray-600">Año Original</label>
-                        <input
-                            type="number"
-                            value={anioOriginal}
-                            onChange={(e) => setAnioOriginal(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md mt-1"
-                            placeholder="Ej: 1935"
-                            min="1900"
-                            max={new Date().getFullYear()}
+                {/* Mostrar campos adicionales solo si NO es bien común de uso común */}
+                {tipoSuperficie !== 'comun' && (
+                    <>
+                        <label className="block mt-4">Metros Cuadrados</label>
+                        <InputNumerico
+                            value={metros}
+                            onChange={handleMetrosChange}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder="Ej: 120.50"
                         />
-                    </div>
 
-                    {ampliaciones.map((ampliacion, index) => (
-                        <div key={ampliacion.id} className="mt-2 flex items-center space-x-2">
-                            <div className="flex-grow">
-                                <label className="block text-xs font-medium text-gray-600">
-                                    Ampliación {index + 1}
-                                </label>
+                        {/* Sección de años y ampliaciones */}
+                        <div className="mt-4 p-2 border rounded-md bg-gray-50">
+                            <div className="flex justify-between items-center">
+                                <h4 className="text-sm font-medium text-gray-700">Años de Construcción</h4>
+                                <button
+                                    type="button"
+                                    onClick={agregarAmpliacion}
+                                    className="bg-green-900 text-white px-2 py-1 rounded text-xs hover:bg-green-800"
+                                >
+                                    + Ampliación
+                                </button>
+                            </div>
+
+                            <div className="mt-2">
+                                <label className="block text-xs font-medium text-gray-600">Año Original</label>
                                 <input
                                     type="number"
-                                    value={ampliacion.anio}
-                                    onChange={(e) => actualizarAmpliacion(ampliacion.id, e.target.value)}
+                                    value={anioOriginal}
+                                    onChange={(e) => setAnioOriginal(e.target.value)}
                                     className="w-full px-3 py-2 border rounded-md mt-1"
-                                    placeholder="Ej: 1970"
+                                    placeholder="Ej: 1935"
                                     min="1900"
                                     max={new Date().getFullYear()}
                                 />
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => eliminarAmpliacion(ampliacion.id)}
-                                className="mt-6 bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs"
-                            >
-                                Eliminar
-                            </button>
-                        </div>
-                    ))}
 
-                    {/* Campos editables para promedio de edad y factor edad */}
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600">Promedio Edad</label>
-                            <InputNumerico
-                                value={promedioEdad}
-                                onChange={handlePromedioEdadChange}
-                                className="w-full px-3 py-2 border rounded-md mt-1"
-                                placeholder="Calculado automáticamente"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600">Factor Edad</label>
-                            <InputNumerico
-                                value={factorEdad}
-                                onChange={handleFactorEdadChange}
-                                className="w-full px-3 py-2 border rounded-md mt-1"
-                                placeholder="Calculado automáticamente"
-                            />
-                        </div>
-                    </div>
+                            {ampliaciones.map((ampliacion, index) => (
+                                <div key={ampliacion.id} className="mt-2 flex items-center space-x-2">
+                                    <div className="flex-grow">
+                                        <label className="block text-xs font-medium text-gray-600">
+                                            Ampliación {index + 1}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={ampliacion.anio}
+                                            onChange={(e) => actualizarAmpliacion(ampliacion.id, e.target.value)}
+                                            className="w-full px-3 py-2 border rounded-md mt-1"
+                                            placeholder="Ej: 1970"
+                                            min="1900"
+                                            max={new Date().getFullYear()}
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => eliminarAmpliacion(ampliacion.id)}
+                                        className="mt-6 bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs"
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
+                            ))}
 
-                    {/* Botón para restaurar cálculo automático */}
-                    {!calculoAutomatico && (
-                        <button
-                            type="button"
-                            onClick={() => setCalculoAutomatico(true)}
-                            className="mt-2 text-xs text-green-900 underline"
-                        >
-                            Restaurar cálculo automático
-                        </button>
-                    )}
-                </div>
+                            {/* Campos editables para promedio de edad y factor edad */}
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600">Promedio Edad</label>
+                                    <InputNumerico
+                                        value={promedioEdad}
+                                        onChange={handlePromedioEdadChange}
+                                        className="w-full px-3 py-2 border rounded-md mt-1"
+                                        placeholder="Calculado automáticamente"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600">Factor Edad</label>
+                                    <InputNumerico
+                                        value={factorEdad}
+                                        onChange={handleFactorEdadChange}
+                                        className="w-full px-3 py-2 border rounded-md mt-1"
+                                        placeholder="Calculado automáticamente"
+                                    />
+                                </div>
+                            </div>
 
-                {/* Estado de conservación con valor editable */}
-                <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700">Estado de Conservación</label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                        <select
-                            value={conservacion}
-                            onChange={handleConservacionChange}
-                            className="block w-full px-3 py-2 border rounded-md"
-                        >
-                            <option value="Nuevo">Nuevo (1.00)</option>
-                            <option value="Buen Estado">Buen Estado (0.95)</option>
-                            <option value="Necesita Mantenimiento">Necesita Mantenimiento (0.90)</option>
-                            <option value="Necesita Reparaciones">Necesita Reparaciones (0.85)</option>
-                            <option value="Personalizado">Personalizado</option>
-                        </select>
+                            {/* Botón para restaurar cálculo automático */}
+                            {!calculoAutomatico && (
+                                <button
+                                    type="button"
+                                    onClick={() => setCalculoAutomatico(true)}
+                                    className="mt-2 text-xs text-green-900 underline"
+                                >
+                                    Restaurar cálculo automático
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Estado de conservación con valor editable */}
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700">Estado de Conservación</label>
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                                <select
+                                    value={conservacion}
+                                    onChange={handleConservacionChange}
+                                    className="block w-full px-3 py-2 border rounded-md"
+                                >
+                                    <option value="Nuevo">Nuevo (1.00)</option>
+                                    <option value="Buen Estado">Buen Estado (0.95)</option>
+                                    <option value="Necesita Mantenimiento">Necesita Mantenimiento (0.90)</option>
+                                    <option value="Necesita Reparaciones">Necesita Reparaciones (0.85)</option>
+                                    <option value="Personalizado">Personalizado</option>
+                                </select>
+                                <InputNumerico
+                                    value={factorConservacionValor}
+                                    onChange={handleFactorConservacionChange}
+                                    className="block w-full px-3 py-2 border rounded-md"
+                                    placeholder="Factor"
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Precio por metro cuadrado */}
+                        <label className="block mt-4">U$S/m²</label>
                         <InputNumerico
-                            value={factorConservacionValor}
-                            onChange={handleFactorConservacionChange}
-                            className="block w-full px-3 py-2 border rounded-md"
-                            placeholder="Factor"
-                            min="0"
-                            max="1"
-                            step="0.01"
+                            value={precioMetro}
+                            onChange={handlePrecioMetroChange}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder="Ej: 1200.50"
                         />
+
+                        <label className="block mt-4">U$S/m² Corregido (Calculado)</label>
+                        <input
+                            type="text"
+                            value={typeof precioMetroCorregido === 'number' ? precioMetroCorregido.toFixed(2) : '0.00'}
+                            disabled
+                            className="w-full px-3 py-2 border rounded-md bg-gray-200"
+                        />
+                    </>
+                )}
+
+                {/* Si es bien común, mostrar información explicativa */}
+                {tipoSuperficie === 'comun' && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <p className="text-sm text-blue-700">
+                            Los bienes comunes de uso común se calculan automáticamente como el 17%
+                            del valor total de los bienes propios. En la tabla se mostrará "G"
+                            en los campos de m² y U$S/m².
+                        </p>
                     </div>
-                </div>
-
-                {/* Precio por metro cuadrado */}
-                <label className="block mt-4">U$S/m²</label>
-                <InputNumerico
-                    value={precioMetro}
-                    onChange={handlePrecioMetroChange}
-                    className="w-full px-3 py-2 border rounded-md"
-                    placeholder="Ej: 1200.50"
-                />
-
-                <label className="block mt-4">U$S/m² Corregido (Calculado)</label>
-                <input
-                    type="text"
-                    value={typeof precioMetroCorregido === 'number' ? precioMetroCorregido.toFixed(2) : '0.00'}
-                    disabled
-                    className="w-full px-3 py-2 border rounded-md bg-gray-200"
-                />
+                )}
 
                 {/* Botones de acción */}
                 <div className="mt-6 flex justify-end">

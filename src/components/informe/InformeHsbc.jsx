@@ -171,7 +171,7 @@ const FormularioHsbc = () => {
   /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
   /// devolveria (*m²-200m²]
   const parseRange = (key, object) => {
-    console.log(object);
+    ////console.log(object);
     var value = object.value;
     var value2 = object.value2;
     var subtype = object.subtype ?? "";
@@ -195,7 +195,7 @@ const FormularioHsbc = () => {
   /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
   /// formato que pueda ser utilizado en la URL y lo setea en el estado
   const modifyFilter = (id, value, opts) => {
-    console.log('Modificando filtro:', id, value, opts)
+    ////console.log('Modificando filtro:', id, value, opts)
     var newFilter = {};
 
     if (opts?.range !== undefined) {
@@ -212,14 +212,14 @@ const FormularioHsbc = () => {
       newFilter.subtype = opts.subtype;
     }
 
-    console.log('Seteando filtro:', newFilter);
+    ////console.log('Seteando filtro:', newFilter);
 
     setComparableFilters((prevFilters) => ({
       ...prevFilters,
       [id]: { ...prevFilters[id], ...newFilter },
     }));
 
-    console.log(filterToUrlParams(comparableFilters));
+    ////console.log(filterToUrlParams(comparableFilters));
   };
 
   const handleComparableSubmit = async () => {
@@ -270,7 +270,7 @@ const FormularioHsbc = () => {
   const handleEditComparable = (comparable) => {
     // const comparable = comparables.find((comparable) => comparable.id === id);
     setComparableEdit(comparable);
-    console.log(comparableEdit);
+    ////console.log(comparableEdit);
     setIsModalEditOpen(true);
   };
 
@@ -280,40 +280,11 @@ const FormularioHsbc = () => {
   };
 
 
-  // Modificación en submitHandler en InformeHsbc.jsx
+
   const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
     try {
-      // Guardar cálculo si existe la función getCalculoData y no es un borrador
-      if (getCalculoData && !borrador) {
-        try {
-          const calculoData = getCalculoData();
-          console.log("Datos del cálculo a enviar:", calculoData);
-
-          // Verificar si hay un ID de informe válido antes de guardar el cálculo
-          if (formData.id) {
-            // Guardar los cálculos usando el servicio
-            await InformeHsbcService.saveCalculo(formData.id, calculoData);
-
-            // Actualizar valores en formData basados en cálculos
-            setFormData(prevData => ({
-              ...prevData,
-              valorMercado: calculoData.valorMercado,
-              valorVentaRapida: calculoData.valorVentaRapida,
-              valorRemate: calculoData.valorRemate,
-              costoReposicion: calculoData.costoReposicion
-            }));
-          } else {
-            console.log("No hay ID de informe para guardar el cálculo. Se guardará después de crear el informe.");
-          }
-        } catch (error) {
-          console.error("Error al obtener datos del cálculo:", error);
-          const confirmar = window.confirm("Hubo un error al procesar los datos del cálculo. ¿Deseas continuar sin guardarlos?");
-          if (!confirmar) {
-            return;
-          }
-        }
-      }
+      //console.log("Iniciando submitHandler con borrador:", borrador);
 
       // Establecer estado del formulario según si es borrador o no
       const dataToSend = {
@@ -321,20 +292,45 @@ const FormularioHsbc = () => {
         estado: borrador ? "borrador" : "enviado"
       };
 
-      // Enviar el formulario
-      const informe = await InformeHsbcService.createInformeHsbc(dataToSend);
+      //console.log("Datos a enviar para crear informe:", dataToSend);
 
-      // Si tenemos datos de cálculo y no se guardaron antes, guardarlos ahora con el ID del informe creado
-      if (getCalculoData && !borrador && !formData.id && informe.id) {
+      // 1. Primero crear el informe para obtener el ID
+      const informe = await InformeHsbcService.createInformeHsbc(dataToSend);
+      //console.log("Informe creado:", informe);
+
+      // 2. Ahora que tenemos el ID del informe, podemos guardar el cálculo
+      if (getCalculoData && !borrador && informe && informe.id) {
         try {
+          //console.log("Obteniendo datos del cálculo para guardar con ID:", informe.id);
           const calculoData = getCalculoData();
+
+          // Mostrar notificación de proceso en curso
+          toast.info("Guardando cálculos, por favor espere...", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+
           await InformeHsbcService.saveCalculo(informe.id, calculoData);
+          //console.log("Cálculo guardado exitosamente");
+
+          // Mostrar notificación de éxito específica para el cálculo
+          toast.success("Cálculos guardados correctamente", {
+            position: "top-right",
+            autoClose: 2000,
+          });
         } catch (error) {
-          console.error("Error al guardar cálculo después de crear informe:", error);
+          console.error("Error al guardar el cálculo:", error);
+
+          // No detenemos el flujo en caso de error en el cálculo, pero mostramos una notificación
+          toast.warning("El informe se guardó correctamente, pero hubo un problema al guardar los cálculos detallados.", {
+            position: "top-right",
+            autoClose: 5000,
+          });
         }
       }
 
-      toast.success("Formulario enviado exitosamente", {
+      // Notificación final de éxito
+      toast.success("Informe enviado exitosamente", {
         position: "top-right",
         autoClose: 2500,
         hideProgressBar: false,
@@ -342,10 +338,20 @@ const FormularioHsbc = () => {
         pauseOnHover: true,
         draggable: true,
       });
+
+      // Opcional: redirigir a la página de listado o limpiar el formulario
+      // navigate('/informes'); // Descomentar si deseas redirigir
+
     } catch (error) {
-      toast.error("Error al enviar el formulario.", {
+      console.error("Error al enviar el formulario:", error);
+
+      if (error.response) {
+        console.error("Respuesta del servidor:", error.response.status, error.response.data);
+      }
+
+      toast.error("Error al enviar el formulario. Por favor intente nuevamente.", {
         position: "top-right",
-        autoClose: 2500,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -355,12 +361,12 @@ const FormularioHsbc = () => {
   };
 
   const handleSaveComparable = (comparable) => {
-    console.log('Attempting to save', comparable)
+    ////console.log('Attempting to save', comparable)
     setFormData((prevData) => ({
       ...prevData,
       comparables: [...prevData.comparables, comparable],
     }));
-    console.log(formData);
+    ////console.log(formData);
     setIsModalEditOpen(false);
   }
 
@@ -1190,6 +1196,7 @@ const FormularioHsbc = () => {
                   </div>
                 </div>
                 <CalculoInforme
+                  tipoInforme="HSBC"
                   configuracion={configuracionHsbc}
                   superficieTerreno={formData.superficieTerreno}
                   onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
@@ -1201,6 +1208,7 @@ const FormularioHsbc = () => {
                   anioConstruccion={formData.anio}
                   deslindeFrente={formData.deslindeFrente}
                   deslindeFondo={formData.deslindeFondo}
+                  valorMetroTerrenoProp={formData.valorMetroTerreno}
                 />
               </div>
 
@@ -1318,6 +1326,8 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
       setComparable({ ...comparable, price: value })
     }
   }
+
+  ////console.log('Viendo comp', comparable)
 
   return <Modal
     isOpen={isModalEditOpen}
