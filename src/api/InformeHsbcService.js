@@ -338,7 +338,7 @@ const InformeHsbcService = {
         // Asegurarnos de que tipoPropiedad siga siendo válido
         calculoToSend.tipoPropiedad = "CASA";
 
-        const response = await axios.post(
+        const response = await apiClient.post(
           `${API_URL}/api/informeHsbc/${informeId}/calculo`,
           calculoToSend,
           {
