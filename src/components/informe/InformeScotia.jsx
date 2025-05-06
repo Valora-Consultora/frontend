@@ -11,6 +11,9 @@ import SelectedComparableList from "../comparables/SelectedComparableList";
 import ComparablesService from "../../api/ComparablesService";
 import CalculoInforme from "../calculo/CalculoInforme";
 import { useLocation, useNavigate } from 'react-router-dom';
+import { exportScotiaToExcel } from "../utils/excelExport.ts";
+
+import Excel from '../../images/icons/excel.svg';
 
 
 
@@ -398,6 +401,11 @@ const InformeScotia = () => {
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
             <div className="grid grid-cols-12 gap-4">
               {/* Información General */}
+              <img
+                src={Excel}
+                onClick={() => exportScotiaToExcel(formData)}
+                className="cursor-pointer"
+              />
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Información General</h4>
                 <div className="grid grid-cols-12 gap-4 items-center">

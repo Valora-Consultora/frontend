@@ -126,10 +126,12 @@ const InformeLayout = () => {
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
             <div className="text-center h-24 space-x-4 justify-evenly flex flex-row my-2">
               {bancos.map((banco) => (
-                <div className="p-4 flex justify-center items-center w-full rounded shadow-lg hover:!ring-2 hover:!ring-green-100" key={banco.id}>
+                <div 
+                  onClick={() => handleBancoChange(banco.id)} 
+                  className="p-4 flex justify-center items-center w-full rounded shadow-lg hover:!ring-2 hover:!ring-green-100" key={banco.id}
+                >
                   <img
                     src={'/logo-' + banco.id + '.png'}
-                    onClick={() => handleBancoChange(banco.id)}
                     className="max-h-16"
                   />
                 </div>

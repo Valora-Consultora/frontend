@@ -8,6 +8,9 @@ import InformeItauService from "../../api/InformeItauService";
 import { ToastContainer, toast } from "react-toastify";
 import ComparablesService from "../../api/ComparablesService";
 import CalculoInforme from "../calculo/CalculoInforme";
+import { exportItauToExcel } from '../utils/excelExport.ts';
+
+import Excel from '../../images/icons/excel.svg';
 
 const FormularioItau = () => {
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
@@ -507,6 +510,12 @@ const FormularioItau = () => {
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
             <div className="grid grid-cols-12 gap-4">
               {/* Información sobre la tasación */}
+              <img
+                src={Excel}
+                onClick={() => exportItauToExcel(formData)}
+                className="cursor-pointer"
+              />
+              
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Información sobre la tasación</h4>
                 <div className="grid grid-cols-12 gap-4 items-center">

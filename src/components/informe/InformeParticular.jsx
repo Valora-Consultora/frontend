@@ -8,6 +8,9 @@ import InformeHsbcService from "../../api/InformeHsbcService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ComparablesService from "../../api/ComparablesService";
+import { exportHSBCToExcel } from "../utils/excelExport.ts";
+
+import Excel from '../../images/icons/excel.svg';
 
 const FormularioParticular = () => {
   const formRef = useRef();
@@ -266,6 +269,11 @@ const FormularioParticular = () => {
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
             <div className="grid grid-cols-12 gap-4">
               {/* Información General */}
+              <img
+                src={Excel}
+                onClick={() => exportHSBCToExcel(formData)}
+                className="cursor-pointer"
+              />
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">Información General</h4>
                 <div className="grid grid-cols-12 gap-4 items-center">
