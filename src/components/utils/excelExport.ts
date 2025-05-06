@@ -138,8 +138,8 @@ import ExcelJS from 'exceljs';
 //     .catch(err => console.error(err));
 // };
 
-const exportToExactExcelTemplateExcelJS = (formData, templateFileName) => {
-  fetch(`/xlsx/${templateFileName}.xlsx`)
+const exportHSBCToExcel = (formData) => {
+  fetch(`/xlsx/hsbc.xlsx`)
     .then(response => response.arrayBuffer())
     .then(arrayBuffer => {
       const workbook = new ExcelJS.Workbook();
@@ -425,4 +425,54 @@ const exportToExactExcelTemplateExcelJS = (formData, templateFileName) => {
     });
 };
 
-export { exportToExactExcelTemplateExcelJS };
+const exportScotiaToExcel = (formData) => {
+  fetch(`/xlsx/scotia.xlsx`)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => {
+      const workbook = new ExcelJS.Workbook();
+      workbook.xlsx.load(arrayBuffer)
+        .then(() => {
+          const worksheet = workbook.worksheets[0];
+
+          // Generate the file
+          const buffer = workbook.xlsx.writeBuffer()
+            .then(buffer => {
+              const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+              // Create and trigger download
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = 'informe_completado.xlsx';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            });
+        });
+    });
+};
+
+const exportItauToExcel = (formData) => {
+  fetch(`/xlsx/itau.xlsx`)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => {
+      const workbook = new ExcelJS.Workbook();
+      workbook.xlsx.load(arrayBuffer)
+        .then(() => {
+          const worksheet = workbook.worksheets[0];
+
+          // Generate the file
+          const buffer = workbook.xlsx.writeBuffer()
+            .then(buffer => {
+              const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+              // Create and trigger download
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = 'informe_completado.xlsx';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            });
+        });
+    });
+};
+
+export { exportHSBCToExcel, exportScotiaToExcel, exportItauToExcel };

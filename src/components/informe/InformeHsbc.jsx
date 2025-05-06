@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ComparablesService from "../../api/ComparablesService";
 import CalculoInforme from "../calculo/CalculoInforme";
-import { exportToExactExcelTemplateExcelJS } from "../utils/excelExport.ts";
+import { exportHSBCToExcel } from "../utils/excelExport.ts";
 
 import Excel from '../../images/icons/excel.svg';
 
@@ -387,7 +387,7 @@ const FormularioHsbc = () => {
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
             <img
               src={Excel}
-              onClick={() => exportToExactExcelTemplateExcelJS(formData, 'hsbc')}
+              onClick={() => exportHSBCToExcel(formData)}
               className="cursor-pointer"
             />
             <div className="grid grid-cols-12 gap-4">
