@@ -14,6 +14,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { exportScotiaToExcel } from "../utils/excelExport.ts";
 
 import Excel from '../../images/icons/excel.svg';
+import { ChevronLeft, ChevronRight, DeleteRounded } from "@mui/icons-material";
 
 
 
@@ -57,6 +58,7 @@ const InformeScotia = () => {
     costoReposicion: preloadInforme.costoReposicion ?? "",
     /// Relevamiento Fotográfico
     fotos: preloadInforme.fotos ?? [],
+    fotosColumnas: preloadInforme.fotosColumnas ?? 3,
     /// Comparable
     comparables: preloadInforme.comparables ?? [],
     /// Anexos Gráficos o Catastrales
@@ -303,40 +305,100 @@ const InformeScotia = () => {
     }
   };
 
-  const FileUploadSection = ({ title, name, accept, files, onRemove }) => (
+  const moveLeft = (index) => {
+    const newFotos = formData.fotos;
+
+    const foto = newFotos[index]
+    newFotos[index] = newFotos[index - 1]
+    newFotos[index - 1] = foto;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      fotos: newFotos,
+    }))
+  }
+
+  const moveRight = (index) => {
+    const newFotos = formData.fotos;
+
+    const foto = newFotos[index]
+    newFotos[index] = newFotos[index + 1]
+    newFotos[index + 1] = foto;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      fotos: newFotos,
+    }))
+  }
+
+  const FileUploadSection = ({ title, name, accept, files, onRemove, swappable }) => (
     <div className="col-span-12 space-y-4 rounded">
       <h4 className="text-xl text-green-900">{title}</h4>
       <div className="grid grid-cols-12 gap-4 items-center">
         <div className="col-span-12">
-          <input
-            type="file"
-            id={name}
-            name={name}
-            accept={accept}
-            onChange={handleInputChange}
-            multiple
-            className="hidden"
-          />
-          <label
-            htmlFor={name}
-            className="cursor-pointer bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
-          >
-            Subir {name === "fotos" ? "Fotos" : "Archivos"}
-          </label>
-          <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="flex flex-row items-center">
+            <input
+              type="file"
+              id={name}
+              name={name}
+              accept={accept}
+              onChange={handleInputChange}
+              multiple
+              className="hidden"
+            />
+            <label
+              htmlFor={name}
+              className="cursor-pointer bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 mr-4"
+            >
+              Subir {name === "fotos" ? "Fotos" : "Archivos"}
+            </label>
+            {swappable && <><label
+              htmlFor="columns"
+              className="col-span-2 text-sm text-gray-700 font-bold mr-2"
+            >
+              Columnas:
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="6"
+              id="fotosColumnas"
+              name="fotosColumnas"
+              value={formData.fotosColumnas}
+              onChange={handleInputChange}
+              className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+            /></>}
+          </div>
+          <div className={`mt-4 grid grid-cols-${formData.fotosColumnas} gap-4`}>
             {files.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between bg-gray-100 p-2 rounded"
+                className="flex flex-col items-center min-h-48 justify-center bg-gray-100 rounded overflow-clip group"
               >
-                <span className="truncate">{file.name}</span>
-                <button
-                  onClick={() => onRemove(name, index)}
-                  className="ml-2 text-red-600 hover:text-red-800 font-bold"
-                  aria-label="Eliminar archivo"
-                >
-                  &#x2715;
-                </button>
+                <div className="relative">
+                  <img src={URL.createObjectURL(file)} alt="Thumbnail" className={`object-fit ${swappable ? 'group-hover:blur-sm' : ''}`} />
+                  {swappable && <><button 
+                    onClick={() => moveLeft(index)}
+                    className={`text-5xl absolute ${index !== 0 ? 'group-hover:block' : ''} hidden top-1/2 -translate-y-1/2`}
+                  >
+                    <ChevronLeft sx={{ stroke: "#000000" }} fontSize="inherit" className="text-white" />
+                  </button>
+                  <button
+                    onClick={() => onRemove(name, index)}
+                    className="text-red-400 text-4xl hover:text-red-800 font-bold absolute hidden group-hover:block top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  >
+                    <DeleteRounded sx={{ stroke: "#000000", strokeWidth: 0.8 }} fontSize="inherit" />
+                  </button>
+                  <button 
+                    onClick={() => moveRight(index)}
+                    className={`text-5xl absolute hidden ${index !== files.length - 1 ? 'group-hover:block' : ''} top-1/2 right-0 -translate-y-1/2`}
+                  >
+                    <ChevronRight sx={{ stroke: "#000000" }} fontSize="inherit" className="text-white" />
+                  </button></>}
+                  {/* <button  */}
+                </div>
+                {/* <span className="truncate">{file.name}</span> */}
+                
               </div>
             ))}
           </div>
@@ -403,7 +465,7 @@ const InformeScotia = () => {
               {/* Información General */}
               <img
                 src={Excel}
-                onClick={() => exportScotiaToExcel(formData)}
+                onClick={async () => await exportScotiaToExcel(formData)}
                 className="cursor-pointer"
               />
               <div className="col-span-12 space-y-4 border p-3 rounded">
@@ -714,6 +776,7 @@ const InformeScotia = () => {
                       accept="image/*"
                       files={formData.fotos}
                       onRemove={handleRemoveFile}
+                      swappable={true}
                     />
                   </div>
                 </div>

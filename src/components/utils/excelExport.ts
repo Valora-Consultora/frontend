@@ -425,15 +425,94 @@ const exportHSBCToExcel = (formData) => {
     });
 };
 
-const exportScotiaToExcel = (formData) => {
+const imageLoad = (images) => {
+  const promise = new Promise((resolve) => {
+    let loadedCount = 0;
+    images.forEach((image) => {
+      image.onload = () => {
+        loadedCount++;
+        if (loadedCount === images.length) {
+          resolve(true);
+        }
+      };
+      image.onerror = () => {
+        loadedCount++;
+        if (loadedCount === images.length) {
+          resolve(false);
+        }
+      };
+    });
+  });
+
+  return promise;
+}
+
+const exportScotiaToExcel = async (formData) => {
   fetch(`/xlsx/scotia.xlsx`)
     .then(response => response.arrayBuffer())
     .then(arrayBuffer => {
       const workbook = new ExcelJS.Workbook();
       workbook.xlsx.load(arrayBuffer)
-        .then(() => {
+        .then(async () => {
           const worksheet = workbook.worksheets[0];
 
+          const images = formData.fotos.map((foto) => {
+            const img = new Image();
+            img.src = URL.createObjectURL(foto);
+            return img;
+          });
+
+          const loaded = await imageLoad(images);
+          if (!loaded) {
+            console.error('Error cargando imagenes');
+            return;
+          }
+
+          const MAX_WIDTH = 128;
+
+          const indexToColumnMapping = {
+            0: 1,
+            1: 3,
+            2: 7,
+            3: 9,
+            4: 12,
+            5: 14,
+          }
+
+          const COLUMNS = Number(formData.fotosColumnas);
+
+          for (let i: number = 0; i < images.length; i += COLUMNS) {
+            const rowImages = images.slice(i, i + COLUMNS);
+            const ratios = rowImages.map((img) => img.width / img.height);
+            const minRatio = Math.min(...ratios);
+            const newHeight = MAX_WIDTH / minRatio;
+            const row = Math.floor(i / COLUMNS) + 25;
+            worksheet.getRow(row).hidden = false;
+            worksheet.getRow(row).height = newHeight;
+          }
+
+          images.forEach((foto, index) => {
+            // debugger
+            // Set the width and height of the image in pixels
+            const width = foto.width;
+            const height = foto.height;
+
+            const ratio = width / height;
+
+            // Put image in cell
+            const imageId = workbook.addImage({
+              // filename: 'logo.png',
+              extension: 'png',
+              buffer: formData.fotos[index],
+            });
+
+            worksheet.addImage(imageId, {
+              tl: { col: indexToColumnMapping[index % COLUMNS], row: 24 + Math.floor(index / COLUMNS) },
+              ext: { width: MAX_WIDTH, height: MAX_WIDTH / ratio, },
+              editAs: 'absolute',
+            });
+          });
+  
           // Generate the file
           const buffer = workbook.xlsx.writeBuffer()
             .then(buffer => {
@@ -441,7 +520,7 @@ const exportScotiaToExcel = (formData) => {
               // Create and trigger download
               const link = document.createElement('a');
               link.href = URL.createObjectURL(blob);
-              link.download = 'informe_completado.xlsx';
+              link.download = 'informe_scotia.xlsx';
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
