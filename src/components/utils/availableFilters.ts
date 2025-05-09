@@ -1,5 +1,765 @@
 export const availableFilters = [
   {
+    "id": "PriceRange",
+    "name": "Precio (en pesos)",
+    "type": "range",
+    "subtype": "UYU",
+    "adornments": false,
+  },
+  // {
+  //   "id": "power_seller",
+  //   "name": "Mejores vendedores",
+  //   "type": "boolean",
+  // },
+  {
+    "id": "PublishedToday",
+    "name": "Fecha de comienzo",
+    "type": "text",
+    "values": [
+      {
+        "id": "YES",
+        "name": "Publicados hoy",
+      }
+    ]
+  },
+  // {
+  //   "id": "until",
+  //   "name": "Fecha de finalización",
+  //   "type": "text",
+  //   "values": [
+  //     {
+  //       "id": "today",
+  //       "name": "Finalizan hoy",
+  //     }
+  //   ]
+  // },
+  // {
+  //   "id": "has_video",
+  //   "name": "Publicaciones con video",
+  //   "type": "boolean",
+  //   "values": [
+  //     {
+  //       "id": "yes",
+  //       "name": "Publicaciones con video",
+  //     }
+  //   ]
+  // },
+  // {
+  //   "id": "has_pictures",
+  //   "name": "Publicaciones con imágenes",
+  //   "type": "boolean",
+  //   "values": [
+  //     {
+  //       "id": "yes",
+  //       "name": "Con fotos",
+  //     }
+  //   ]
+  // },
+  {
+    "id": "seller_type",
+    "name": "Quien publica",
+    "type": "text",
+    "pathParam": true,
+    "values": [
+      {
+        "id": "inmobiliaria",
+        "name": "Inmobiliaria",
+      },
+      {
+        "id": "dueno",
+        "name": "Dueño",
+      }
+    ]
+  },
+  {
+    "id": "BEDROOMS",
+    "name": "Cantidad de dormitorios",
+    "type": "range",
+    "pathParam": true,
+    "formatted": true,
+    "values": [
+      {
+        "id": "[0-0]",
+        "name": "Monoambiente",
+      },
+      {
+        "id": "[1-1]",
+        "name": "1 dormitorio",
+      },
+      {
+        "id": "[2-2]",
+        "name": "2 dormitorios",
+      },
+      {
+        "id": "[3-3]",
+        "name": "3 dormitorios",
+      },
+      {
+        "id": "[4-*)",
+        "name": "4 dormitorios o más",
+      }
+    ]
+  },
+  {
+    "id": "COVERED*AREA",
+    "name": "Área cubierta (en m²)",
+    "type": "range",
+    "subtype": "m²",
+    "adornments": false,
+    "values": [
+      {
+        "id": "(*-40m²]",
+        "name": "40 m² cubiertos o menos",
+      },
+      {
+        "id": "[40m²-65m²]",
+        "name": "40 a 65 m² cubiertos",
+      },
+      {
+        "id": "[65m²-150m²]",
+        "name": "65 a 150 m² cubiertos",
+      },
+      {
+        "id": "[150m²-*)",
+        "name": "150 m² cubiertos o más",
+      }
+    ]
+  },
+  {
+    "id": "FULL*BATHROOMS",
+    "name": "Cantidad de baños",
+    "type": "range",
+    "adornments": false,
+    "values": [
+      {
+        "id": "[1-1]",
+        "name": "1 baño",
+      },
+      {
+        "id": "[2-2]",
+        "name": "2 baños",
+      },
+      {
+        "id": "[3-3]",
+        "name": "3 baños",
+      },
+      {
+        "id": "[4-4]",
+        "name": "4 baños",
+      },
+      {
+        "id": "[5-*)",
+        "name": "5 baños o más",
+      }
+    ]
+  },
+  {
+    "id": "FURNISHED",
+    "name": "Esta amoblado",
+    "type": "boolean",
+    "values": [
+      {
+        "id": "242085",
+        "name": "Es amoblado",
+      }
+    ]
+  },
+  {
+    "id": "HAS*AIR*CONDITIONING",
+    "name": "Tiene aire acondicionado",
+    "type": "boolean",
+    "values": [
+      {
+        "id": "242085",
+        "name": "Con aire acondicionado",
+      }
+    ]
+  },
+  {
+    "id": "HAS*GARDEN",
+    "name": "Tiene jardín",
+    "type": "boolean",
+    "values": [
+      {
+        "id": "242085",
+        "name": "Con jardín",
+      }
+    ]
+  },
+  {
+    "id": "HAS*SWIMMING*POOL",
+    "name": "Tiene piscina",
+    "type": "boolean",
+    "values": [
+      {
+        "id": "242085",
+        "name": "Con piscina",
+      }
+    ]
+  },
+  {
+    "id": "state",
+    "name": "Ubicación",
+    "type": "text",
+    "pathParam": true,
+    "values": [
+      {
+        "id": "maldonado",
+        "name": "Maldonado",
+      },
+      {
+        "id": "montevideo",
+        "name": "Montevideo",
+      },
+      {
+        "id": "canelones",
+        "name": "Canelones",
+      },
+      {
+        "id": "colonia",
+        "name": "Colonia",
+      },
+      {
+        "id": "rocha",
+        "name": "Rocha",
+      },
+      {
+        "id": "san-jose",
+        "name": "San José",
+      },
+      {
+        "id": "lavalleja",
+        "name": "Lavalleja",
+      },
+      {
+        "id": "durazno",
+        "name": "Durazno",
+      },
+      {
+        "id": "paysandu",
+        "name": "Paysandú",
+      },
+      {
+        "id": "tacuarembo",
+        "name": "Tacuarembó",
+      },
+      {
+        "id": "flores",
+        "name": "Flores",
+      },
+      {
+        "id": "florida",
+        "name": "Florida",
+      },
+      {
+        "id": "soriano",
+        "name": "Soriano",
+      },
+      {
+        "id": "treinta-y-tres",
+        "name": "Treinta y Tres",
+      },
+      {
+        "id": "salto",
+        "name": "Salto",
+      },
+      {
+        "id": "rio-negro",
+        "name": "Río Negro",
+      },
+      {
+        "id": "rivera",
+        "name": "Rivera",
+      },
+      {
+        "id": "cerro-largo",
+        "name": "Cerro Largo",
+      },
+      {
+        "id": "artigas",
+        "name": "Artigas",
+      }
+    ]
+  },
+  {
+    "id": "city",
+    "name": "Ciudad",
+    "type": "text",
+    "values": [],
+  },
+  {
+    "id": "ITEM*CONDITION",
+    "name": "Condición",
+    "type": "STRING",
+    "values": [
+      {
+        "id": "2230581",
+        "name": "Usado",
+      },
+      {
+        "id": "2230284",
+        "name": "Nuevo",
+      }
+    ]
+  },
+  {
+    "id": "OPERATION",
+    "name": "Operación",
+    "type": "STRING",
+    "pathParam": true,
+    "values": [
+      {
+        "id": "venta",
+        "name": "Venta",
+      },
+      {
+        "id": "alquiler-temporada",
+        "name": "Alquiler temporada",
+      },
+      {
+        "id": "alquiler",
+        "name": "Alquiler",
+      }
+    ]
+  },
+  {
+    "id": "OPERATION_SUBTYPE",
+    "name": "Subtipo de operación",
+    "type": "STRING",
+    "pathParam": true,
+    "values": [
+      {
+        "id": "propiedades-individuales",
+        "name": "Propiedades individuales",
+      },
+      {
+        "id": "emprendimiento",
+        "name": "Emprendimientos",
+      }
+    ]
+  },
+  {
+    "id": "PARKING*LOTS",
+    "name": "Cantidad de cocheras",
+    "type": "range",
+    "adornments": false,
+    "values": [
+      {
+        "id": "[0-0]",
+        "name": "No tiene cocheras",
+      },
+      {
+        "id": "[1-1]",
+        "name": "1 cochera",
+      },
+      {
+        "id": "[2-2]",
+        "name": "2 cocheras",
+      },
+      {
+        "id": "[3-3]",
+        "name": "3 cocheras",
+      },
+      {
+        "id": "[4-*)",
+        "name": "4 cocheras o más",
+      }
+    ]
+  },
+  {
+    "id": "PROPERTY*AGE",
+    "name": "Antigüedad (en años)",
+    "type": "range",
+    "subtype": "años",
+    "adornments": false,
+    "values": [
+      {
+        "id": "[0años-0años]",
+        "name": "A estrenar",
+      },
+      {
+        "id": "[1años-3años]",
+        "name": "1 a 3 años",
+      },
+      {
+        "id": "[3años-15años]",
+        "name": "3 a 15 años",
+      },
+      {
+        "id": "[15años-50años]",
+        "name": "15 a 50 años",
+      },
+      {
+        "id": "[50años-*)",
+        "name": "50 años o más",
+      }
+    ]
+  },
+  {
+    "id": "PROPERTY_TYPE",
+    "name": "Inmueble",
+    "type": "STRING",
+    "pathParam": true,
+    "values": [
+      {
+        "id": "apartamentos",
+        "name": "Apartamento",
+      },
+      {
+        "id": "casas",
+        "name": "Casas",
+      },
+      {
+        "id": "terrenos",
+        "name": "Terrenos",
+      },
+      {
+        "id": "locales",
+        "name": "Locales",
+      },
+      {
+        "id": "quintas",
+        "name": "Quintas",
+      },
+      {
+        "id": "campos",
+        "name": "Campos",
+      },
+      {
+        "id": "oficinas",
+        "name": "Oficinas",
+      },
+      {
+        "id": "otros",
+        "name": "Otros inmuebles",
+      },
+      {
+        "id": "depositos-galpones",
+        "name": "Depósitos y galpones",
+      },
+      {
+        "id": "llave-negocio",
+        "name": "Llave de negocio",
+      },
+      {
+        "id": "cocheras",
+        "name": "Cocheras",
+      },
+      {
+        "id": "habitaciones",
+        "name": "Habitaciones",
+      }
+    ]
+  },
+  {
+    "id": "TOTAL*AREA",
+    "name": "Superficie total (en m²)",
+    "type": "range",
+    "subtype": "m²",
+    "adornments": false,
+  },
+  {
+    "id": "WITH*VIRTUAL*TOUR",
+    "name": "Multimedia",
+    "type": "boolean",
+    "values": [
+      {
+        "id": "242085",
+        "name": "Con tour virtual",
+      }
+    ]
+  },
+  {
+    "id": "Tienda",
+    "name": "Tiendas oficiales",
+    "type": "text",
+    "pathParam": false,
+    "values": [
+      {
+        "id": "all",
+        "name": "Todas las tiendas",
+      },
+      {
+        "id": "abate-propiedades",
+        "pathParam": true,
+        "name": "Abate Propiedades"
+      },
+      {
+        "id": "afilia-propiedades",
+        "pathParam": true,
+        "name": "AFILIA Propiedades"
+      },
+      {
+        "id": "alda-group",
+        "pathParam": true,
+        "name": "ALDA GROUP"
+      },
+      {
+        "id": "altius-group",
+        "pathParam": true,
+        "name": "Altius Group"
+      },
+      {
+        "id": "antonio-mieres",
+        "name": "Antonio Mieres"
+      },
+      {
+        "id": "axon-negocios-inmobiliarios",
+        "pathParam": true,
+        "name": "Axon Negocios Inmobiliarios"
+      },
+      {
+        "id": "beba-paez-vilaro",
+        "name": "Beba Páez Vilaró"
+      },
+      {
+        "id": "caetano-negocios-inmobiliarios",
+        "pathParam": true,
+        "name": "Caetano Negocios Inmobiliarios"
+      },
+      {
+        "id": "caldeyro-victorica",
+        "name": "Caldeyro Victorica"
+      },
+      {
+        "id": "calyptus-desarrollos",
+        "pathParam": true,
+        "name": "Calyptus Desarrollos"
+      },
+      {
+        "id": "campiglia",
+        "name": "CAMPIGLIA"
+      },
+      {
+        "id": "capital-real-estate",
+        "name": "Capital Real Estate"
+      },
+      {
+        "id": "carriquiry-propiedades",
+        "pathParam": true,
+        "name": "CARRIQUIRY PROPIEDADES"
+      },
+      {
+        "id": "casagrande",
+        "pathParam": true,
+        "name": "CasaGrande"
+      },
+      {
+        "id": "century-21-premier",
+        "pathParam": true,
+        "name": "Century 21 Premier"
+      },
+      {
+        "id": "diego-perdomo",
+        "pathParam": true,
+        "name": "Diego Perdomo"
+      },
+      {
+        "id": "engel-volkers-montevideo",
+        "name": "Engel &amp; Völkers Montevideo"
+      },
+      {
+        "id": "estudio-sm",
+        "name": "ESTUDIO SM"
+      },
+      {
+        "id": "foti",
+        "pathParam": true,
+        "name": "FOTI"
+      },
+      {
+        "id": "gasalla-negocios-inmobiliarios",
+        "pathParam": true,
+        "name": "Gasalla Negocios Inmobiliarios"
+      },
+      {
+        "id": "golf-inmobiliaria",
+        "name": "Golf Inmobiliaria"
+      },
+      {
+        "id": "hho-broker",
+        "pathParam": true,
+        "name": "HHO BROKER"
+      },
+      {
+        "id": "housi",
+        "name": "Housi"
+      },
+      {
+        "id": "hughes-rienzi",
+        "name": "HUGHES &amp; RIENZI"
+      },
+      {
+        "id": "inmobiliaria-exito",
+        "name": "Inmobiliaria Exito"
+      },
+      {
+        "id": "inmobiliaria-imperium",
+        "pathParam": true,
+        "name": "INMOBILIARIA IMPERIUM"
+      },
+      {
+        "id": "inmobiliaria-mannise",
+        "name": "Inmobiliaria Mannise"
+      },
+      {
+        "id": "j-s-desarrollos-inmobiliarios",
+        "pathParam": true,
+        "name": "J S desarrollos Inmobiliarios"
+      },
+      {
+        "id": "justany-desarrollos",
+        "pathParam": true,
+        "name": "Justany Desarrollos"
+      },
+      {
+        "id": "kaplan",
+        "name": "KAPLAN"
+      },
+      {
+        "id": "kopel-sanchez",
+        "pathParam": true,
+        "name": "Kopel Sanchez"
+      },
+      {
+        "id": "kw-one",
+        "pathParam": true,
+        "name": "KW One"
+      },
+      {
+        "id": "leonardo-giardello",
+        "name": "LEONARDO GIARDELLO"
+      },
+      {
+        "id": "meikle",
+        "name": "Meikle"
+      },
+      {
+        "id": "nicolas-de-modena-inmobiliaria",
+        "pathParam": true,
+        "name": "NICOLAS DE MODENA INMOBILIARIA"
+      },
+      {
+        "id": "otto-otto",
+        "pathParam": true,
+        "name": "Otto Otto"
+      },
+      {
+        "id": "parolin-asoc-propiedades",
+        "pathParam": true,
+        "name": "Parolin Asoc Propiedades"
+      },
+      {
+        "id": "passadore-otero",
+        "name": "Passadore Otero"
+      },
+      {
+        "id": "paula-cruz-real-estate",
+        "pathParam": true,
+        "name": "Paula Cruz Real Estate"
+      },
+      {
+        "id": "paulo-alvez",
+        "pathParam": true,
+        "name": "Paulo Alvez"
+      },
+      {
+        "id": "perez-robaudo-inmobiliaria",
+        "pathParam": true,
+        "name": "PEREZ ROBAUDO INMOBILIARIA"
+      },
+      {
+        "id": "plaza-mayor-propiedades",
+        "pathParam": true,
+        "name": "Plaza Mayor Propiedades"
+      },
+      {
+        "id": "poggio-propiedades",
+        "name": "Poggio Propiedades"
+      },
+      {
+        "id": "pointer",
+        "name": "POINTER"
+      },
+      {
+        "id": "pres",
+        "pathParam": true,
+        "name": "Pres"
+      },
+      {
+        "id": "prop",
+        "name": "PROP"
+      },
+      {
+        "id": "propiedadesuy",
+        "pathParam": true,
+        "name": "PROPIEDADESUY"
+      },
+      {
+        "id": "punta-ballena-inmobiliaria",
+        "name": "Punta Ballena Inmobiliaria"
+      },
+      {
+        "id": "raiz-estudio-inmobiliario",
+        "name": "RAIZ ESTUDIO INMOBILIARIO"
+      },
+      {
+        "id": "remax-focus",
+        "pathParam": true,
+        "name": "REMAX FOCUS"
+      },
+      {
+        "id": "salaya-romera-propiedades",
+        "pathParam": true,
+        "name": "SALAYA ROMERA Propiedades"
+      },
+      {
+        "id": "sertel",
+        "name": "SERTEL"
+      },
+      {
+        "id": "si-servicios-inmobiliarios",
+        "pathParam": true,
+        "name": "SI SERVICIOS INMOBILIARIOS"
+      },
+      {
+        "id": "sures-real-estate",
+        "name": "SURES REAL ESTATE"
+      },
+      {
+        "id": "terramar-inmobiliaria",
+        "pathParam": true,
+        "name": "TERRAMAR INMOBILIARIA"
+      },
+      {
+        "id": "toribio-achaval",
+        "name": "TORIBIO ACHAVAL"
+      },
+      {
+        "id": "treehouse-bienes-raices",
+        "pathParam": true,
+        "name": "Treehouse Bienes Raices"
+      },
+      {
+        "id": "uruhaus",
+        "pathParam": true,
+        "name": "URUHAUS"
+      },
+      {
+        "id": "varela-inmobiliaria",
+        "pathParam": true,
+        "name": "Varela Inmobiliaria"
+      },
+      {
+        "id": "vitrium-capital",
+        "name": "Vitrium Capital"
+      }
+    ]
+  }
+];
+
+export const _availableFilters = [
+  {
     "id": "price",
     "name": "Precio (en pesos)",
     "type": "range",

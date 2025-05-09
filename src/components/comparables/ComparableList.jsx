@@ -37,7 +37,7 @@ const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, h
               </span>
             </div>
             <div className="flex flex-row space-x-4">
-              <img src={comparable.thumbnail} alt={comparable.title} className="max-w-64 max-h-64 ring-4 rounded ring-gray-300" />
+              <img src={`${comparable.thumbnail}`} alt={comparable.title} className="max-w-64 w-64 h-64 max-h-64 ring-4 rounded ring-gray-300" />
               <div className="flex flex-col space-y-4">
                 <div className="flex flex-row space-x-2 items-center">
                   <img src={Payments} />
@@ -54,7 +54,7 @@ const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, h
                     className="col-span-10"
                     readOnly
                   >
-                    {comparable.location.address_line}
+                    {comparable.location}
                   </span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">

@@ -1,8 +1,27 @@
+import axios from "axios";
 import apiClient from "./apiClient";
 
 const API_URL = process.env.REACT_APP_API_URL;
+const SCRAPPING_URL = process.env.REACT_APP_SCRAPPING_URL;
 
 const ComparablesService = {
+  getScrappedComparables: async (url) => {
+    try {
+      const response = await axios.post(`${SCRAPPING_URL}/scrap/ml`, {
+        url,
+      });
+      // FIXME: BACKEND CAPAZ
+      // response.results.map((result) => {
+      //   result.thumbnail = result.thumbnail.replace("I.jpg", "F.jpg");
+      //   return result;
+      // });
+      return response;
+    } catch (error) {
+      console.error("Error al obtener los comparables:", error);
+      throw error;
+    }
+  },
+
   getComparables: async (params) => {
     try {
       const response = await apiClient.get(`${API_URL}/api/comparables?${params}&limit=30`);

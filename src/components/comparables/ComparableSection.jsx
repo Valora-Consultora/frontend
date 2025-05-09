@@ -83,7 +83,7 @@ const Filter = ({filter, modifyFilter, filters, state, setState}) => {
       >
         <option value={filters?.[filter.id] ?? ""}>Seleccionar {filter.name.toLowerCase()}</option>
         {filter.values?.map((option) => (
-          <option key={option.id} value={option.id}>
+          <option key={option.id} value={option.id + (option.pathParam ? '_PATH_' : '')}>
             {option.name}
           </option>
         ))}
