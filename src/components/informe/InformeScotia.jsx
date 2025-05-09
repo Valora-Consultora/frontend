@@ -156,6 +156,23 @@ const InformeScotia = () => {
     return urlParams.toString();
   };
 
+  /// Dado un filtro de comparables, lo convierte a una URL scrappeable
+  // Si object.pathParam === true, entonces se agrega el valor como un path param
+  // Si no, se agrega como un query param
+  const filterToScrappingUrl = (filter) => {
+    var urlSuffixPath = "";
+    var urlSuffixParams = "";
+    for (const key in filter) {
+      const object = filter[key];
+      if (object.pathParam === true) {
+        urlSuffixPath += "/" + object.value;
+      } else {
+        urlSuffixParams += "_" + key + "_" + (object.range ? parseRange(key, object) : object.value);
+      }
+    }
+    return urlSuffixPath + "/" + urlSuffixParams;
+  };
+
   /// Parsear el rango para que quede en formato [value1-value2] con sus 
   /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
   /// devolveria (*m²-200m²]
@@ -167,7 +184,7 @@ const InformeScotia = () => {
 
     // Increible que los locos de ML hayan puesto un formato especifico solo para
     // precios, pero bueno, aca estamos
-    if (key === "price") {
+    if (key === "price" || !object.adornments) {
       var rangeString = "";
       rangeString += value ? + value : "*";
       rangeString += subtype + "-";
@@ -192,6 +209,11 @@ const InformeScotia = () => {
     }
 
     if (opts?.range === 0 || !opts?.range) {
+      if (value.includes("_PATH_")) {
+        const [value1] = value.split("_PATH_");
+        newFilter.value = value1;
+        newFilter.pathParam = true;
+      }
       newFilter.value = value;
     } else if (opts?.range === 1) {
       newFilter.value2 = value;
@@ -200,6 +222,11 @@ const InformeScotia = () => {
     if (opts?.subtype) {
       newFilter.subtype = opts.subtype;
     }
+
+    if (!newFilter.pathParam) {
+      newFilter.pathParam = opts?.pathParam;
+    }
+    newFilter.adornments = opts?.adornments;
 
     //console.log('Seteando filtro:', newFilter);
 
@@ -213,8 +240,8 @@ const InformeScotia = () => {
 
   const handleComparableSubmit = async () => {
     try {
-      const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
-      setComparables(comparables.results);
+      const comparables = await ComparablesService.getScrappedComparables(filterToScrappingUrl(comparableFilters));
+      setComparables(comparables.data);
       setComparablePage(1);
     } catch (error) {
       toast.error("Error al obtener comparables.", {
