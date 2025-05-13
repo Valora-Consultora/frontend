@@ -77,7 +77,7 @@ const InspeccionesList = () => {
     <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
       <div className="bg-white shadow-md p-0 mx-auto mt-4 mb-4 rounded-lg">
         {inspecciones && inspecciones.length === 0 ? (
-          <EmptyList Icon={Check} message="Ya terminaste todo el laburo loco bien ahi" />
+          <EmptyList Icon={Check} message="No hay nada que mostrar" />
         ) : <Table>
           <TableHead sx={{ overflow: 'hidden' }}>
             <TableRow sx={{ bgcolor: '#f5f5f5' }}>

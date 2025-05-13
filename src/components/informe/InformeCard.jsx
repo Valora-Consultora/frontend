@@ -8,7 +8,7 @@ export const InformeCard = ({ informe, handleCardSelect }) => {
   }
   return (
     <div
-      className={`${classNames[informe.estado]} flex flex-col items-start shadow-lg rounded-xl p-3 mb-6`}
+      className={`${classNames[informe.estado]} w-full flex flex-col items-start shadow-lg rounded-xl p-3 mb-6`}
       onClick={() => handleCardSelect(informe)}
     >
       <h3 className="text-xl text-green-900 font-light">{new Date(informe.fechaInicio).toLocaleString()}</h3>

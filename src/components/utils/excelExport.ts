@@ -409,18 +409,35 @@ const exportHSBCToExcel = (formData) => {
 
           });
 
-          // Generate the file
-          const buffer = workbook.xlsx.writeBuffer()
-            .then(buffer => {
-              const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-              // Create and trigger download
-              const link = document.createElement('a');
-              link.href = URL.createObjectURL(blob);
-              link.download = 'informe_completado.xlsx';
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            });
+          debugger
+
+          addImagesToExcel({
+            workbook,
+            worksheet,
+            fotos: formData.vistasInteriores,
+            columnas: formData.vistasInterioresColumnas,
+            fila: 87,
+            width: 128,
+            mapping: {
+              0: 1,
+              1: 6,
+              2: 11,
+            }
+          }).then(() => {
+            // Generate the file
+            workbook.xlsx.writeBuffer()
+              .then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                // Create and trigger download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'informe_completado.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              });
+          }
+          );
         });
     });
 };
@@ -447,6 +464,56 @@ const imageLoad = (images) => {
   return promise;
 }
 
+const addImagesToExcel = async ({ workbook, worksheet, fotos, columnas, mapping, fila, width }) => {
+  const images = fotos.map((foto) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(foto);
+    return img;
+  });
+
+  const loaded = await imageLoad(images);
+  if (!loaded) {
+    console.error('Error cargando imagenes');
+    return;
+  }
+
+  const MAX_WIDTH = width;
+
+  const COLUMNS = Number(columnas);
+
+  for (let i: number = 0; i < images.length; i += COLUMNS) {
+    const rowImages = images.slice(i, i + COLUMNS);
+    const ratios = rowImages.map((img) => img.width / img.height);
+    const minRatio = Math.min(...ratios);
+    const newHeight = MAX_WIDTH / minRatio;
+    const row = Math.floor(i / COLUMNS) + fila + 1;
+    worksheet.getRow(row).hidden = false;
+    worksheet.getRow(row).height = newHeight;
+  }
+
+  images.forEach((foto, index) => {
+    // debugger
+    // Set the width and height of the image in pixels
+    const width = foto.width;
+    const height = foto.height;
+
+    const ratio = width / height;
+
+    // Put image in cell
+    const imageId = workbook.addImage({
+      // filename: 'logo.png',
+      extension: 'png',
+      buffer: fotos[index],
+    });
+
+    worksheet.addImage(imageId, {
+      tl: { col: mapping[index % COLUMNS], row: fila + Math.floor(index / COLUMNS) },
+      ext: { width: MAX_WIDTH, height: MAX_WIDTH / ratio, },
+      editAs: 'absolute',
+    });
+  });
+}
+
 const exportScotiaToExcel = async (formData) => {
   fetch(`/xlsx/scotia.xlsx`)
     .then(response => response.arrayBuffer())
@@ -456,62 +523,22 @@ const exportScotiaToExcel = async (formData) => {
         .then(async () => {
           const worksheet = workbook.worksheets[0];
 
-          const images = formData.fotos.map((foto) => {
-            const img = new Image();
-            img.src = URL.createObjectURL(foto);
-            return img;
-          });
-
-          const loaded = await imageLoad(images);
-          if (!loaded) {
-            console.error('Error cargando imagenes');
-            return;
-          }
-
-          const MAX_WIDTH = 128;
-
-          const indexToColumnMapping = {
-            0: 1,
-            1: 3,
-            2: 7,
-            3: 9,
-            4: 12,
-            5: 14,
-          }
-
-          const COLUMNS = Number(formData.fotosColumnas);
-
-          for (let i: number = 0; i < images.length; i += COLUMNS) {
-            const rowImages = images.slice(i, i + COLUMNS);
-            const ratios = rowImages.map((img) => img.width / img.height);
-            const minRatio = Math.min(...ratios);
-            const newHeight = MAX_WIDTH / minRatio;
-            const row = Math.floor(i / COLUMNS) + 25;
-            worksheet.getRow(row).hidden = false;
-            worksheet.getRow(row).height = newHeight;
-          }
-
-          images.forEach((foto, index) => {
-            // debugger
-            // Set the width and height of the image in pixels
-            const width = foto.width;
-            const height = foto.height;
-
-            const ratio = width / height;
-
-            // Put image in cell
-            const imageId = workbook.addImage({
-              // filename: 'logo.png',
-              extension: 'png',
-              buffer: formData.fotos[index],
-            });
-
-            worksheet.addImage(imageId, {
-              tl: { col: indexToColumnMapping[index % COLUMNS], row: 24 + Math.floor(index / COLUMNS) },
-              ext: { width: MAX_WIDTH, height: MAX_WIDTH / ratio, },
-              editAs: 'absolute',
-            });
-          });
+          addImagesToExcel({
+            workbook,
+            worksheet,
+            fotos: formData.fotos,
+            columnas: formData.fotosColumnas,
+            fila: 24,
+            width: 256,
+            mapping: {
+              0: 1,
+              1: 3,
+              2: 7,
+              3: 9,
+              4: 12,
+              5: 14,
+            }
+          })
   
           // Generate the file
           const buffer = workbook.xlsx.writeBuffer()

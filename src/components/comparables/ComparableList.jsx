@@ -15,7 +15,7 @@ const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, h
   ////console.log("viendo comparables", comparables);
   return (
     comparables?.length > 0 ? (
-      <div className="grid grid-cols-12 gap-4 mt-4">
+      <div className="grid grid-cols-12 gap-4 mt-4 p-1">
         {/* Interested in: */}
         {/* results.title */}
         {/* results.price */}
@@ -24,7 +24,7 @@ const ComparableList = ({ handleLoadMoreComparables, handleSelectedComparable, h
         {comparables.map((comparable, index) => (
           <div
             key={index}
-            className={`col-span-6 space-y-4 border p-3 rounded hover:ring-2 hover:ring-green-900 cursor-pointer ${comparable.selected ? "ring-2 ring-green-900" : ""}`}
+            className={`col-span-6 space-y-4 p-3 rounded hover:ring-2 hover:ring-green-900 cursor-pointer ${comparable.selected ? "ring-2 ring-green-900" : ""}`}
             onClick={() => handleSelectedComparable(comparable.id)}
           >
             <div className="flex flex-row space-x-2 items-center">
