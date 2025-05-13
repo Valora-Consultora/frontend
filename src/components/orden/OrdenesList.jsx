@@ -18,10 +18,13 @@ import { useSelector } from "react-redux";
 import orderService from "../../api/OrderService";
 import EmptyList from "../utils/EmptyList";
 import { ArrowForward, ArrowRight, Check, Delete } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const OrdenesList = () => {
   const usuario = useSelector(state => state.user);
   const tasadorId = usuario.id;
+
+  const navigate = useNavigate();
 
   const [ordenes, setOrdenes] = useState([]);
 
@@ -74,9 +77,18 @@ const OrdenesList = () => {
 
   return (
     <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+      {usuario && (usuario.tipoUsuario === "SECRETARIA" || usuario.tipoUsuario === "ADMINISTRADOR") && <div className="flex flex-row justify-end p-4">
+        <button
+          type="button"
+          className="bg-green-900 text-white py-2 px-4 rounded-md hover:bg-green-700"
+          onClick={() => { navigate("/Orden/Create") }}
+        >
+          Crear Orden
+        </button>
+      </div>}
       <div className="bg-white shadow-md p-0 mx-auto mt-4 mb-4 rounded-lg">
         {ordenes && ordenes.length === 0 ? (
-          <EmptyList Icon={Check} message="Ya terminaste todo el laburo loco bien ahi" />
+          <EmptyList Icon={Check} message="No hay nada que mostrar" />
         ) : <Table>
           <TableHead sx={{ overflow: 'hidden' }}>
             <TableRow sx={{ bgcolor: '#f5f5f5' }}>

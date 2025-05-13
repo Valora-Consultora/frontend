@@ -104,6 +104,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/Orden/Create"
+                  element={
+                    <WithHeader>
+                      <Order />
+                    </WithHeader>
+                  }
+                />
+                <Route
                   path="/Inspeccion"
                   element={
                     <WithHeader>

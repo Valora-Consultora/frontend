@@ -14,6 +14,8 @@ import CalculoInforme from "../calculo/CalculoInforme";
 import { exportHSBCToExcel } from "../utils/excelExport.ts";
 
 import Excel from '../../images/icons/excel.svg';
+import FileUploadSection from "../utils/FileUploadSection.jsx";
+import { filterToScrappingUrl } from "../utils/formatters.js";
 
 const FormularioHsbc = () => {
   const formRef = useRef();
@@ -62,7 +64,7 @@ const FormularioHsbc = () => {
     deslindeFrente: "",
     deslindeFondo: "",
     descripcionPredio: "",
-    entornoUrbano: "", // TODO: FOTO
+    entornoUrbano: [],
 
     /// Descripcion del bien
     // Comodidades - ambiente
@@ -97,8 +99,9 @@ const FormularioHsbc = () => {
     bienesComunes: [],
     superficieEdificada: "",
     anio: "",
-    vistaExterior: "", // FOTO
+    vistaExterior: [], // FOTO
     vistasInteriores: [], // FOTOS
+    vistasInterioresColumnas: 3,
     // TODO: COMPARABLES
     comparables: [],
 
@@ -110,6 +113,7 @@ const FormularioHsbc = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
+      //console.log('Checkbox modificado:', name, value, checked);
       setFormData((prevData) => ({
         ...prevData,
         [name]: checked
@@ -117,6 +121,7 @@ const FormularioHsbc = () => {
           : prevData[name].filter((item) => item !== value),
       }));
     } else {
+      //console.log('Field modificado:', name, value);
       setFormData({
         ...formData,
         [name]: value,
@@ -224,12 +229,12 @@ const FormularioHsbc = () => {
 
   const handleComparableSubmit = async () => {
     try {
-      const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
-      comparables.results.map((result) => {
-        result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
-        return result;
-      });
-      setComparables(comparables.results);
+      const comparables = await ComparablesService.getScrappedComparables(filterToScrappingUrl(comparableFilters));
+      // comparables.results.map((result) => {
+      //   result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
+      //   return result;
+      // });
+      setComparables(comparables.data);
       setComparablePage(1);
     } catch (error) {
       toast.error("Error al obtener comparables.", {
@@ -278,8 +283,6 @@ const FormularioHsbc = () => {
     setComparableEdit(comparable);
     setIsModalHomologationOpen(true);
   };
-
-
 
   const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
@@ -825,13 +828,16 @@ const FormularioHsbc = () => {
 
                 <div className="grid grid-cols-12 gap-4 items-center">
                   <div className="col-span-12">
-                    {/* <FileUploadSection
+                    <FileUploadSection
                       title="Entorno Urbano"
                       name="entornoUrbano"
+                      multiple={false}
                       accept="image/*"
                       files={formData.entornoUrbano}
-                      onRemove={handleRemoveFile}
-                    /> */}
+                      swappable={false}
+                      formData={formData}
+                      setFormData={setFormData}
+                    />
                   </div>
                 </div>
               </div>
@@ -1172,7 +1178,34 @@ const FormularioHsbc = () => {
                       onChange={handleInputChange}
                       className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
-                  </div>{/* Comparable */}
+                  </div>
+                  {/* Vista exterior */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <FileUploadSection
+                      title="Vista exterior"
+                      name="vistaExterior"
+                      multiple={false}
+                      accept="image/*"
+                      files={formData.vistaExterior}
+                      swappable={false}
+                      formData={formData}
+                      setFormData={setFormData}
+                    />
+                  </div>
+                  {/* Vistas interiores */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <FileUploadSection
+                      title="Vistas interiores"
+                      name="vistasInteriores"
+                      accept="image/*"
+                      multiple={true}
+                      files={formData.vistasInteriores}
+                      swappable={true}
+                      formData={formData}
+                      setFormData={setFormData}
+                    />
+                  </div>
+                  {/* Comparable */}
                   <div className="col-span-12 space-y-4 border p-3 rounded">
                     <h4 className="text-xl text-green-900">Comparables</h4>
                     <div className="grid grid-cols-12 gap-4 items-center">
@@ -1274,7 +1307,7 @@ const FormularioHsbc = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 text-center space-x-2">
+              <div className="col-span-12 mt-4 text-center space-x-2">
                 <button
                   type="submit"
                   className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6"

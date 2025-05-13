@@ -282,7 +282,7 @@ const TaskDashboard = () => {
     }
 
     if (taskList.totalTasks === 0) {
-      return <EmptyList Icon={Done} message={"Estas al día mano, bien ahí"} />
+      return <EmptyList Icon={Done} message={"Estas al día"} />
     }
 
     return <>
