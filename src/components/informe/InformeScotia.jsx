@@ -15,6 +15,8 @@ import { exportScotiaToExcel } from "../utils/excelExport.ts";
 
 import Excel from '../../images/icons/excel.svg';
 import { ChevronLeft, ChevronRight, DeleteRounded } from "@mui/icons-material";
+import FileUploadSection from "../utils/FileUploadSection.jsx";
+import { filterToScrappingUrl } from "../utils/formatters.js";
 
 
 
@@ -25,6 +27,7 @@ const InformeScotia = () => {
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
+  const [isFetchingComparables, setIsFetchingComparables] = useState(false);
 
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
@@ -63,6 +66,7 @@ const InformeScotia = () => {
     comparables: preloadInforme.comparables ?? [],
     /// Anexos Gráficos o Catastrales
     anexos: preloadInforme.anexos ?? [],
+    anexosColumnas: preloadInforme.anexosColumnas ?? 3,
     /// Seguro de Incendio
     seguroIncendio: preloadInforme.seguroIncendio ?? [],
     /// Observaciones
@@ -106,6 +110,18 @@ const InformeScotia = () => {
     }
   };
 
+  const handleHomologationSave = (homologation) => {
+    debugger
+    setFormData((prevData) => ({
+      ...prevData,
+      comparables: prevData.comparables.map((comparable) =>
+        comparable.id === homologation.id ? { ...comparable, ...homologation } : comparable
+      ),
+    }));
+    setIsModalHomologationOpen(false);
+    setComparableEdit(null);
+  };
+
   const handleRemoveFile = (name, index) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -142,66 +158,9 @@ const InformeScotia = () => {
     setComparablePage((prevPage) => prevPage + 1);
   }
 
-  /// Dado un filtro de comparables, lo convierte a una URL query string
-  const filterToUrlParams = (filter) => {
-    var urlParams = new URLSearchParams();
-    for (const key in filter) {
-      const object = filter[key];
-      if (object.range) {
-        urlParams.append(key, parseRange(key, object));
-      } else {
-        urlParams.append(key, object.value);
-      }
-    }
-    return urlParams.toString();
-  };
-
-  /// Dado un filtro de comparables, lo convierte a una URL scrappeable
-  // Si object.pathParam === true, entonces se agrega el valor como un path param
-  // Si no, se agrega como un query param
-  const filterToScrappingUrl = (filter) => {
-    var urlSuffixPath = "";
-    var urlSuffixParams = "";
-    for (const key in filter) {
-      const object = filter[key];
-      if (object.pathParam === true) {
-        urlSuffixPath += "/" + object.value;
-      } else {
-        urlSuffixParams += "_" + key + "_" + (object.range ? parseRange(key, object) : object.value);
-      }
-    }
-    return urlSuffixPath + "/" + urlSuffixParams;
-  };
-
-  /// Parsear el rango para que quede en formato [value1-value2] con sus 
-  /// respectivos subtipos, ej: { value: undefined, value2: 100, subtipo: m² }
-  /// devolveria (*m²-200m²]
-  const parseRange = (key, object) => {
-    //console.log(object);
-    var value = object.value;
-    var value2 = object.value2;
-    var subtype = object.subtype ?? "";
-
-    // Increible que los locos de ML hayan puesto un formato especifico solo para
-    // precios, pero bueno, aca estamos
-    if (key === "price" || !object.adornments) {
-      var rangeString = "";
-      rangeString += value ? + value : "*";
-      rangeString += subtype + "-";
-      rangeString += value2 ? value2 + subtype : "*" + subtype;
-    } else {
-      var rangeString = "";
-      rangeString += value ? "[" + value : "(*";
-      rangeString += subtype + "-";
-      rangeString += value2 ? value2 + subtype + "]" : "*" + subtype + ")";
-    }
-    return rangeString;
-  };
-
   /// Funcion que handlea el cambio de un filtro comparable, lo lleva a un
   /// formato que pueda ser utilizado en la URL y lo setea en el estado
   const modifyFilter = (id, value, opts) => {
-    //console.log('Modificando filtro:', id, value, opts)
     var newFilter = {};
 
     if (opts?.range !== undefined) {
@@ -228,19 +187,22 @@ const InformeScotia = () => {
     }
     newFilter.adornments = opts?.adornments;
 
-    //console.log('Seteando filtro:', newFilter);
-
     setComparableFilters((prevFilters) => ({
       ...prevFilters,
       [id]: { ...prevFilters[id], ...newFilter },
     }));
-
-    //console.log(filterToUrlParams(comparableFilters));
   };
 
   const handleComparableSubmit = async () => {
     try {
+      setIsFetchingComparables(true);
       const comparables = await ComparablesService.getScrappedComparables(filterToScrappingUrl(comparableFilters));
+
+      comparables.data.map((result) => {
+        result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
+        return result;
+      });
+      
       setComparables(comparables.data);
       setComparablePage(1);
     } catch (error) {
@@ -252,6 +214,8 @@ const InformeScotia = () => {
         pauseOnHover: true,
         draggable: true,
       });
+    } finally {
+      setIsFetchingComparables(false);
     }
   };
 
@@ -358,83 +322,8 @@ const InformeScotia = () => {
     }))
   }
 
-  const FileUploadSection = ({ title, name, accept, files, onRemove, swappable }) => (
-    <div className="col-span-12 space-y-4 rounded">
-      <h4 className="text-xl text-green-900">{title}</h4>
-      <div className="grid grid-cols-12 gap-4 items-center">
-        <div className="col-span-12">
-          <div className="flex flex-row items-center">
-            <input
-              type="file"
-              id={name}
-              name={name}
-              accept={accept}
-              onChange={handleInputChange}
-              multiple
-              className="hidden"
-            />
-            <label
-              htmlFor={name}
-              className="cursor-pointer bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 mr-4"
-            >
-              Subir {name === "fotos" ? "Fotos" : "Archivos"}
-            </label>
-            {swappable && <><label
-              htmlFor="columns"
-              className="col-span-2 text-sm text-gray-700 font-bold mr-2"
-            >
-              Columnas:
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="6"
-              id="fotosColumnas"
-              name="fotosColumnas"
-              value={formData.fotosColumnas}
-              onChange={handleInputChange}
-              className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-            /></>}
-          </div>
-          <div className={`mt-4 grid grid-cols-${formData.fotosColumnas} gap-4`}>
-            {files.map((file, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center min-h-48 justify-center bg-gray-100 rounded overflow-clip group"
-              >
-                <div className="relative">
-                  <img src={URL.createObjectURL(file)} alt="Thumbnail" className={`object-fit ${swappable ? 'group-hover:blur-sm' : ''}`} />
-                  {swappable && <><button 
-                    onClick={() => moveLeft(index)}
-                    className={`text-5xl absolute ${index !== 0 ? 'group-hover:block' : ''} hidden top-1/2 -translate-y-1/2`}
-                  >
-                    <ChevronLeft sx={{ stroke: "#000000" }} fontSize="inherit" className="text-white" />
-                  </button>
-                  <button
-                    onClick={() => onRemove(name, index)}
-                    className="text-red-400 text-4xl hover:text-red-800 font-bold absolute hidden group-hover:block top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  >
-                    <DeleteRounded sx={{ stroke: "#000000", strokeWidth: 0.8 }} fontSize="inherit" />
-                  </button>
-                  <button 
-                    onClick={() => moveRight(index)}
-                    className={`text-5xl absolute hidden ${index !== files.length - 1 ? 'group-hover:block' : ''} top-1/2 right-0 -translate-y-1/2`}
-                  >
-                    <ChevronRight sx={{ stroke: "#000000" }} fontSize="inherit" className="text-white" />
-                  </button></>}
-                  {/* <button  */}
-                </div>
-                {/* <span className="truncate">{file.name}</span> */}
-                
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   const handleSaveComparable = (comparable) => {
+    debugger
     if (comparableEdit) {
       setFormData((prevData) => ({
         ...prevData,
@@ -471,7 +360,16 @@ const InformeScotia = () => {
     },
   };
 
-
+  const calcularDolaresPorMetrosCuadradosTerreno = () => {
+    const comparables = formData.comparables;
+    const dolaresPorMetrosCuadradosTerrenos = [];
+    for (let i = 0; i < comparables.length; i++) {
+      const comparable = comparables[i];
+      dolaresPorMetrosCuadradosTerrenos.push(comparable.dolarPorMetrosCuadrados * comparable.superficie * comparable.altura * comparable.forma * comparable.ubicacion);
+    }
+    const total = dolaresPorMetrosCuadradosTerrenos.length;
+    return dolaresPorMetrosCuadradosTerrenos.reduce((acc, val) => acc + val, 0) / total;
+  }
 
   return (
     <div className="bg-gray-100">
@@ -803,7 +701,10 @@ const InformeScotia = () => {
                       accept="image/*"
                       files={formData.fotos}
                       onRemove={handleRemoveFile}
+                      multiple={true}
                       swappable={true}
+                      formData={formData}
+                      setFormData={setFormData}
                     />
                   </div>
                 </div>
@@ -833,6 +734,7 @@ const InformeScotia = () => {
                         filters={comparableFilters}
                         modifyFilter={modifyFilter}
                         handleSubmit={handleComparableSubmit}
+                        isFetching={isFetchingComparables}
                       />
                       <ComparableList
                         handleSelectedComparable={handleSelectedComparable}
@@ -882,6 +784,10 @@ const InformeScotia = () => {
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       files={formData.anexos}
                       onRemove={handleRemoveFile}
+                      multiple={true}
+                      swappable={true}
+                      formData={formData}
+                      setFormData={setFormData}
                     />
                   </div>
                 </div>
@@ -998,6 +904,7 @@ const InformeScotia = () => {
             <CalculoInforme
               configuracion={configuracionScotia}
               superficieTerreno={formData.supPredio}
+              dolarPorMetrosCuadradosTerreno={calcularDolaresPorMetrosCuadradosTerreno()}
               onGetCalculoData={(fn) => setGetCalculoData(() => fn)}
               comparables=""
               bienesPropios=""
@@ -1027,7 +934,7 @@ const InformeScotia = () => {
         </form>
       </div>
       <ModalComparable isModalEditOpen={isModalEditOpen} setIsModalEditOpen={setIsModalEditOpen} comparableEdit={comparableEdit} handleSaveComparable={handleSaveComparable} />
-      <ModalHomologacion isModalHomologationOpen={isModalHomologationOpen} setIsModalHomologationOpen={setIsModalHomologationOpen} handleInputChange={handleInputChange} />
+      <ModalHomologacion comparableEdit={comparableEdit} isModalHomologationOpen={isModalHomologationOpen} setIsModalHomologationOpen={setIsModalHomologationOpen} handleHomologationSave={handleHomologationSave} />
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -1379,7 +1286,27 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
   </Modal>
 }
 
-const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange}) => {
+const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen, comparableEdit, handleHomologationSave}) => {
+  const [homologation, setHomologation] = useState(null);
+
+  useEffect(() => {
+    if (comparableEdit) {
+      setHomologation({
+        id: comparableEdit?.id,
+        ubicacion: comparableEdit?.ubicacion,
+        forma: comparableEdit?.forma,
+        altura: comparableEdit?.altura,
+        superficie: comparableEdit?.superficie,
+      });
+    }
+  }, [comparableEdit]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setHomologation({ ...homologation, [name]: value });
+  }
+
   return <Modal
     isOpen={isModalHomologationOpen}
     onRequestClose={() => setIsModalHomologationOpen(false)}
@@ -1388,23 +1315,24 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
     overlayClassName="fixed inset-0 bg-black bg-opacity-50"
   >
     <div className="bg-gray-100 w-2/5 rounded-lg">
-      {/* Editar homologacion, campos: piso, ubicacion */}
+      {/* Editar homologacion, campos: ubnicacion, forma, altura, superficie */}
       <div className="bg-white shadow-lg rounded-xl p-6">
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-12 space-y-4 border p-3 rounded">
             <h4 className="text-xl text-green-900">Homologación</h4>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="piso"
+                htmlFor="dolarPorMetrosCuadrados"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
-                Piso:
+                Dólar por m²:
               </label>
               <input
                 type="text"
-                id="piso"
-                name="piso"
-                onChange={handleInputChange}
+                id="dolarPorMetrosCuadrados"
+                name="dolarPorMetrosCuadrados"
+                disabled
+                value={comparableEdit?.dolarPorMetrosCuadrados}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
             <div className="grid grid-cols-12 gap-4 items-center">
@@ -1418,7 +1346,68 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
                 type="text"
                 id="ubicacion"
                 name="ubicacion"
+                value={homologation?.ubicacion}
                 onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="forma"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Forma:
+              </label>
+              <input
+                type="text"
+                id="forma"
+                name="forma"
+                value={homologation?.forma}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="altura"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Altura:
+              </label>
+              <input
+                type="text"
+                id="altura"
+                name="altura"
+                value={homologation?.altura}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="superficie"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Superficie:
+              </label>
+              <input
+                type="text"
+                id="superficie"
+                name="superficie"
+                value={homologation?.superficie}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="observaciones"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Total:
+              </label>
+              <input
+                type="text"
+                id="total"
+                name="total"
+                value={comparableEdit?.dolarPorMetrosCuadrados * homologation?.superficie * homologation?.altura * homologation?.forma * homologation?.ubicacion}
+                disabled
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
           </div>
@@ -1427,7 +1416,7 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
           <div className="text-center">
             <button
               type="button"
-              onClick={() => setIsModalHomologationOpen(false)}
+              onClick={() => handleHomologationSave(homologation)}
               className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700"
             >
               Guardar

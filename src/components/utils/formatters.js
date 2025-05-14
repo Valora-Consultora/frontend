@@ -31,13 +31,11 @@ const parseRange = (key, object) => {
   var value2 = object.value2;
   var subtype = object.subtype ?? "";
 
-  // Increible que los locos de ML hayan puesto un formato especifico solo para
-  // precios, pero bueno, aca estamos
   if (key === "price" || !object.adornments) {
     var rangeString = "";
-    rangeString += value ? + value : "*";
+    rangeString += value ? + value : "0";
     rangeString += subtype + "-";
-    rangeString += value2 ? value2 + subtype : "*" + subtype;
+    rangeString += value2 ? value2 + subtype : "0" + subtype;
   } else {
     var rangeString = "";
     rangeString += value ? "[" + value : "(*";

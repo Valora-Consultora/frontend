@@ -1,7 +1,9 @@
 import React from 'react';
 import { availableFilters as exportedFilters, stateFilters } from '../utils/availableFilters.ts';
+import { CircularProgress } from '@mui/material';
+import { filterToScrappingUrl } from '../utils/formatters.js';
 
-const ComparableSection = ({ filters, modifyFilter, handleSubmit }) => {
+const ComparableSection = ({ filters, modifyFilter, handleSubmit, isFetching }) => {
   const [availableFilters, setAvailableFilters] = React.useState(exportedFilters);
   const [shownFilters, setShownFilters] = React.useState(false);
   const [state, setState] = React.useState();
@@ -20,7 +22,7 @@ const ComparableSection = ({ filters, modifyFilter, handleSubmit }) => {
   }, [state]);
 
   return (
-    <div className="border p-4 rounded-lg mb-4 bg-white w-full">
+    <div className="border p-4 rounded-lg mb-4 space-y-2 bg-white w-full">
       <div className="flex flex-col items-start space-y-4 w-full">
         <ShowFiltersButton className="mb-4" shownFilters={shownFilters} setShownFilters={setShownFilters} />
         {shownFilters && (
@@ -29,13 +31,20 @@ const ComparableSection = ({ filters, modifyFilter, handleSubmit }) => {
           </div>
         )}
       </div>
-      <button
-        type='button'
-        onClick={handleSubmit}
-        className="bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-700 w-1/6 "
-      >
-        Aplicar filtros
-      </button>
+      <div className="flex flex-row space-x-4 items-center">
+        <button
+          disabled={isFetching}
+          type='button'
+          onClick={handleSubmit}
+          className={`flex flex-row space-x-2 justify-center items-center ${!isFetching ? 'bg-green-900 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-400'} text-white px-4 py-2 rounded-md w-1/6`}
+        >
+          {isFetching && <CircularProgress color={'primary'} size={20} />}
+          <span>Aplicar filtros</span>
+        </button>
+        <a href={"https://listado.mercadolibre.com.uy/inmuebles" + filterToScrappingUrl(filters)} target="_blank" rel="noopener noreferrer">
+          Ver este filtro en MercadoLibre
+        </a>
+      </div>
     </div>
   );
 };
@@ -63,12 +72,12 @@ const Filter = ({filter, modifyFilter, filters, state, setState}) => {
         <input
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-900"
           name={filter.id}
-          onChange={(e) => modifyFilter(filter.id, e.target.value, { range: 0, subtype: filter.subtype })} />
+          onChange={(e) => modifyFilter(filter.id, e.target.value, { range: 0, ...filter })} />
         <label> — </label>
         <input
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-900"
           name={filter.id}
-          onChange={(e) => modifyFilter(filter.id, e.target.value, { range: 1, subtype: filter.subtype })} />
+          onChange={(e) => modifyFilter(filter.id, e.target.value, { range: 1, ...filter })} />
       </div>
     ) : null}
     {filter.type === "text" || filter.type === "STRING" ? (
@@ -78,7 +87,7 @@ const Filter = ({filter, modifyFilter, filters, state, setState}) => {
           if (filter.id === 'state') {
             setState(e.target.value)
           }
-          modifyFilter(filter.id, e.target.value)
+          modifyFilter(filter.id, e.target.value, { ...filter });
         }}
       >
         <option value={filters?.[filter.id] ?? ""}>Seleccionar {filter.name.toLowerCase()}</option>
@@ -94,7 +103,7 @@ const Filter = ({filter, modifyFilter, filters, state, setState}) => {
         type="checkbox"
         className="mr-2"
         value={filters?.[filter.id] ?? ""}
-        onChange={(e) => modifyFilter(filter.id, e.target.checked)} />
+        onChange={(e) => modifyFilter(filter.id, e.target.checked, { ...filter })} />
     ) : null}
   </div>;
 }

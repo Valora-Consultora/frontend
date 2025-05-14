@@ -406,10 +406,7 @@ const exportHSBCToExcel = (formData) => {
               const cell = worksheet.getCell(cellAddress as string);
               cell.value = formData[key];
             }
-
           });
-
-          debugger
 
           addImagesToExcel({
             workbook,
@@ -523,35 +520,117 @@ const exportScotiaToExcel = async (formData) => {
         .then(async () => {
           const worksheet = workbook.worksheets[0];
 
-          addImagesToExcel({
-            workbook,
-            worksheet,
-            fotos: formData.fotos,
-            columnas: formData.fotosColumnas,
-            fila: 24,
-            width: 256,
-            mapping: {
-              0: 1,
-              1: 3,
-              2: 7,
-              3: 9,
-              4: 12,
-              5: 14,
+          const checkBoxes: string[] = []
+
+          const radios = [
+            'conservacion',
+          ]
+
+          // Mapping of JSON keys to Excel cell locations
+          const cellMappings = {
+            solicitante: 'E5',
+            oficial: 'E6',
+            sucursal: 'K6',
+            titular: 'E7',
+            cedula: 'K7',
+            direccion: 'E8',
+            padron: 'N8',
+            localidad: 'E9',
+            departamento: 'N9',
+            /// Superficies
+            supPredio: 'E12',
+            supConstruida: 'E13',
+            comodidades: 'E14',
+            conservacion: {
+              "Muy Bueno": 'F15', 
+              "Bueno": 'J15', 
+              "Aceptable": 'M15', 
+              "Regular": 'O15'
+            },
+          };
+
+          // Fill in the cells while preserving original formatting
+          Object.entries(cellMappings).forEach(([key, cellAddress]) => {
+            if (checkBoxes.includes(key)) {
+              Object.entries(cellMappings[key] as { [key: string]: string }).forEach(([value, checkAddress]: [string, string]) => {
+                if (formData[key].includes(value)) {
+                  const cell = worksheet.getCell(checkAddress);
+                  const newStyle = { ...cell.style };
+                  newStyle.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF808080' }
+                  };
+                  cell.style = newStyle;
+                }
+              });
+            } else if (radios.includes(key)) {
+              const radioValue = formData[key]
+              if (radioValue) {
+                const radioAddress = (cellMappings[key] as { [key: string]: string })[radioValue];
+                const cell = worksheet.getCell(radioAddress);
+                const newStyle = { ...cell.style };
+                newStyle.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FF808080' }
+                };
+                cell.style = newStyle;
+              }
+            } else if (formData[key]) {
+              const cell = worksheet.getCell(cellAddress as string);
+              cell.value = formData[key];
             }
-          })
+          });
+
+          Promise.all([
+            addImagesToExcel({
+              workbook,
+              worksheet,
+              fotos: formData.fotos,
+              columnas: formData.fotosColumnas,
+              fila: 24,
+              width: 256,
+              mapping: {
+                0: 1,
+                1: 3,
+                2: 7,
+                3: 9,
+                4: 12,
+                5: 14,
+              }
+            }),
+            addImagesToExcel({
+              workbook,
+              worksheet,
+              fotos: formData.anexos,
+              columnas: formData.anexosColumnas,
+              fila: 45,
+              width: 256,
+              mapping: {
+                0: 1,
+                1: 3,
+                2: 7,
+                3: 9,
+                4: 12,
+                5: 14,
+              }
+            })
+          ]).then(() => {
   
-          // Generate the file
-          const buffer = workbook.xlsx.writeBuffer()
-            .then(buffer => {
-              const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-              // Create and trigger download
-              const link = document.createElement('a');
-              link.href = URL.createObjectURL(blob);
-              link.download = 'informe_scotia.xlsx';
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            });
+            // Generate the file
+            const buffer = workbook.xlsx.writeBuffer()
+              .then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                // Create and trigger download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'informe_scotia.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              });
+          });
         });
     });
 };
