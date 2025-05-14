@@ -22,6 +22,7 @@ const FormularioHsbc = () => {
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
+  const [isFetchingComparables, setIsFetchingComparables] = useState(false);
 
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
@@ -229,11 +230,14 @@ const FormularioHsbc = () => {
 
   const handleComparableSubmit = async () => {
     try {
+      setIsFetchingComparables(true);
       const comparables = await ComparablesService.getScrappedComparables(filterToScrappingUrl(comparableFilters));
-      // comparables.results.map((result) => {
-      //   result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
-      //   return result;
-      // });
+
+      comparables.results.map((result) => {
+        result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
+        return result;
+      });
+
       setComparables(comparables.data);
       setComparablePage(1);
     } catch (error) {
@@ -245,6 +249,8 @@ const FormularioHsbc = () => {
         pauseOnHover: true,
         draggable: true,
       });
+    } finally {
+      setIsFetchingComparables(false);
     }
   };
 
@@ -1215,6 +1221,7 @@ const FormularioHsbc = () => {
                             filters={comparableFilters}
                             modifyFilter={modifyFilter}
                             handleSubmit={handleComparableSubmit}
+                            isFetching={isFetchingComparables}
                           />
                           <ComparableList
                             handleSelectedComparable={handleSelectedComparable}

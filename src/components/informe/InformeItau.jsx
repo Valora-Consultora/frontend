@@ -15,6 +15,7 @@ import Excel from '../../images/icons/excel.svg';
 const FormularioItau = () => {
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
+  const [isFetchingComparables, setIsFetchingComparables] = useState(false);
 
   const [comparableFilters, setComparableFilters] = useState({});
   const [comparables, setComparables] = useState([]);
@@ -406,7 +407,14 @@ const FormularioItau = () => {
 
   const handleComparableSubmit = async () => {
     try {
+      setIsFetchingComparables(true);
       const comparables = await ComparablesService.getComparables(filterToUrlParams(comparableFilters));
+
+      comparables.results.map((result) => {
+        result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
+        return result;
+      });
+
       setComparables(comparables.results);
       setComparablePage(1);
     } catch (error) {
@@ -418,6 +426,8 @@ const FormularioItau = () => {
         pauseOnHover: true,
         draggable: true,
       });
+    } finally {
+      setIsFetchingComparables(false);
     }
   };
 
@@ -1925,6 +1935,7 @@ const FormularioItau = () => {
                         filters={comparableFilters}
                         modifyFilter={modifyFilter}
                         handleSubmit={handleComparableSubmit}
+                        isFetching={isFetchingComparables}
                       />
                       <ComparableList
                         handleSelectedComparable={handleSelectedComparable}
