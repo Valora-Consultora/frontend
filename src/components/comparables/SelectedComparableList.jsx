@@ -88,7 +88,7 @@ const SelectedComparableList = ({ handleEditHomologation, handleEditComparable, 
                   <span
                     className="col-span-10"
                   >
-                    {comparable.location.address_line}
+                    {comparable.location}
                   </span>
                 </div>
                 <div className={`flex flex-row space-x-2 items-center ${comparable.permalink ? "" : "hidden"}`}>

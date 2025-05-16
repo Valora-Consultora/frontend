@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Modal from "react-modal";
 
 import HsbcLogo from "../../images/logo-hsbc.png";
@@ -110,6 +110,8 @@ const FormularioHsbc = () => {
     // ...
     descripcion: "",
   });
+
+  console.log("formData", formData);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -233,7 +235,7 @@ const FormularioHsbc = () => {
       setIsFetchingComparables(true);
       const comparables = await ComparablesService.getScrappedComparables(filterToScrappingUrl(comparableFilters));
 
-      comparables.results.map((result) => {
+      comparables.data.map((result) => {
         result.selected = formData.comparables.some((comparable) => comparable.id === result.id);
         return result;
       });
@@ -370,12 +372,21 @@ const FormularioHsbc = () => {
   };
 
   const handleSaveComparable = (comparable) => {
-    ////console.log('Attempting to save', comparable)
-    setFormData((prevData) => ({
-      ...prevData,
-      comparables: [...prevData.comparables, comparable],
-    }));
-    ////console.log(formData);
+    if (comparableEdit) {
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: prevData.comparables.map((comp) =>
+          comp.id === comparableEdit.id ? { ...comp, ...comparable } : comp
+        ),
+      }));
+    } else {
+      comparable.id = crypto.randomUUID();
+      setFormData((prevData) => ({
+        ...prevData,
+        comparables: [...prevData.comparables, comparable],
+      }));
+    }
+    setComparableEdit(null);
     setIsModalEditOpen(false);
   }
 
@@ -1211,29 +1222,6 @@ const FormularioHsbc = () => {
                       setFormData={setFormData}
                     />
                   </div>
-                  {/* Comparable */}
-                  <div className="col-span-12 space-y-4 border p-3 rounded">
-                    <h4 className="text-xl text-green-900">Comparables</h4>
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                      <div className="col-span-12">
-                        <p className="text-sm text-gray-700">
-                          <ComparableSection
-                            filters={comparableFilters}
-                            modifyFilter={modifyFilter}
-                            handleSubmit={handleComparableSubmit}
-                            isFetching={isFetchingComparables}
-                          />
-                          <ComparableList
-                            handleSelectedComparable={handleSelectedComparable}
-                            handleLoadMoreComparables={handleLoadMoreComparables}
-                            handleSelectMainComparable={handleSelectMainComparable}
-                            comparables={formData.comparables}
-                            page={comparablePage}
-                          />
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 <CalculoInforme
                   tipoInforme="HSBC"
@@ -1276,6 +1264,7 @@ const FormularioHsbc = () => {
                         filters={comparableFilters}
                         modifyFilter={modifyFilter}
                         handleSubmit={handleComparableSubmit}
+                        isFetching={isFetchingComparables}
                       />
                       <ComparableList
                         handleSelectedComparable={handleSelectedComparable}
@@ -1356,15 +1345,18 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'direccion') {
-      setComparable({ ...comparable, location: { ...(comparable?.location ?? {}), address_line: value } })
+    if (name === 'ubicacion') {
+      setComparable({ ...comparable, location: value })
     }
-    if (name === 'titulo') {
+    else if (name === 'titulo') {
       setComparable({ ...comparable, title: value })
     }
-    if (name === 'precio') {
+    else if (name === 'precio') {
       setComparable({ ...comparable, price: value })
+    } else {
+      setComparable({...comparable, [name]: value })
     }
+
   }
 
   ////console.log('Viendo comp', comparable)
@@ -1384,27 +1376,10 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
             <h4 className="text-xl text-green-900">Modificar Datos de Comparable</h4>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="direccion"
-                className="col-span-2 text-sm text-gray-700 font-bold"
-              >
-                Dirección:
-              </label>
-              <input
-                type="text"
-                id="direccion"
-                name="direccion"
-                value={comparable?.location?.address_line}
-                defaultValue={comparable?.location?.address_line}
-                onChange={handleInputChange}
-                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-              />
-            </div>
-            <div className="grid grid-cols-12 gap-4 items-center">
-              <label
                 htmlFor="titulo"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
-                Título:
+                Titulo:
               </label>
               <input
                 type="text"
@@ -1412,6 +1387,357 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
                 name="titulo"
                 value={comparable?.title}
                 defaultValue={comparable?.title}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="ubicacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Ubicacion:
+              </label>
+              <input
+                type="text"
+                id="ubicacion"
+                name="ubicacion"
+                value={comparable?.ubicacion}
+                defaultValue={comparable?.ubicacion}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="esquina"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Esquina:
+              </label>
+              <input
+                type="text"
+                id="esquina"
+                name="esquina"
+                value={comparable?.esquina}
+                defaultValue={comparable?.esquina}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="localidad"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Localidad:
+              </label>
+              <input
+                type="text"
+                id="localidad"
+                name="localidad"
+                value={comparable?.localidad}
+                defaultValue={comparable?.localidad}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="departamento|"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Departamento:
+              </label>
+              <input
+                type="text"
+                id="departamento"
+                name="departamento"
+                value={comparable?.departamento}
+                defaultValue={comparable?.departamento}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            {/* Data: checkbox */}
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="datos"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Datos:
+              </label>
+              <div className="col-span-10 flex flex-row space-x-8">
+                <div>
+                  <label
+                    htmlFor="cotizacion"
+                    className="text-gray-700 mr-2"
+                  >
+                    Cotización
+                  </label>
+                  <input
+                    type="radio"
+                    id="cotizacion"
+                    name="datos"
+                    value="cotizacion"
+                    checked={comparable?.datos === "cotizacion"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="venta"
+                    className="text-gray-700 mr-2"
+                  >
+                    Venta
+                  </label>
+                  <input
+                    type="radio"
+                    id="venta"
+                    name="datos"
+                    value="venta"
+                    checked={comparable?.datos === "venta"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="homologacionUbicacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Ubicacion:
+              </label>
+              <div className="col-span-10 flex flex-row space-x-8">
+
+                <div>
+                  <label
+                    htmlFor="ubicacionInferior"
+                    className="text-gray-700 mr-2"
+                  >
+                    Inferior
+                  </label>
+                  <input
+                    type="radio"
+                    id="ubicacionInferior"
+                    name="homologacionUbicacion"
+                    value="inferior"
+                    checked={comparable?.homologacionUbicacion === "inferior"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="ubicacionSemejante"
+                    className="text-gray-700 mr-2"
+                  >
+                    Semejante
+                  </label>
+                  <input
+                    type="radio"
+                    id="ubicacionSemejante"
+                    name="homologacionUbicacion"
+                    value="semejante"
+                    checked={comparable?.homologacionUbicacion === "semejante"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="ubicacionEquivalente"
+                    className="text-gray-700 mr-2"
+                  >
+                    Equivalente
+                  </label>
+                  <input
+                    type="radio"
+                    id="ubicacionEquivalente"
+                    name="homologacionUbicacion"
+                    value="equivalente"
+                    checked={comparable?.homologacionUbicacion === "equivalente"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="ubicacionSuperior"
+                    className="text-gray-700 mr-2"
+                  >
+                    Superior
+                  </label>
+                  <input
+                    type="radio"
+                    id="ubicacionSuperior"
+                    name="homologacionUbicacion"
+                    value="superior"
+                    checked={comparable?.homologacionUbicacion === "superior"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="comodidades"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Comodidades:
+              </label>
+              <div className="col-span-10 flex flex-row space-x-8">
+                <div>
+                  <label
+                    htmlFor="comodidadesInferior"
+                    className="text-gray-700 mr-2"
+                  >
+                    Inferior
+                  </label>
+                  <input
+                    type="radio"
+                    id="comodidadesInferior"
+                    name="comodidades"
+                    value="inferior"
+                    checked={comparable?.comodidades === "inferior"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="comodidadesSemejante"
+                    className="text-gray-700 mr-2"
+                  >
+                    Semejante
+                  </label>
+                  <input
+                    type="radio"
+                    id="comodidadesSemejante"
+                    name="comodidades"
+                    value="semejante"
+                    checked={comparable?.comodidades === "semejante"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="comodidadesEquivalente"
+                    className="text-gray-700 mr-2"
+                  >
+                    Equivalente
+                  </label>
+                  <input
+                    type="radio"
+                    id="comodidadesEquivalente"
+                    name="comodidades"
+                    value="equivalente"
+                    checked={comparable?.comodidades === "equivalente"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="comodidadesSuperior"
+                    className="text-gray-700 mr-2"
+                  >
+                    Superior
+                  </label>
+                  <input
+                    type="radio"
+                    id="comodidadesSuperior"
+                    name="comodidades"
+                    value="superior"
+                    checked={comparable?.comodidades === "superior"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="conservacion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Conservacion:
+              </label>
+              <div className="col-span-10 flex flex-row space-x-8">
+                <div>
+                  <label
+                    htmlFor="conservacionInferior"
+                    className="text-gray-700 mr-2"
+                  >
+                    Inferior
+                  </label>
+                  <input
+                    type="radio"
+                    id="conservacionInferior"
+                    name="conservacion"
+                    value="inferior"
+                    checked={comparable?.conservacion === "inferior"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="conservacionSemejante"
+                    className="text-gray-700 mr-2"
+                  >
+                    Semejante
+                  </label>
+                  <input
+                    type="radio"
+                    id="conservacionSemejante"
+                    name="conservacion"
+                    value="semejante"
+                    checked={comparable?.conservacion === "semejante"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="conservacionEquivalente"
+                    className="text-gray-700 mr-2"
+                  >
+                    Equivalente
+                  </label>
+                  <input
+                    type="radio"
+                    id="conservacionEquivalente"
+                    name="conservacion"
+                    value="equivalente"
+                    checked={comparable?.conservacion === "equivalente"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="conservacionSuperior"
+                    className="text-gray-700 mr-2"
+                  >
+                    Superior
+                  </label>
+                  <input
+                    type="radio"
+                    id="conservacionSuperior"
+                    name="conservacion"
+                    value="superior"
+                    checked={comparable?.conservacion === "superior"}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="anio"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Año:
+              </label>
+              <input
+                type="text"
+                id="anio"
+                name="anio"
+                value={comparable?.anio}
+                defaultValue={comparable?.anio}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
               />
@@ -1431,6 +1757,58 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
                 defaultValue={comparable?.price}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="superficieEdificada"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Superficie Edificada:
+              </label>
+              <input
+                type="text"
+                id="superficieEdificada"
+                name="superficieEdificada"
+                value={comparable?.superficieEdificada}
+                defaultValue={comparable?.superficieEdificada}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="precioMetroCuadrado"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+
+              >
+                Precio/m²:
+              </label>
+              <input
+                type="text"
+                id="precioMetroCuadrado"
+                name="precioMetroCuadrado"
+                value={comparable?.precioMetroCuadrado ?? (comparable?.price && comparable?.superficieEdificada) ? (comparable?.price / comparable?.superficieEdificada) : ""}
+                defaultValue={comparable?.precioMetroCuadrado ?? (comparable?.price && comparable?.superficieEdificada) ? (comparable?.price / comparable?.superficieEdificada) : ""}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="observaciones"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Observaciones:
+              </label>
+              <textarea
+                id="observaciones"
+                name="observaciones"
+                value={comparable?.observaciones}
+                defaultValue={comparable?.observaciones}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                rows="4"
               />
             </div>
           </div>
@@ -1462,7 +1840,26 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
   </Modal>
 }
 
-const ModalHomologacion = ({ isModalHomologationOpen, setIsModalHomologationOpen, handleInputChange }) => {
+const ModalHomologacion = ({ isModalHomologationOpen, setIsModalHomologationOpen, comparableEdit, handleHomologationSave }) => {
+  const [homologation, setHomologation] = useState(null);
+
+  useEffect(() => {
+    if (comparableEdit) {
+      setHomologation({
+        id: comparableEdit?.id,
+        ubicacion: comparableEdit?.homologacionUbicacion,
+        superficie: comparableEdit?.homologacionSuperficie,
+        altura: comparableEdit?.homologacionAltura,
+      });
+    }
+  }, [comparableEdit]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setHomologation({ ...homologation, [name]: value });
+  }
+  
   return <Modal
     isOpen={isModalHomologationOpen}
     onRequestClose={() => setIsModalHomologationOpen(false)}
@@ -1476,20 +1873,6 @@ const ModalHomologacion = ({ isModalHomologationOpen, setIsModalHomologationOpen
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-12 space-y-4 border p-3 rounded">
             <h4 className="text-xl text-green-900">Homologación</h4>
-            <div className="grid grid-cols-12 gap-4 items-center">
-              <label
-                htmlFor="piso"
-                className="col-span-2 text-sm text-gray-700 font-bold"
-              >
-                Piso:
-              </label>
-              <input
-                type="text"
-                id="piso"
-                name="piso"
-                onChange={handleInputChange}
-                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
-            </div>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
                 htmlFor="ubicacion"
