@@ -111,7 +111,6 @@ const InformeScotia = () => {
   };
 
   const handleHomologationSave = (homologation) => {
-    debugger
     setFormData((prevData) => ({
       ...prevData,
       comparables: prevData.comparables.map((comparable) =>
@@ -323,7 +322,6 @@ const InformeScotia = () => {
   }
 
   const handleSaveComparable = (comparable) => {
-    debugger
     if (comparableEdit) {
       setFormData((prevData) => ({
         ...prevData,
@@ -957,7 +955,7 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
     const { name, value } = e.target;
 
     if (name === 'direccion') {
-      setComparable({ ...comparable, location: { ...(comparable?.location ?? {}), address_line: value } })
+      setComparable({ ...comparable, location: value })
     }
     else if (name === 'titulo') {
       setComparable({ ...comparable, title: value })
@@ -986,23 +984,6 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
             <h4 className="text-xl text-green-900">Modificar Datos de Comparable</h4>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="direccion"
-                className="col-span-2 text-sm text-gray-700 font-bold"
-              >
-                Dirección:
-              </label>
-              <input
-                type="text"
-                id="direccion"
-                name="direccion"
-                value={comparable?.location?.address_line}
-                defaultValue={comparable?.location?.address_line}
-                onChange={handleInputChange}
-                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-              />
-            </div>
-            <div className="grid grid-cols-12 gap-4 items-center">
-              <label
                 htmlFor="titulo"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
@@ -1014,6 +995,23 @@ const ModalComparable = ({ isModalEditOpen, setIsModalEditOpen, comparableEdit, 
                 name="titulo"
                 value={comparable?.title}
                 defaultValue={comparable?.title}
+                onChange={handleInputChange}
+                className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+              />
+            </div>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <label
+                htmlFor="direccion"
+                className="col-span-2 text-sm text-gray-700 font-bold"
+              >
+                Dirección:
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                name="direccion"
+                value={comparable?.location}
+                defaultValue={comparable?.location}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
               />
@@ -1293,10 +1291,10 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
     if (comparableEdit) {
       setHomologation({
         id: comparableEdit?.id,
-        ubicacion: comparableEdit?.ubicacion,
-        forma: comparableEdit?.forma,
-        altura: comparableEdit?.altura,
-        superficie: comparableEdit?.superficie,
+        homologacionUbicacion: comparableEdit?.homologacionUbicacion,
+        homologacionForma: comparableEdit?.homologacionForma,
+        homologacionAltura: comparableEdit?.homologacionAltura,
+        homologacionSuperficie: comparableEdit?.homologacionSuperficie,
       });
     }
   }, [comparableEdit]);
@@ -1306,6 +1304,11 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
 
     setHomologation({ ...homologation, [name]: value });
   }
+
+  console.log('CALC');
+  console.log('Homologacion', homologation);
+  console.log('ComparableEdit', comparableEdit);
+  console.log('ComparableEdit', comparableEdit?.dolarPorMetrosCuadrados * homologation?.homologacionSuperficie * homologation?.homologacionAltura * homologation?.homologacionForma * homologation?.homologacionUbicacion);
 
   return <Modal
     isOpen={isModalHomologationOpen}
@@ -1337,67 +1340,67 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
             </div>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="ubicacion"
+                htmlFor="homologacionUbicacion"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
                 Ubicación:
               </label>
               <input
-                type="text"
-                id="ubicacion"
-                name="ubicacion"
-                value={homologation?.ubicacion}
+                type="number"
+                id="homologacionUbicacion"
+                name="homologacionUbicacion"
+                value={homologation?.homologacionUbicacion}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="forma"
+                htmlFor="homologacionForma"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
                 Forma:
               </label>
               <input
-                type="text"
-                id="forma"
-                name="forma"
-                value={homologation?.forma}
+                type="number"
+                id="homologacionForma"
+                name="homologacionForma"
+                value={homologation?.homologacionForma}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="altura"
+                htmlFor="homologacionAltura"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
                 Altura:
               </label>
               <input
-                type="text"
-                id="altura"
-                name="altura"
-                value={homologation?.altura}
+                type="number"
+                id="homologacionAltura"
+                name="homologacionAltura"
+                value={homologation?.homologacionAltura}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="superficie"
+                htmlFor="homologacionSuperficie"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
                 Superficie:
               </label>
               <input
-                type="text"
-                id="superficie"
-                name="superficie"
-                value={homologation?.superficie}
+                type="number"
+                id="homologacionSuperficie"
+                name="homologacionSuperficie"
+                value={homologation?.homologacionSuperficie}
                 onChange={handleInputChange}
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
             <div className="grid grid-cols-12 gap-4 items-center">
               <label
-                htmlFor="observaciones"
+                htmlFor="total"
                 className="col-span-2 text-sm text-gray-700 font-bold"
               >
                 Total:
@@ -1406,7 +1409,7 @@ const ModalHomologacion = ({isModalHomologationOpen, setIsModalHomologationOpen,
                 type="text"
                 id="total"
                 name="total"
-                value={comparableEdit?.dolarPorMetrosCuadrados * homologation?.superficie * homologation?.altura * homologation?.forma * homologation?.ubicacion}
+                value={comparableEdit?.dolarPorMetrosCuadrados * homologation?.homologacionSuperficie * homologation?.homologacionAltura * homologation?.homologacionForma * homologation?.homologacionUbicacion}
                 disabled
                 className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
             </div>
