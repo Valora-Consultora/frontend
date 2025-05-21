@@ -9,8 +9,7 @@ function Order() {
 
   //const defaulttasadorInspeccion = "default value";
 
-  const [tasadorInspecciones, settasadorInspecciones] = useState([]);
-  const [tasadorAntecedentes, setTasadorAntecedentes] = useState([]);
+  const [tasadores, setTasadores] = useState([]);
   const [bancos, setBancos] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +32,7 @@ function Order() {
     esquina: "",
     localidad: "",
     tasadorAntecedenteId: "",
-    padron: "",
+    padron: undefined,
 
 
     tasacion: false,
@@ -66,27 +65,15 @@ function Order() {
 
 
   useEffect(() => {
-    const fetchtasadorInspecciones = async () => {
+    const fetchTasadores = async () => {
       try {
         const data = await OrderService.getTasadores();
-        settasadorInspecciones(data);
+        setTasadores(data);
       } catch (error) {
       }
     };
 
-    fetchtasadorInspecciones();
-  }, []);
-
-  useEffect(() => {
-    const fetchTasadorAntecedentes = async () => {
-      try {
-        const data = await OrderService.getTasadores();
-        setTasadorAntecedentes(data);
-      } catch (error) {
-      }
-    };
-
-    fetchTasadorAntecedentes();
+    fetchTasadores();
   }, []);
 
   useEffect(() => {
@@ -119,7 +106,9 @@ function Order() {
     if (name === "tasadorInspeccion") {
       const fetchTasador = async () => {
         try {
-          const selectedTasador = await OrderService.getTasadorById(value);
+          const selectedTasador = tasadores.find(
+            (tasador) => tasador.id == value
+          );
           setInfo((prevInfo) => ({
             ...prevInfo,
             tasadorInspeccion: selectedTasador,
@@ -138,7 +127,9 @@ function Order() {
     } else if (name === "banco") {
       const fetchBanco = async () => {
         try {
-          const selectedBanco = await OrderService.getBancoById(value);
+          const selectedBanco = bancos.find(
+            (banco) => banco.id == value
+          );
           setInfo((prevInfo) => ({
             ...prevInfo,
             banco: selectedBanco,
@@ -153,8 +144,8 @@ function Order() {
     else if (name === "departamento") {
       const fetchDepartamento = async () => {
         try {
-          const selectDepartamento = await OrderService.getDepartamentoById(
-            value
+          const selectDepartamento = departamentos.find(
+            (departamento) => departamento.id == value
           );
           setInfo((prevInfo) => ({
             ...prevInfo,
@@ -346,7 +337,7 @@ function Order() {
                     onChange={handleInputChange}
                   >
                     <option value="">Seleccione un tasador</option>
-                    {tasadorInspecciones.map((tasador) => (
+                    {tasadores.map((tasador) => (
                       <option key={tasador.id} value={tasador.id}>
                         {tasador.nombre}
                       </option>
@@ -456,7 +447,7 @@ function Order() {
                     Padrón:
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="padron"
                     name="padron"
@@ -660,7 +651,7 @@ function Order() {
                         onChange={handleInputChange}
                       >
                         <option value="">Tasador</option>
-                        {tasadorAntecedentes.map((tasador) => (
+                        {tasadores.map((tasador) => (
                           <option key={tasador.id} value={tasador.id}>
                             {tasador.nombre}
                           </option>

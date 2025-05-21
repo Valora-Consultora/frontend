@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ItauLogo from "../../images/logo-itau.png";
 import Modal from "react-modal";
 import ComparableSection from "../comparables/ComparableSection";
@@ -11,6 +11,7 @@ import CalculoInforme from "../calculo/CalculoInforme";
 import { exportItauToExcel } from '../utils/excelExport.ts';
 
 import Excel from '../../images/icons/excel.svg';
+import UsuarioService from '../../api/UsuarioService.js';
 
 const FormularioItau = () => {
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
@@ -21,6 +22,8 @@ const FormularioItau = () => {
   const [comparables, setComparables] = useState([]);
   const [comparablePage, setComparablePage] = useState(1);
   const [comparableEdit, setComparableEdit] = useState(null);
+
+  const [tasadores, setTasadores] = useState([]);
 
   const [shownComparablesML, setShownComparablesML] = useState(true);
   const [getCalculoData, setGetCalculoData] = useState(null);
@@ -235,6 +238,16 @@ const FormularioItau = () => {
     comparables: [],
   });
 
+  useEffect(() => {
+    (async function fetchTasadores() {
+      try {
+        const data = await UsuarioService.getUsuarios("TASADOR");
+        setTasadores(data);
+      } catch (error) {
+      }
+    })();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -269,6 +282,10 @@ const FormularioItau = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
+      formData.fechaInicio = new Date().toISOString();
+      formData.ascensores = formData.ascensores === "Si" ? true : false;
+      formData.servicioVigilancia = formData.servicioVigilancia === "Si" ? true : false;
+      formData.tasador = tasadores.find(tasador => tasador.id == formData.tasador);
       // Primero crear el informe
       const response = await InformeItauService.createInformeItau(formData);
 
@@ -582,14 +599,20 @@ const FormularioItau = () => {
                   <label htmlFor="tasador" className="col-span-2 text-sm text-gray-700 font-bold">
                     Tasador:
                   </label>
-                  <input
-                    type="text"
+                  <select
                     id="tasador"
                     name="tasador"
                     value={formData.tasador}
                     onChange={handleInputChange}
                     className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                  >
+                    <option value="">Seleccione un tasador</option>
+                    {tasadores.map((tasador) => (
+                      <option key={tasador.id} value={tasador.id}>
+                        {tasador.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-12 gap-4 items-center">

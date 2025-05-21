@@ -42,7 +42,7 @@ const OrderService = {
 
   getTasadores: async () => {
     try {
-      const response = await apiClient.get(`${API_URL}/api/tasadores`);
+      const response = await apiClient.get(`${API_URL}/api/usuario?roles=TASADOR,ADMINISTRADOR`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener tasadores:', error);

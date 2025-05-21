@@ -25,12 +25,13 @@ function Login() {
       
       if (response) {
         const user = response.usuario;
+        const isAdmin = user.tipos.some(tipo => tipo === "ADMINISTRADOR");
 
         // Guarda el usuario en el estado global
         dispatch(setUser({
           username: user.username,
           nombre: user.nombre,
-          tipoUsuario: user.tipoUsuario,
+          tipoUsuario: isAdmin ? "ADMINISTRADOR" : user.tipos[0],
           id: user.id,
         }));
 
@@ -52,12 +53,13 @@ function Login() {
 
       if (response) {
         const user = response.usuario;
+        const isAdmin = user.tipos.some(tipo => tipo === "ADMINISTRADOR");
 
         // Guarda el usuario en el estado global
         dispatch(setUser({
           username: user.username,
           nombre: user.nombre,
-          tipoUsuario: user.tipoUsuario,
+          tipoUsuario: isAdmin ? "ADMINISTRADOR" : user.tipos[0],
           id: user.id,
         }));
         

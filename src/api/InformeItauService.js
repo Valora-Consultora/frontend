@@ -63,7 +63,7 @@ const InformeItauService = {
       informeData.CantidadAmbientesResidenciaFondo = informeData.fondos || 0;
       
       // Asegurarse que el banco esté configurado
-      informeData.banco = "Itau";
+      informeData.banco = "itau";
       
       // Si hay comparables, filtrar solo los seleccionados
       if (informeData.comparables) {

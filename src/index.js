@@ -13,7 +13,7 @@ import { ThemeProvider } from '@material-tailwind/react';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <ThemeProvider>
       <Provider store={store}>
         {/* Agrega PersistGate alrededor de App */}
@@ -22,7 +22,7 @@ root.render(
         </PersistGate>
       </Provider>
     </ThemeProvider>
-  </React.StrictMode>
+  //</React.StrictMode>
 );
 
 reportWebVitals();

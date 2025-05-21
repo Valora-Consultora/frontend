@@ -53,6 +53,9 @@ const Perfil = () => {
     return <div className="w-full h-screen"><ErrorScreen error={{ message: "No tienes permisos para ver este usuario" }} /></div>;
   }
 
+  const isAdmin = usuario.tipos?.some(tipo => tipo === "ADMINISTRADOR");
+  const tipoUsuario = isAdmin ? "ADMINISTRADOR" : usuario.tipos?.[0];
+
   return (
     // <div className="flex flex-row justify-center">
       <div className="flex flex-col items-center justify-center bg-gray-100 p-4 relative">
@@ -61,7 +64,7 @@ const Perfil = () => {
         </div>
         <div className="bg-white shadow-md rounded-lg p-6 pt-12 w-96 mt-16">
           <h2 className="text-2xl font-bold mb-2">{usuario.nombre}</h2>
-          <p className="text-gray-600 mb-2">{normalizeText(usuario.tipoUsuario)}</p>
+          <p className={`${isAdmin ? 'text-green-600' : 'text-gray-600'} mb-2`}>{normalizeText(usuario.tipoTasador === "RELEVADOR" ? 'Relevador' : tipoUsuario)}</p>
         </div>
         <div className="bg-white shadow-md rounded-lg flex flex-col items-center justify-center p-4 m-4">
           <InformeList emptyListMessage={`${usuario.nombre} aún no tiene informes.`} informes={informes} onCardSelect={(_) => { }} />

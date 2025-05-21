@@ -33,11 +33,8 @@ function Inspeccion() {
                         departamento: orden.departamento,
                         localidad: orden.localidad,
                         banco: nombreBanco,
-                        ordenId: orden.id,
-                        tasadorId: usuario.id
+                        orden: { id: orden.id },
                     };
-
-                    console.log('prefill', prefill);
                     
                     setInspeccion((prev) => ({ ...prev, ...prefill }));
                     console.log('insp.', inspeccion);
@@ -48,7 +45,7 @@ function Inspeccion() {
         }
     }, [ordenId]);
 
-    const [inspeccion, setInspeccion] = useState(() => initialInspeccionState({}));
+    const [inspeccion, setInspeccion] = useState(() => initialInspeccionState(usuario));
     const [locales, setLocales] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentLocal, setCurrentLocal] = useState(null);
@@ -218,7 +215,7 @@ function Inspeccion() {
             if (name === "banco") {
                 const fetchBanco = async () => {
                     try {
-                        const selectedBanco = await OrderService.getBancoById(value);
+                        const selectedBanco = bancos.find(banco => banco.id == value);
                         setInspeccion(prevState => ({
                             ...prevState,
                             banco: selectedBanco,
@@ -233,7 +230,7 @@ function Inspeccion() {
             if (name === "departamento") {
                 const fetchDepartamento = async () => {
                     try {
-                        const selectedDepartamento = await OrderService.getDepartamentoById(value);
+                        const selectedDepartamento = departamentos.find(departamento => departamento.id == value);
                         setInspeccion(prevState => ({
                             ...prevState,
                             departamento: selectedDepartamento,

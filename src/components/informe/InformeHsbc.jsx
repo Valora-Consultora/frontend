@@ -16,9 +16,11 @@ import { exportHSBCToExcel } from "../utils/excelExport.ts";
 import Excel from '../../images/icons/excel.svg';
 import FileUploadSection from "../utils/FileUploadSection.jsx";
 import { filterToScrappingUrl } from "../utils/formatters.js";
+import { useSelector } from "react-redux";
 
 const FormularioHsbc = () => {
   const formRef = useRef();
+  const usuario = useSelector(state => state.user);
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [isModalHomologationOpen, setIsModalHomologationOpen] = useState(false);
@@ -295,6 +297,10 @@ const FormularioHsbc = () => {
   const submitHandler = async (e, borrador = false) => {
     e.preventDefault();
     try {
+      formData.tasador = { id: usuario.id }
+      formData.banco = "hsbc"
+      formData.fechaInicio = new Date().toISOString();
+
       //console.log("Iniciando submitHandler con borrador:", borrador);
 
       // Establecer estado del formulario según si es borrador o no

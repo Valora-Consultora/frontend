@@ -4,9 +4,13 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 const UsuarioService = {
 
-    getUsuarios: async () => {
+    getUsuarios: async (roles) => {
     try {
-      const response = await apiClient.get(`${API_URL}/api/usuario`);
+      let append = "";
+      if (roles) {
+        append = `?roles=${roles}`;
+      }
+      const response = await apiClient.get(`${API_URL}/api/usuario${append}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
