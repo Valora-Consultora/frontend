@@ -65,3 +65,12 @@ html, body {
   padding: 0;
   transform: translate(-50%, -50%);
 }
+
+.no-arrows::-webkit-inner-spin-button,
+.no-arrows::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-arrows {
+  -moz-appearance: textfield;
+}

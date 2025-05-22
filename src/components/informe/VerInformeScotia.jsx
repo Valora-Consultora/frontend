@@ -37,14 +37,22 @@ const VerInformeScotia = () => {
 
   const handleApprove = () => {
     InformeService.approveInforme(id).then(() => {
-      toast.success("Informe aprobado correctamente");
+      if (!toast.isActive("approve-informe", "see-informe"))  
+        toast.success("Informe aprobado correctamente", {
+          toastId: "approve-informe",
+          containerId: "see-informe"
+        });
       setInforme({...informe, estadoInforme: 'APROBADO'});
     })
   }
   
   const handleDisapprove = () => {
     InformeService.disapproveInforme(id).then(() => {
-      toast.success("Aprobación cancelada correctamente");
+      if (!toast.isActive("cancel-informe", "see-informe"))  
+        toast.success("Aprobación cancelada correctamente", {
+          toastId: "cancel-informe",
+          containerId: "see-informe"
+        });
       setInforme({...informe, estadoInforme: 'PENDIENTE'});
     })
   }
@@ -381,6 +389,7 @@ const VerInformeScotia = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        containerId={"see-informe"}
       />
     </div>
   );

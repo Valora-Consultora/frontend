@@ -118,12 +118,6 @@ function Order() {
       };
 
       fetchTasador();
-    } else if (name === "tasadorAntecedenteId") {
-
-      setInfo((prevInfo) => ({
-        ...prevInfo,
-        tasadorAntecedenteId: value,
-      }));
     } else if (name === "banco") {
       const fetchBanco = async () => {
         try {
@@ -147,6 +141,8 @@ function Order() {
           const selectDepartamento = departamentos.find(
             (departamento) => departamento.id == value
           );
+          const localidades = await OrderService.getLocalidadesByDepartamentoId(value);
+          setlocalidades(localidades);
           setInfo((prevInfo) => ({
             ...prevInfo,
             departamento: selectDepartamento,
@@ -287,7 +283,7 @@ function Order() {
                     id="telefonoContacto"
                     name="telefonoContacto"
                     onChange={handleInputChange}
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="no-arrows col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
                 <div className="grid grid-cols-12 gap-4 items-center">
@@ -315,7 +311,7 @@ function Order() {
                     id="telefonoSolicitante"
                     name="telefonoSolicitante"
                     onChange={handleInputChange}
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="no-arrows col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
               </div>
@@ -435,7 +431,7 @@ function Order() {
                   </label>
                   <input
                     type="number"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="unidad"
                     name="unidad"
                     onChange={handleInputChange}
@@ -448,7 +444,7 @@ function Order() {
                   </label>
                   <input
                     type="number"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="padron"
                     name="padron"
                     onChange={handleInputChange}
@@ -461,7 +457,7 @@ function Order() {
                   </label>
                   <input
                     type="text"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="block"
                     name="block"
                     onChange={handleInputChange}
@@ -474,9 +470,35 @@ function Order() {
                   </label>
                   <input
                     type="text"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="solar"
                     name="solar"
+                    onChange={handleInputChange}
+                  />
+                  <label
+                    htmlFor="manzana"
+                    className="col-span-1 text-sm text-gray-700 font-bold"
+                  >
+                    Manzana:
+                  </label>
+                  <input
+                    type="text"
+                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    id="manzana"
+                    name="manzana"
+                    onChange={handleInputChange}
+                  />
+                  <label
+                    htmlFor="esBis"
+                    className="col-span-1 text-sm text-gray-700 font-bold"
+                  >
+                    Es bis:
+                  </label>
+                  <input
+                    type="checkbox"
+                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    id="esBis"
+                    name="esBis"
                     onChange={handleInputChange}
                   />
                 </div>
@@ -506,13 +528,19 @@ function Order() {
                   >
                     Localidad:
                   </label>
-                  <input
-                    type="text"
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  <select
                     id="localidad"
                     name="localidad"
                     onChange={handleInputChange}
-                  />
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  >
+                    <option value="">Seleccione una localidad</option>
+                    {localidades.map((localidad) => (
+                      <option key={localidad.id} value={localidad.nombre}>
+                        {localidad.nombre}
+                      </option>
+                    ))}
+                  </select>
                   {/*                 <select
                   id="localidad"
                   name="localidad"
@@ -531,7 +559,7 @@ function Order() {
                   <div className="flex flex-col space-y-4">
                     <h4 className="text-xl text-green-900 mt-5">Observaciones</h4>
                     <textarea
-                      className="w-full h-40 p-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      className="w-full h-60 p-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                       placeholder="Escriba sus observaciones aquí..."
                       id="observacion"
                       name="observacion"
@@ -638,25 +666,18 @@ function Order() {
                         className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900  text-center"
                       />
                       <label
-                        htmlFor="tasadorAntecedenteId"
+                        htmlFor="antecedenteTasadoPorValora"
                         className="col-span-4 text-sm text-gray-700 font-bold"
                       >
-                        Tasador:
+                        Tasado por Valora:
                       </label>
-                      <select
-                        className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                        id="tasadorAntecedenteId"
-                        name="tasadorAntecedenteId"
-                        value={selectedTasadorAntecedenteId}
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 mt-1"
+                        id="antecedenteTasadoPorValora"
+                        name="antecedenteTasadoPorValora"
                         onChange={handleInputChange}
-                      >
-                        <option value="">Tasador</option>
-                        {tasadores.map((tasador) => (
-                          <option key={tasador.id} value={tasador.id}>
-                            {tasador.nombre}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </div>
 
@@ -690,6 +711,36 @@ function Order() {
                         name="sucursal"
                         onChange={handleInputChange}
                         className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                    <div className="grid grid-cols-12 gap-4 items-center mt-3">
+                      <label
+                        htmlFor="correoOficial" 
+                        className="col-span-4 text-sm text-gray-700 font-bold"
+                      >
+                        Correo:
+                      </label>
+                      <input
+                        type="email"
+                        id="correoOficial"
+                        name="correoOficial"
+                        onChange={handleInputChange}
+                        className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                    <div className="grid grid-cols-12 gap-4 items-center mt-3">
+                      <label
+                        htmlFor="telefonoOficial"
+                        className="col-span-4 text-sm text-gray-700 font-bold"
+                      >
+                        Teléfono:
+                      </label>
+                      <input
+                        type="number"
+                        id="telefonoOficial"
+                        name="telefonoOficial"
+                        onChange={handleInputChange}
+                        className="no-arrows col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                       />
                     </div>
                   </div>

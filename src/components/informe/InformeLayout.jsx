@@ -105,7 +105,7 @@ const InformeLayout = () => {
     fetchInformes();
   }, [usuario]);
 
-  //console.log('selected', selectedBanco);
+  console.log('selected', selectedBanco);
 
   return (
     <div>

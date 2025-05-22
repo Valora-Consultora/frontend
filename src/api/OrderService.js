@@ -13,6 +13,16 @@ const OrderService = {
       }
   },
 
+  getLocalidadesByDepartamentoId: async (id) => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/departamento/localidades/${parseInt(id)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener localidades por departamento ID:', error);
+      throw error;
+    }
+  },
+
   createOrden: async (ordenData) => {
     try {
       //console.log('llega al create orden ')
