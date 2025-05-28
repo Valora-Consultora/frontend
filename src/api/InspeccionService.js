@@ -4,6 +4,29 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 const InspeccionService = {
 
+  assignTasador: async (inspeccionId, tasadorId) => {
+    try {
+      //console.log('ingresa en el assignTasado de inspeccionService');
+      //console.log('inspeccionId', inspeccionId);
+      //console.log('tasadorId', tasadorId);
+      const response = await apiClient.put(`${API_URL}/api/inspeccion/${inspeccionId}/assign-tasador/${tasadorId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al asignar tasador a la inspección:', error);
+      throw error;
+    }
+  },
+
+  getAllInspecciones: async () => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/inspeccion`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener todas las inspecciones:', error);
+      throw error;
+    }
+  },
+
     getInspeccionesByTasadorId: async (id) => {
         try {
           const response = await apiClient.get(`${API_URL}/api/inspeccion/tasador/${parseInt(id)}`);
@@ -28,6 +51,7 @@ const InspeccionService = {
       try {
           //console.log('ingresa en el create de inspeccionService');
           //console.log('inspeccionData', inspeccionData);
+          inspeccionData.avaluador = inspeccionData.avaluador?.nombre;
 
           const response = await apiClient.post(`${API_URL}/api/create-inspeccion`, inspeccionData, {
               headers: {

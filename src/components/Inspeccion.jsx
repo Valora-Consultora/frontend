@@ -11,33 +11,65 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { setProvisionalInspectionId } from '../app/slices/inspectionSlice';
 import OrderService from '../api/OrderService';
 import { setUser } from '../app/slices/userSlice';
+import { CircularProgress } from '@mui/material';
 
 function Inspeccion() {
     const { ordenId } = useParams();
     const usuario = useSelector(state => state.user);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchBancos = async () => {
+            try {
+                const data = await OrderService.getBancos();
+                setBancos(data);
+            } catch (error) {
+            }
+        };
+
+        fetchBancos();
+
+        const fetchDepartamentos = async () => {
+            try {
+                const data = await OrderService.getDepartamentos();
+                setDepartamentos(data);
+            } catch (error) {
+                // Manejar errores
+            }
+        };
+
+        fetchDepartamentos();
+    }, []);
+
+    useEffect(() => {
+        console.log(ordenId)
         if (ordenId) {
             (async function fetchOrden() {
                 try {
                     const orden = await OrderService.getOrdenById(ordenId);
                     const banco = await OrderService.getBancoById(orden.bancoId);
+                    const localidad = await OrderService.getLocalidadById(orden.localidadId);
+                    const departamento = await OrderService.getDepartamentoById(localidad.departamentoId);
+                    const localidades = await OrderService.getLocalidadesByDepartamentoId(departamento.id);
+                    setlocalidades(localidades);
                     const nombreBanco = banco.nombre.toLowerCase();
+                    // console.log(departamentos);
 
                     const prefill = {
+                        avaluador: usuario,
                         solicitante: orden.nombreSolicitante,
                         calle: orden.calle,
                         nro: orden.nroPuerta,
                         esquina: orden.esquina,
                         unidad: orden.unidad,
-                        departamento: orden.departamento,
-                        localidad: orden.localidad,
-                        banco: nombreBanco,
+                        departamento,
+                        localidad,
+                        banco,
                         orden: { id: orden.id },
                     };
                     
+                    setLoading(false);
                     setInspeccion((prev) => ({ ...prev, ...prefill }));
-                    console.log('insp.', inspeccion);
                 } catch (error) {
                     console.error("Error al obtener la orden:", error);
                 }
@@ -53,6 +85,7 @@ function Inspeccion() {
     const fetchCalled = useRef(false);
     const [bancos, setBancos] = useState([]);
     const [departamentos, setDepartamentos] = useState([]);
+    const [localidades, setlocalidades] = useState([]);
 
 
     const [isVisible, setIsVisible] = useState(true);
@@ -111,30 +144,6 @@ function Inspeccion() {
     //         }));
     //     }
     // }, [usuario]);
-
-
-    useEffect(() => {
-        const fetchBancos = async () => {
-            try {
-                const data = await OrderService.getBancos();
-                setBancos(data);
-            } catch (error) {
-            }
-        };
-
-        fetchBancos();
-
-        const fetchDepartamentos = async () => {
-            try {
-                const data = await OrderService.getDepartamentos();
-                setDepartamentos(data);
-            } catch (error) {
-                // Manejar errores
-            }
-        };
-
-        fetchDepartamentos();
-    }, []);
 
     const handleOpenModal = (e, local = null) => {
         e.stopPropagation();
@@ -230,16 +239,29 @@ function Inspeccion() {
             if (name === "departamento") {
                 const fetchDepartamento = async () => {
                     try {
-                        const selectedDepartamento = departamentos.find(departamento => departamento.id == value);
-                        setInspeccion(prevState => ({
-                            ...prevState,
-                            departamento: selectedDepartamento,
-                        }));
+                        const localidades = await OrderService.getLocalidadesByDepartamentoId(value);
+                        setlocalidades(localidades);
                     } catch (error) {
-                        console.error('Error al obtener el banco:', error);
+                        console.error('Error al obtener las localidades:', error);
                     }
                 };
                 fetchDepartamento();
+            }
+
+            if (name === "localidad") {
+                const fetchLocalidad = async () => {
+                    try {
+                        const selectedLocalidad = localidades.find(
+                            (localidad) => localidad.id == value
+                        );
+                        setInspeccion((prevInfo) => ({
+                            ...prevInfo,
+                            localidad: selectedLocalidad,
+                        }));
+                    } catch (error) {
+                    }
+                };
+                fetchLocalidad();
             }
         }
     };
@@ -303,6 +325,14 @@ function Inspeccion() {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <CircularProgress />
+            </div>
+        );
+    }
+
 
     return (
 
@@ -337,7 +367,9 @@ function Inspeccion() {
                                     type="text"
                                     id="avaluador"
                                     name="avaluador"
-                                    onChange={handleInputChange}
+                                    disabled={true}
+                                    value={inspeccion.avaluador?.nombre}
+                                    // onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
                                 <label
@@ -407,7 +439,7 @@ function Inspeccion() {
                                     name="departamento"
                                     value={selectedDepartamentoId}
                                     onChange={handleInputChange}
-                                    className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                    className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                                 >
                                     <option value="">Departamento</option>
                                     {departamentos.map((departamento) => (
@@ -423,14 +455,20 @@ function Inspeccion() {
                                 >
                                     Localidad:
                                 </label>
-                                <input
-                                    type="text"
+                                <select
                                     id="localidad"
                                     name="localidad"
-                                    value={inspeccion.localidad}
+                                    value={inspeccion.localidad?.id}
                                     onChange={handleInputChange}
-                                    className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
-                                />
+                                    className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                                >
+                                    <option value="">Localidad</option>
+                                    {localidades.map((localidad) => (
+                                        <option key={localidad.id} value={localidad.id}>
+                                            {localidad.nombre}
+                                        </option>
+                                    ))}
+                                </select>
 
                                 <label
                                     htmlFor="secJudicial"
@@ -443,7 +481,7 @@ function Inspeccion() {
                                     id="secJudicial"
                                     name="secJudicial"
                                     onChange={handleInputChange}
-                                    className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
 
                                 <label
@@ -470,7 +508,7 @@ function Inspeccion() {
                                     id="calle"
                                     name="calle"
                                     onChange={handleInputChange}
-                                    className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
                                 <label
                                     htmlFor="nro"
@@ -541,7 +579,7 @@ function Inspeccion() {
                                     id="entreCalles"
                                     name="entreCalles"
                                     onChange={handleInputChange}
-                                    className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
+                                    className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
 
                                 <label
@@ -2868,9 +2906,9 @@ function initialInspeccionState(usuario) {
     //console.log('initialInspeccionState usuario ', usuario);
 
     return {
-        avaluador: '',
+        avaluador: usuario,
         fechaAvalador: '',
-        tasador: usuario || null,
+        tasador: null,
         banco: '',
         solicitante: '',
         departamento: '',

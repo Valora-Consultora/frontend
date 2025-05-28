@@ -48,9 +48,6 @@ function Order() {
   const selectedTasadorId = info.tasadorInspeccion
     ? info.tasadorInspeccion.id
     : "";
-  const selectedTasadorAntecedenteId = info.tasadorAntecedenteId
-    ? info.tasadorAntecedenteId
-    : "";
   const selectedBancoId = info.banco ? info.banco.id : "";
   //const selectedDepartamentoId = info.departamento ? info.departamento.id : "";
 
@@ -138,20 +135,29 @@ function Order() {
     else if (name === "departamento") {
       const fetchDepartamento = async () => {
         try {
-          const selectDepartamento = departamentos.find(
-            (departamento) => departamento.id == value
-          );
           const localidades = await OrderService.getLocalidadesByDepartamentoId(value);
           setlocalidades(localidades);
+        } catch (error) {
+          
+        }
+      };
+
+      fetchDepartamento();
+    } else if (name === "localidad") {
+      const fetchLocalidad = async () => {
+        try {
+          const selectedLocalidad = localidades.find(
+            (localidad) => localidad.nombre == value
+          );
           setInfo((prevInfo) => ({
             ...prevInfo,
-            departamento: selectDepartamento,
+            localidad: selectedLocalidad,
           }));
         } catch (error) {
         }
       };
 
-      fetchDepartamento();
+      fetchLocalidad();
     } else if (name === "fechaAntecedente") {
       const fechaFormateada = new Date(value + "T00:00:00");
       setInfo((prevInfo) => ({

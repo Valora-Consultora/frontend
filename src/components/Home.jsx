@@ -30,26 +30,6 @@ const Home = () => {
     tasador: usuario,
   });
 
-  useEffect(() => {
-  }, [usuario]);
-
-
-  const handleClickInspeccion = async () => {
-    try {
-      const response = await InspeccionService.createInspeccion(inspeccion);
-
-      if (response && response.id) {
-        const provisionalId = response.id;
-        dispatch(setProvisionalInspectionId(provisionalId));
-        navigate('/Inspeccion', { state: { provisionalId: provisionalId } });
-      } else {
-        throw new Error('Respuesta de creación de inspección inválida');
-      }
-    } catch (error) {
-      console.error('Error al crear la inspección:', error);
-    }
-  };
-
   if (tipoUsuario === "TASADOR") {
     opciones.push(
       <div className="bg-white rounded-lg shadow-md flex flex-col items-center justify-between p-8 h-72">
@@ -58,11 +38,11 @@ const Home = () => {
         </div>
         <div className="text-center flex-1 flex flex-col justify-center">
           <h3 className="text-lg font-semibold">Inspección</h3>
-          <p className="text-gray-500">Crea una nueva Inspección en el sistema</p>
+          <p className="text-gray-500">Ver la lista de inspecciones del sistema</p>
         </div>
-        <button className="text-green-900 hover:underline" onClick={handleClickInspeccion}>
+        <a className="text-green-900 no-underline hover:underline" href="/Inspeccion">
           Ir a Inspección
-        </button>
+        </a>
       </div>
     );
     opciones.push(
@@ -117,11 +97,11 @@ const Home = () => {
         </div>
         <div className="text-center flex-1 flex flex-col justify-center">
           <h3 className="text-lg font-semibold">Inspección</h3>
-          <p className="text-gray-500">Crea una nueva Inspección en el sistema</p>
+          <p className="text-gray-500">Ver la lista de inspecciones del sistema</p>
         </div>
-        <button className="text-green-900 hover:underline" onClick={handleClickInspeccion}>
+        <a className="text-green-900 no-underline hover:underline" href="/Inspeccion">
           Ir a Inspección
-        </button>
+        </a>
       </div>
     );
     opciones.push(

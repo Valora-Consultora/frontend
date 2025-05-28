@@ -23,6 +23,16 @@ const OrderService = {
     }
   },
 
+  getLocalidadById: async (id) => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/localidad/${parseInt(id)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener localidad por ID:', error);
+      throw error;
+    }
+  },
+
   createOrden: async (ordenData) => {
     try {
       //console.log('llega al create orden ')
@@ -46,6 +56,16 @@ const OrderService = {
       return response.data;
     } catch (error) {
       console.error('Error al obtener ordenes por tasador ID:', error);
+      throw error;
+    }
+  },
+
+  getAllOrdenes: async () => {
+    try {
+      const response = await apiClient.get(`${API_URL}/api/orden`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener todas las ordenes', error);
       throw error;
     }
   },

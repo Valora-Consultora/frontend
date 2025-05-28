@@ -17,12 +17,13 @@ import {
 import { useSelector } from "react-redux";
 import orderService from "../../api/OrderService";
 import EmptyList from "../utils/EmptyList";
-import { ArrowForward, ArrowRight, Check, Delete } from "@mui/icons-material";
+import { ArrowForward, ArrowRight, Check, Delete, Person } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const OrdenesList = () => {
   const usuario = useSelector(state => state.user);
   const tasadorId = usuario.id;
+  const privileged = ["ADMINISTRADOR"].includes(usuario.tipoUsuario);
 
   const navigate = useNavigate();
 
@@ -31,7 +32,12 @@ const OrdenesList = () => {
   useEffect(() => {
     const fetchOrdenes = async () => {
       try {
-        var response = await orderService.getOrdenesByTasadorId(tasadorId);
+        var response
+        if (privileged) {
+          response = await orderService.getAllOrdenes();
+        } else {
+          response = await orderService.getOrdenesByTasadorId(tasadorId);
+        }
         setOrdenes(response);
       } catch (error) {
         console.error("Error al obtener las ordenes:", error);
@@ -45,26 +51,27 @@ const OrdenesList = () => {
     { accessorKey: 'fechaCreacion', header: 'Fecha Creación' },
     { accessorKey: 'nombreContacto', header: 'Nombre del Contacto' },
     { accessorKey: 'observacion', header: 'Observaciones' },
+    { accessorKey: 'tasador', header: 'Tasador', cell: ({ row }) => row.original.nombreTasadorInspeccion || 'No asignado' },
     {
       accessorKey: 'acciones',
       header: 'Inspeccion',
       cell: ({ row }) => (
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: 'black',
-            color: 'white',
-            minWidth: '32px',
-            padding: '5px',
-            justifyContent: 'center',
-            '&:hover': { backgroundColor: '#14532d' },
-          }}
-          onClick={() => {  }}
-        >
-          <a href={`/inspeccion/orden/${row.original.id}`} style={{ textDecoration: 'none', color: 'white' }}>
+        <a href={`/inspeccion/orden/${row.original.id}`} style={{ textDecoration: 'none', color: 'white' }}>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: 'black',
+              color: 'white',
+              minWidth: '32px',
+              padding: '5px',
+              justifyContent: 'center',
+              '&:hover': { backgroundColor: '#14532d' },
+            }}
+            onClick={() => {  }}
+          >
             <ArrowForward sx={{ fontSize: 18 }} />
-          </a>
-        </Button>
+          </Button>
+        </a>
       ),
     },
   ];
