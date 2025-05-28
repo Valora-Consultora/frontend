@@ -78,10 +78,8 @@ function Inspeccion() {
     }, [ordenId]);
 
     const [inspeccion, setInspeccion] = useState(() => initialInspeccionState(usuario));
-    const [locales, setLocales] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentLocal, setCurrentLocal] = useState(null);
-    const [localesLoaded, setLocalesLoaded] = useState(false);
     const fetchCalled = useRef(false);
     const [bancos, setBancos] = useState([]);
     const [departamentos, setDepartamentos] = useState([]);
@@ -93,7 +91,7 @@ function Inspeccion() {
     const location = useLocation();
     const state = useState();
     const navigate = useNavigate();
-    const provisionalInspectionId = useSelector(state => state.inspection.provisionalInspectionId);
+    // const provisionalInspectionId = useSelector(state => state.inspection.provisionalInspectionId);
     const { provisionalId } = location.state || {};
     const selectedBancoId = inspeccion.banco ? inspeccion.banco.id : "";
     const selectedDepartamentoId = inspeccion.departamento ? inspeccion.departamento.id : "";
@@ -153,60 +151,25 @@ function Inspeccion() {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        fetchLocalesByInspeccionId(provisionalInspectionId);
     };
 
 
     const handleDeleteClick = (idLote) => {
-        LocalService.deleteLocalById(idLote)
-            .then(() => {
-                setLocales(prevLocales => prevLocales.filter(local => local.id !== idLote));
-            })
-            .catch(error => {
-                console.error('Error al eliminar el local:', error);
-            });
-    };
-
-    useEffect(() => {
-        if (!provisionalInspectionId && provisionalId) {
-            dispatch(setProvisionalInspectionId(provisionalId));
-        }
-    }, [dispatch, provisionalId, provisionalInspectionId]);
-
-
-
-    useEffect(() => {
-        if (!provisionalInspectionId) {
-            createInspeccion();
-        }
-    }, [provisionalInspectionId]);
-
-
-    const createInspeccion = async () => {
-        try {
-            const response = await InspeccionService.createInspeccion(inspeccion);
-            if (response && response.id) {
-                dispatch(setProvisionalInspectionId(response.id));
-                navigate('/Inspeccion', { state: { provisionalId: response.id } });
-            } else {
-                throw new Error('Respuesta de creación de inspección inválida');
-            }
-        } catch (error) {
-            console.error('Error al crear la inspección:', error);
-        }
+        setInspeccion(prevState => ({
+            ...prevState,
+            locales: prevState.locales.filter(local => local.id !== idLote),
+        }));
     };
 
     const handleInputChange = (e, id) => {
         const { name, value, type, checked } = e.target;
-
         if (id) {
-            setLocales((prevLocales) =>
-                prevLocales.map((local) =>
-                    local.id === id
-                        ? { ...local, [name]: type === 'checkbox' ? checked : value }
-                        : local
-                )
-            );
+            setInspeccion(prevState => ({
+                ...prevState,
+                locales: prevState.locales.map(local =>
+                    local.id === id ? { ...local, [name]: type === 'checkbox' ? checked : value } : local
+                ),
+            }));
         } else {
             setInspeccion(prevState => ({
                 ...prevState,
@@ -266,35 +229,20 @@ function Inspeccion() {
         }
     };
 
-    const fetchLocalesByInspeccionId = async (provisionalInspectionId) => {
-        try {
-            const response = await LocalService.getLocalByIdInspeccion(provisionalInspectionId);
-            setLocales(response);
-            setLocalesLoaded(true);
-        } catch (error) {
-            console.error('Error al obtener los locales:', error);
-            alert('Error al obtener los locales');
-        }
-    };
-
-    useEffect(() => {
-        if (provisionalInspectionId && !localesLoaded && !fetchCalled.current) {
-            fetchCalled.current = true;
-            fetchLocalesByInspeccionId(provisionalInspectionId);
-        }
-    }, [provisionalInspectionId, localesLoaded]);
-
-
     const handleSaveLocal = async (local) => {
         if (local.id) {
-            const updatedLocales = locales.map(l => (l.id === local.id ? local : l));
-            setLocales(updatedLocales);
-            await LocalService.updateLocal(local.id, local);
+            const updatedLocales = inspeccion.locales.map(l => (l.id === local.id ? local : l));
+            setInspeccion(prevState => ({
+                ...prevState,
+                locales: updatedLocales,
+            }));
         } else {
-            // Crear nuevo local
-            local.inspeccion = { id: provisionalInspectionId };
-            const response = await LocalService.createLocal(local);
-            setLocales([...locales, response]);
+            local.id = Date.now(); // Generar un ID único temporalmente
+            setInspeccion(prevState => ({
+                ...prevState,
+                locales: [...prevState.locales, local],
+            }));
+            toast.success('Local agregado correctamente');
         }
         handleCloseModal();
     };
@@ -302,20 +250,29 @@ function Inspeccion() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-
-            for (const local of locales) {
-                await handleSaveLocal(local);
-            }
-
+            debugger
             let response;
 
-            if (provisionalInspectionId) {
-                response = await InspeccionService.updateInspeccion(provisionalInspectionId, inspeccion);
-                toast.success('Inspección creada correctamente');
-            } else {
-                response = await InspeccionService.createInspeccion(inspeccion);
-                toast.success('Inspección creada correctamente');
-            }
+            inspeccion.locales = inspeccion.locales.map(local => ({
+                ...local,
+                id: null, // Asegurarse de que el ID sea nulo para que se genere el local
+            }));
+            response = await InspeccionService.createInspeccion(inspeccion);
+            
+            // const inspeccionId = response.id;
+            // const locales = inspeccion.locales.map(local => ({
+            //     ...local,
+            //     inspeccion: { id: inspeccionId },
+            // }));
+            
+            // const createLocales = Promise.all(
+            //     locales.map(local => LocalService.createLocal(local))
+            // )
+
+            // await createLocales;
+
+            toast.success('Inspección creada correctamente');
+
             setTimeout(() => {
                 navigate('/home');
             }, 3000);
@@ -1233,7 +1190,7 @@ function Inspeccion() {
 
                         <div className="col-span-12 border p-3 rounded space-y-4">
                             <h4 className="text-xl text-green-900">Locales</h4>
-                            {locales.map((local) => (
+                            {inspeccion.locales.map((local) => (
                                 isVisible && (
                                     <div key={local.id} className="grid grid-cols-[auto,1fr,1fr,1fr,1fr,1fr,1fr] gap-4">
                                         <div className="pt-14 rounded-md">
@@ -2709,11 +2666,11 @@ function Inspeccion() {
                                             CantIdad Pisos:
                                         </label>
                                         <input
-                                            type="checkbox"
+                                            type="number"
                                             id="cantIdadPisosConsideraciones"
                                             name="cantIdadPisosConsideraciones"
                                             onChange={handleInputChange}
-                                            className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
                                     </div>
                                     <div className="flex flex-col md:flex-row md:items-center">
@@ -2724,11 +2681,11 @@ function Inspeccion() {
                                             Aptos/Piso:
                                         </label>
                                         <input
-                                            type="checkbox"
+                                            type="number"
                                             id="aptosPisoConsideraciones"
                                             name="aptosPisoConsideraciones"
                                             onChange={handleInputChange}
-                                            className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
                                     </div>
                                     <div className="flex flex-col md:flex-row md:items-center">
@@ -2739,11 +2696,11 @@ function Inspeccion() {
                                             Ascensores:
                                         </label>
                                         <input
-                                            type="checkbox"
+                                            type="number"
                                             id="ascensoresConsideraciones"
                                             name="ascensoresConsideraciones"
                                             onChange={handleInputChange}
-                                            className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
+                                            className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
                                     </div>
                                     <div className="flex flex-col md:flex-row md:items-center">
@@ -2885,10 +2842,8 @@ function Inspeccion() {
             <CustomModalAdd
                 isOpen={isModalOpen}
                 onRequestClose={handleCloseModal}
-                idInspeccion={provisionalInspectionId}
                 initialFormData={currentLocal || {}}
                 onSave={handleSaveLocal}
-
             />
 
         </div>
@@ -2909,11 +2864,12 @@ function initialInspeccionState(usuario) {
         avaluador: usuario,
         fechaAvalador: '',
         tasador: null,
-        banco: '',
+        banco: null,
         solicitante: '',
         departamento: '',
-        localidad: '',
+        localidad: null,
         secJudicial: '',
+        locales: [],
         padron: '',
         calle: '',
         nro: '',

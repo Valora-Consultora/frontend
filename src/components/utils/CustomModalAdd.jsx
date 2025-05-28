@@ -6,11 +6,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 Modal.setAppElement('#root');
 
-const CustomModal = ({ isOpen, onRequestClose, idInspeccion, initialFormData }) => {
+const CustomModal = ({ isOpen, onRequestClose, initialFormData, onSave }) => {
 
     //Prueba
     
     const [formData, setFormData] = useState({
+        nombre: '',
         estructuraHarmado: false,
         estructuraMuroPort: false,
         estructuraMixta: false,
@@ -57,6 +58,7 @@ const CustomModal = ({ isOpen, onRequestClose, idInspeccion, initialFormData }) 
     useEffect(() => {
         if (isOpen) {
             setFormData({
+                nombre: '',
                 estructuraHarmado: false,
                 estructuraMuroPort: false,
                 estructuraMixta: false,
@@ -109,34 +111,10 @@ const CustomModal = ({ isOpen, onRequestClose, idInspeccion, initialFormData }) 
         });
     };
 
-/*     const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const localData = {
-                ...formData,
-                inspeccion: { id: idInspeccion }
-            };
-            let response;
-            if (formData.id) {
-                response = await LocalService.updateLocal(formData.id, localData);
-            } else {
-                response = await LocalService.createLocal(localData);
-            }
-            onRequestClose(); // Cierra el modal y actualiza los locales
-        } catch (error) {
-            console.error('Error al enviar el formulario:', error);
-        }
-    }; */
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const localData = {
-                ...formData,
-                inspeccion: { id: idInspeccion }
-            };
-            const response = await LocalService.createLocal(localData);
-            onRequestClose(); // Cierra el modal y actualiza los locales
+            onSave(formData); // Llama a la función onSave con los datos del formulario
         } catch (error) {
             console.error('Error al enviar el formulario:', error);
         }
@@ -155,6 +133,22 @@ const CustomModal = ({ isOpen, onRequestClose, idInspeccion, initialFormData }) 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="col-span-12 border p-3 rounded space-y-4">
                         <h4 className="text-xl text-green-900">Local</h4>
+                        <div className="ml-1 flex flex-col md:flex-row md:items-center">
+                            <label
+                                htmlFor="nombre"
+                                className="text-lg text-green-900 mr-2 md:w-20"
+                            >
+                                Nombre
+                            </label>
+                            <input
+                                type="text"
+                                id="nombre"
+                                name="nombre"
+                                value={formData.nombre}
+                                onChange={handleInputChange}
+                                className="col-span-2 rounded text-sm h-8 text-start py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-full md:w-1/2"
+                            />
+                        </div>
                         <div className="columns-6 gap-4">
                             <div className="break-inside-avoid bg-white p-1 rounded-md">
                                 <h6 className="text-lg text-green-900">Estructura</h6>
