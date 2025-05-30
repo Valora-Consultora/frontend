@@ -104,6 +104,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/Orden/:ordenId"
+                  element={
+                    <WithHeader>
+                      <Order />
+                    </WithHeader>
+                  }
+                />
+                <Route
                   path="/Orden/Create"
                   element={
                     <WithHeader>
@@ -116,6 +124,14 @@ function App() {
                   element={
                     <WithHeader>
                       <InspeccionesList />
+                    </WithHeader>
+                  }
+                />
+                <Route
+                  path="/Inspeccion/:inspeccionId"
+                  element={
+                    <WithHeader>
+                      <Inspeccion />
                     </WithHeader>
                   }
                 />

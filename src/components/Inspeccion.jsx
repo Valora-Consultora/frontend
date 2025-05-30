@@ -14,7 +14,7 @@ import { setUser } from '../app/slices/userSlice';
 import { CircularProgress } from '@mui/material';
 
 function Inspeccion() {
-    const { ordenId } = useParams();
+    const { ordenId, inspeccionId } = useParams();
     const usuario = useSelector(state => state.user);
     const [loading, setLoading] = useState(true);
 
@@ -76,6 +76,37 @@ function Inspeccion() {
             })();
         }
     }, [ordenId]);
+
+    useEffect(() => {
+        debugger
+        if (inspeccionId) {
+            (async function fetchInspeccion() {
+                try {
+                    debugger
+                    const inspeccionData = await InspeccionService.getInspeccionById(inspeccionId);
+                    const banco = await OrderService.getBancoById(inspeccionData.bancoId);
+                    const localidad = await OrderService.getLocalidadById(inspeccionData.localidadId);
+                    const departamento = await OrderService.getDepartamentoById(localidad.departamentoId);
+                    const localidades = await OrderService.getLocalidadesByDepartamentoId(departamento.id);
+                    setlocalidades(localidades);
+                    const prefill = {
+                        ...inspeccionData,
+                        avaluador: usuario,
+                        banco,
+                        localidad,
+                        departamento,
+                    };
+                    setInspeccion(prefill);
+                    setLoading(false);
+                } catch (error) {
+                    console.error("Error al obtener la inspección:", error);
+                    setLoading(false);
+                }
+            })();
+        } else {
+            setLoading(false);
+        }
+    }, [inspeccionId, usuario]);
 
     const [inspeccion, setInspeccion] = useState(() => initialInspeccionState(usuario));
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -339,6 +370,7 @@ function Inspeccion() {
                                     type="date"
                                     id="fechaAvalador"
                                     name="fechaAvalador"
+                                    value={inspeccion.fechaAvalador}
                                     onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
                                 />
@@ -437,6 +469,7 @@ function Inspeccion() {
                                     type="text"
                                     id="secJudicial"
                                     name="secJudicial"
+                                    value={inspeccion.secJudicial}
                                     onChange={handleInputChange}
                                     className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -451,6 +484,7 @@ function Inspeccion() {
                                     type="number"
                                     id="padron"
                                     name="padron"
+                                    value={inspeccion.padron}
                                     onChange={handleInputChange}
                                     className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -464,6 +498,7 @@ function Inspeccion() {
                                     type="text"
                                     id="calle"
                                     name="calle"
+                                    value={inspeccion.calle}
                                     onChange={handleInputChange}
                                     className="col-span-2 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -507,6 +542,7 @@ function Inspeccion() {
                                     type="number"
                                     id="piso"
                                     name="piso"
+                                    value={inspeccion.piso}
                                     onChange={handleInputChange}
                                     className="col-span-1 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -521,6 +557,7 @@ function Inspeccion() {
                                     type="checkbox"
                                     id="garage"
                                     name="garage"
+                                    value={inspeccion.garage}
                                     onChange={handleInputChange}
                                     className="form-checkbox h-4 w-4 text-green-900 col-span-1 mt-1"
                                 />
@@ -535,6 +572,7 @@ function Inspeccion() {
                                     type="text"
                                     id="entreCalles"
                                     name="entreCalles"
+                                    value={inspeccion.entreCalles}
                                     onChange={handleInputChange}
                                     className="col-span-3 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-start"
                                 />
@@ -573,6 +611,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="urbanoZona"
                                             name="urbanoZona"
+                                            checked={inspeccion.urbanoZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -588,6 +627,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="suburbanoZona"
                                             name="suburbanoZona"
+                                            checked={inspeccion.suburbanoZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -603,6 +643,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="ruralZona"
                                             name="ruralZona"
+                                            checked={inspeccion.ruralZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -618,6 +659,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="balnearioZona"
                                             name="balnearioZona"
+                                            checked={inspeccion.balnearioZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -637,6 +679,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="residencialZona"
                                             name="residencialZona"
+                                            checked={inspeccion.residencialZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -652,6 +695,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="comercialZona"
                                             name="comercialZona"
+                                            checked={inspeccion.comercialZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -667,6 +711,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="industrialZona"
                                             name="industrialZona"
+                                            checked={inspeccion.industrialZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -682,6 +727,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="otrosZona"
                                             name="otrosZona"
+                                            checked={inspeccion.otrosZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -701,6 +747,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="suntuosaZona"
                                             name="suntuosaZona"
+                                            checked={inspeccion.suntuosaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -716,6 +763,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="muyBuenaZona"
                                             name="muyBuenaZona"
+                                            checked={inspeccion.muyBuenaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -731,6 +779,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="buenaZona"
                                             name="buenaZona"
+                                            checked={inspeccion.buenaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -746,6 +795,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="economicaZona"
                                             name="economicaZona"
+                                            checked={inspeccion.economicaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -761,6 +811,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="modestaZona"
                                             name="modestaZona"
+                                            checked={inspeccion.modestaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -780,6 +831,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="compactaZona"
                                             name="compactaZona"
+                                            checked={inspeccion.compactaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -795,6 +847,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="mediaZona"
                                             name="mediaZona"
+                                            checked={inspeccion.mediaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -810,6 +863,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="pocoDensaZona"
                                             name="pocoDensaZona"
+                                            checked={inspeccion.pocoDensaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -825,6 +879,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="ralaZona"
                                             name="ralaZona"
+                                            checked={inspeccion.ralaZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -846,6 +901,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="hormBituZona"
                                             name="hormBituZona"
+                                            checked={inspeccion.hormBituZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -861,6 +917,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="balastroZona"
                                             name="balastroZona"
+                                            checked={inspeccion.balastroZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -881,6 +938,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="oseZona"
                                             name="oseZona"
+                                            checked={inspeccion.oseZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -896,6 +954,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="pozoZona"
                                             name="pozoZona"
+                                            checked={inspeccion.pozoZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -911,6 +970,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="colectorZona"
                                             name="colectorZona"
+                                            checked={inspeccion.colectorZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -926,6 +986,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="uteZona"
                                             name="uteZona"
+                                            checked={inspeccion.uteZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -941,6 +1002,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="antelZona"
                                             name="antelZona"
+                                            checked={inspeccion.antelZona}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -965,6 +1027,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="altoPredio"
                                             name="altoPredio"
+                                            checked={inspeccion.altoPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -980,6 +1043,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="aNivelPredio"
                                             name="aNivelPredio"
+                                            checked={inspeccion.aNivelPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -995,6 +1059,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="bajoPredio"
                                             name="bajoPredio"
+                                            checked={inspeccion.bajoPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -1014,6 +1079,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="irregularPredio"
                                             name="irregularPredio"
+                                            checked={inspeccion.irregularPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -1029,6 +1095,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="regularPredio"
                                             name="regularPredio"
+                                            checked={inspeccion.regularPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -1048,6 +1115,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="siPredio"
                                             name="siPredio"
+                                            checked={inspeccion.siPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -1063,6 +1131,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="noPredio"
                                             name="noPredio"
+                                            checked={inspeccion.noPredio}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -1082,6 +1151,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="siPredioRetiro"
                                             name="siPredioRetiro"
+                                            checked={inspeccion.siPredioRetiro}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -1097,6 +1167,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="noPredioRetiro"
                                             name="noPredioRetiro"
+                                            checked={inspeccion.noPredioRetiro}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/8"
                                         />
@@ -1110,6 +1181,7 @@ function Inspeccion() {
                                             type="text"
                                             id="orientacionPredio"
                                             name="orientacionPredio"
+                                            value={inspeccion.orientacionPredio}
                                             onChange={handleInputChange}
                                             className="text-center rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-24"
                                         />
@@ -1129,6 +1201,7 @@ function Inspeccion() {
                                             type="number"
                                             id="frentePredio"
                                             name="frentePredio"
+                                            value={inspeccion.frentePredio}
                                             onChange={handleInputChange}
                                             className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                         />
@@ -1145,6 +1218,7 @@ function Inspeccion() {
                                             type="number"
                                             id="fondoPredio"
                                             name="fondoPredio"
+                                            value={inspeccion.fondoPredio}
                                             onChange={handleInputChange}
                                             className="text-center text-sm mt-2 rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                         />
@@ -1161,6 +1235,7 @@ function Inspeccion() {
                                             type="number"
                                             id="supTotalPredio"
                                             name="supTotalPredio"
+                                            value={inspeccion.supTotalPredio}
                                             onChange={handleInputChange}
                                             className="text-center text-sm mt-2 rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                         />
@@ -1945,6 +2020,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="comunCerramientos"
                                             name="comunCerramientos"
+                                            checked={inspeccion.comunCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -1960,6 +2036,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="aluminioCerramientos"
                                             name="aluminioCerramientos"
+                                            checked={inspeccion.aluminioCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -1975,6 +2052,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="pvcCerramientos"
                                             name="pvcCerramientos"
+                                            checked={inspeccion.pvcCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -1990,6 +2068,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="maderaCerramientos"
                                             name="maderaCerramientos"
+                                            checked={inspeccion.maderaCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2005,6 +2084,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="otrosCerramientos"
                                             name="otrosCerramientos"
+                                            checked={inspeccion.otrosCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2024,6 +2104,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="cortinasCerramientos"
                                             name="cortinasCerramientos"
+                                            checked={inspeccion.cortinasCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2039,6 +2120,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="postigosCerramientos"
                                             name="postigosCerramientos"
+                                            checked={inspeccion.postigosCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2054,6 +2136,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="celosiasCerramientos"
                                             name="celosiasCerramientos"
+                                            checked={inspeccion.celosiasCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2069,6 +2152,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="rejasCerramientos"
                                             name="rejasCerramientos"
+                                            checked={inspeccion.rejasCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2084,6 +2168,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="otrosCerramientos"
                                             name="otrosCerramientos"
+                                            checked={inspeccion.otrosCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2103,6 +2188,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="banoCalienteCerramientos"
                                             name="banoCalienteCerramientos"
+                                            checked={inspeccion.banoCalienteCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2118,6 +2204,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="banoFriaCerramientos"
                                             name="banoFriaCerramientos"
+                                            checked={inspeccion.banoFriaCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2133,6 +2220,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="cocinaCalienteCerramientos"
                                             name="cocinaCalienteCerramientos"
+                                            checked={inspeccion.cocinaCalienteCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2148,6 +2236,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="cocinaFriaCerramientos"
                                             name="cocinaFriaCerramientos"
+                                            checked={inspeccion.cocinaFriaCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2167,6 +2256,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="embutidaCerramientos"
                                             name="embutidaCerramientos"
+                                            checked={inspeccion.embutidaCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2182,6 +2272,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="exteriorCerramientos"
                                             name="exteriorCerramientos"
+                                            checked={inspeccion.exteriorCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2197,6 +2288,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="mixtaCerramientos"
                                             name="mixtaCerramientos"
+                                            checked={inspeccion.mixtaCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2212,6 +2304,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="instGasCerramientos"
                                             name="instGasCerramientos"
+                                            checked={inspeccion.instGasCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2231,6 +2324,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="colectorCerramientos"
                                             name="colectorCerramientos"
+                                            checked={inspeccion.colectorCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2246,6 +2340,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="camSepticaCerramientos"
                                             name="camSepticaCerramientos"
+                                            checked={inspeccion.camSepticaCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2261,6 +2356,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="pozoNegroCerramientos"
                                             name="pozoNegroCerramientos"
+                                            checked={inspeccion.pozoNegroCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2280,6 +2376,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="losaRadianteCerramientos"
                                             name="losaRadianteCerramientos"
+                                            checked={inspeccion.losaRadianteCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2295,6 +2392,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="radiadoresCerramientos"
                                             name="radiadoresCerramientos"
+                                            checked={inspeccion.radiadoresCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2310,6 +2408,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="panelElectCerramientos"
                                             name="panelElectCerramientos"
+                                            checked={inspeccion.panelElectCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2325,6 +2424,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="aireAcondCerramientos"
                                             name="aireAcondCerramientos"
+                                            checked={inspeccion.aireAcondCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2340,6 +2440,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="otrosCerramientos"
                                             name="otrosCerramientos"
+                                            checked={inspeccion.otrosCerramientos}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2365,6 +2466,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="modestaConsideraciones"
                                             name="modestaConsideraciones"
+                                            checked={inspeccion.modestaConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2380,6 +2482,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="economicaConsideraciones"
                                             name="economicaConsideraciones"
+                                            checked={inspeccion.economicaConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2395,6 +2498,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="buenaConsideraciones"
                                             name="buenaConsideraciones"
+                                            checked={inspeccion.buenaConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2410,6 +2514,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="confortableConsideraciones"
                                             name="confortableConsideraciones"
+                                            checked={inspeccion.confortableConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2425,6 +2530,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="muyConfortableConsideraciones"
                                             name="muyConfortableConsideraciones"
+                                            checked={inspeccion.muyConfortableConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2444,6 +2550,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="maloConsideraciones"
                                             name="maloConsideraciones"
+                                            checked={inspeccion.maloConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2459,6 +2566,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="regularConsideraciones"
                                             name="regularConsideraciones"
+                                            checked={inspeccion.regularConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2474,6 +2582,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="buenoConsideraciones"
                                             name="buenoConsideraciones"
+                                            checked={inspeccion.buenoConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2489,6 +2598,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="muybuenoConsideraciones"
                                             name="muybuenoConsideraciones"
+                                            checked={inspeccion.muybuenoConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2504,6 +2614,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="nuevoConsideraciones"
                                             name="nuevoConsideraciones"
+                                            checked={inspeccion.nuevoConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2523,6 +2634,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="propietarioConsideraciones"
                                             name="propietarioConsideraciones"
+                                            checked={inspeccion.propietarioConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2538,6 +2650,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="alquiladaConsideraciones"
                                             name="alquiladaConsideraciones"
+                                            checked={inspeccion.alquiladaConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2553,6 +2666,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="desocupadaConsideraciones"
                                             name="desocupadaConsideraciones"
+                                            checked={inspeccion.desocupadaConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2568,6 +2682,7 @@ function Inspeccion() {
                                             type="number"
                                             id="edadConsideraciones"
                                             name="edadConsideraciones"
+                                            value={inspeccion.edadConsideraciones}
                                             onChange={handleInputChange}
                                             className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
@@ -2589,6 +2704,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="casaConsideraciones"
                                             name="casaConsideraciones"
+                                            checked={inspeccion.casaConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2604,6 +2720,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="casaPhConsideraciones"
                                             name="casaPhConsideraciones"
+                                            checked={inspeccion.casaPhConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2619,6 +2736,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="apartamentoConsideraciones"
                                             name="apartamentoConsideraciones"
+                                            checked={inspeccion.apartamentoConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2634,6 +2752,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="localComercialConsideraciones"
                                             name="localComercialConsideraciones"
+                                            checked={inspeccion.localComercialConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2649,6 +2768,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="otrosConsideraciones"
                                             name="otrosConsideraciones"
+                                            checked={inspeccion.otrosConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2669,6 +2789,7 @@ function Inspeccion() {
                                             type="number"
                                             id="cantIdadPisosConsideraciones"
                                             name="cantIdadPisosConsideraciones"
+                                            value={inspeccion.cantIdadPisosConsideraciones}
                                             onChange={handleInputChange}
                                             className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
@@ -2684,6 +2805,7 @@ function Inspeccion() {
                                             type="number"
                                             id="aptosPisoConsideraciones"
                                             name="aptosPisoConsideraciones"
+                                            value={inspeccion.aptosPisoConsideraciones}
                                             onChange={handleInputChange}
                                             className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
@@ -2699,6 +2821,7 @@ function Inspeccion() {
                                             type="number"
                                             id="ascensoresConsideraciones"
                                             name="ascensoresConsideraciones"
+                                            value={inspeccion.ascensoresConsideraciones}
                                             onChange={handleInputChange}
                                             className="text-center text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-12"
                                         />
@@ -2714,6 +2837,7 @@ function Inspeccion() {
                                             type="checkbox"
                                             id="portElectConsideraciones"
                                             name="portElectConsideraciones"
+                                            checked={inspeccion.portElectConsideraciones}
                                             onChange={handleInputChange}
                                             className="form-checkbox h-4 w-4 text-green-900 md:w-1/7"
                                         />
@@ -2741,6 +2865,7 @@ function Inspeccion() {
                                                 type="number"
                                                 id="superficieCubierta"
                                                 name="superficieCubierta"
+                                                value={inspeccion.superficieCubierta}
                                                 onChange={handleInputChange}
                                                 className="text-start text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
@@ -2759,6 +2884,7 @@ function Inspeccion() {
                                                 type="number"
                                                 id="superficieSemiCubierta"
                                                 name="superficieSemiCubierta"
+                                                value={inspeccion.superficieSemiCubierta}
                                                 onChange={handleInputChange}
                                                 className="text-start text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
@@ -2780,6 +2906,7 @@ function Inspeccion() {
                                                 type="number"
                                                 id="bienesPropios"
                                                 name="bienesPropios"
+                                                value={inspeccion.bienesPropios}
                                                 onChange={handleInputChange}
                                                 className="text-start text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
@@ -2798,6 +2925,7 @@ function Inspeccion() {
                                                 type="number"
                                                 id="bienesComunes"
                                                 name="bienesComunes"
+                                                value={inspeccion.bienesComunes}
                                                 onChange={handleInputChange}
                                                 className="text-start text-sm rounded py-1 px-2 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 w-20"
                                             />
@@ -2819,6 +2947,7 @@ function Inspeccion() {
                                                 placeholder="Escriba sus observaciones aquí..."
                                                 id="observaciones"
                                                 name="observaciones"
+                                                value={inspeccion.observaciones}
                                                 onChange={handleInputChange}
                                             ></textarea>
                                         </div>

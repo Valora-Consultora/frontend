@@ -300,7 +300,7 @@ const TaskDashboard = () => {
         </div>
         {taskList.ordenes.map((orden) => (
           <div key={orden.id} className="ml-4 mt-2 flex items-center space-x-2">
-            <span className="text-md font-semibold flex-grow">{orden.localidad}</span>
+            <span className="text-md font-semibold flex-grow">{orden.calle}</span>
             {/* <button
               className="text-blue-500 hover:underline"
               onClick={() => {}}
@@ -324,7 +324,7 @@ const TaskDashboard = () => {
         </div>
         {taskList.inspecciones.map((inspeccion) => (
           <div key={inspeccion.id} className="ml-4 mt-2 flex items-center space-x-2">
-            <span className="text-md font-semibold flex-grow">{inspeccion.localidad}</span>
+            <span className="text-md font-semibold flex-grow">{inspeccion.calle}</span>
             {/* <button
               className="text-blue-500 hover:underline"
               onClick={() => {}}

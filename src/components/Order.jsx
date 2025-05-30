@@ -3,9 +3,10 @@ import OrderService from "../api/OrderService";
 import { useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function Order() {
+  const { ordenId } = useParams();
 
   //const defaulttasadorInspeccion = "default value";
 
@@ -50,6 +51,22 @@ function Order() {
     : "";
   const selectedBancoId = info.banco ? info.banco.id : "";
   //const selectedDepartamentoId = info.departamento ? info.departamento.id : "";
+
+  useEffect(() => {
+    if (ordenId) {
+      const fetchOrden = async () => {
+        try {
+          debugger
+          const orden = await OrderService.getOrdenById(ordenId);
+          setInfo(orden);
+        } catch (error) {
+          console.error("Error al obtener la orden:", error);
+          toast.error('Error al obtener la orden');
+        }
+      };
+      fetchOrden();
+    }
+  }, [ordenId]);
 
   useEffect(() => {
     if (usuario && usuario.nombre) {
@@ -207,7 +224,7 @@ function Order() {
           pauseOnHover
         />
         <h2 className="text-center text-5xl text-green-900 font-light mx-auto my-10">
-          CREAR ORDEN
+          {ordenId ? 'EDITAR' : 'CREAR'} ORDEN
         </h2>
         <form onSubmit={submitHandler} className="space-y-6">
           <div className="bg-white shadow-lg w-4/5 mx-auto rounded-xl p-6 mb-16">
@@ -225,6 +242,7 @@ function Order() {
                     type="date"
                     id="fechaCreacion"
                     name="fechaCreacion"
+                    value={info.fechaCreacion}
                     onChange={handleInputChange}
                     className="col-span-4 rounded py-2 px-3 leading-tight border text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
                   />
@@ -260,6 +278,7 @@ function Order() {
                     type="text"
                     id="titular"
                     name="titular"
+                    value={info.titular}
                     onChange={handleInputChange}
                     className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
@@ -275,6 +294,7 @@ function Order() {
                     type="text"
                     id="nombreContacto"
                     name="nombreContacto"
+                    value={info.nombreContacto}
                     onChange={handleInputChange}
                     className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
@@ -288,6 +308,7 @@ function Order() {
                     type="number"
                     id="telefonoContacto"
                     name="telefonoContacto"
+                    value={info.telefonoContacto}
                     onChange={handleInputChange}
                     className="no-arrows col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
@@ -303,6 +324,7 @@ function Order() {
                     type="text"
                     id="nombreSolicitante"
                     name="nombreSolicitante"
+                    value={info.nombreSolicitante}
                     onChange={handleInputChange}
                     className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
@@ -316,6 +338,7 @@ function Order() {
                     type="number"
                     id="telefonoSolicitante"
                     name="telefonoSolicitante"
+                    value={info.telefonoSolicitante}
                     onChange={handleInputChange}
                     className="no-arrows col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
@@ -359,6 +382,7 @@ function Order() {
                       className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
                       id="fechaInspeccion"
                       name="fechaInspeccion"
+                      value={info.fechaInspeccion}
                       onChange={handleInputChange}
                     />
                   </div>
@@ -374,6 +398,7 @@ function Order() {
                       className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 text-center"
                       id="horaInspeccion"
                       name="horaInspeccion"
+                      value={info.horaInspeccion}
                       onChange={handleInputChange}
                     />
                   </div>
@@ -399,6 +424,7 @@ function Order() {
                     className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="calle"
                     name="calle"
+                    value={info.calle}
                     onChange={handleInputChange}
                   />
                   <label
@@ -412,6 +438,7 @@ function Order() {
                     className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="esquina"
                     name="esquina"
+                    value={info.esquina}
                     onChange={handleInputChange}
                   />
                   <label
@@ -425,6 +452,7 @@ function Order() {
                     className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="nroPuerta"
                     name="nroPuerta"
+                    value={info.nroPuerta}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -440,6 +468,7 @@ function Order() {
                     className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="unidad"
                     name="unidad"
+                    value={info.unidad}
                     onChange={handleInputChange}
                   />
                   <label
@@ -453,6 +482,7 @@ function Order() {
                     className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="padron"
                     name="padron"
+                    value={info.padron}
                     onChange={handleInputChange}
                   />
                   <label
@@ -466,6 +496,7 @@ function Order() {
                     className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="block"
                     name="block"
+                    value={info.block}
                     onChange={handleInputChange}
                   />
                   <label
@@ -479,6 +510,7 @@ function Order() {
                     className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="solar"
                     name="solar"
+                    value={info.solar}
                     onChange={handleInputChange}
                   />
                   <label
@@ -492,6 +524,7 @@ function Order() {
                     className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="manzana"
                     name="manzana"
+                    value={info.manzana}
                     onChange={handleInputChange}
                   />
                   <label
@@ -505,6 +538,7 @@ function Order() {
                     className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     id="esBis"
                     name="esBis"
+                    checked={info.esBis}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -569,6 +603,7 @@ function Order() {
                       placeholder="Escriba sus observaciones aquí..."
                       id="observacion"
                       name="observacion"
+                      value={info.observacion}
                       onChange={handleInputChange}
                     ></textarea>
                   </div>
@@ -587,6 +622,7 @@ function Order() {
                           className="form-checkbox h-4 w-4 text-green-900 col-span-1 mt-1"
                           id="tasacion"
                           name="tasacion"
+                          checked={info.tasacion}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -601,6 +637,7 @@ function Order() {
                           className="form-checkbox h-4 w-4 text-green-900 col-span-1 mt-1"
                           id="retasacion"
                           name="retasacion"
+                          checked={info.retasacion}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -624,6 +661,7 @@ function Order() {
                           className="form-checkbox h-4 w-4 mt-1"
                           id="enInspeccion"
                           name="enInspeccion"
+                          checked={info.enInspeccion}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -641,6 +679,7 @@ function Order() {
                           className="form-checkbox h-4 w-4 mt-1"
                           id="enEstudio"
                           name="enEstudio"
+                          checked={info.enEstudio}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -668,6 +707,7 @@ function Order() {
                         type="date"
                         id="fechaAntecedente"
                         name="fechaAntecedente"
+                        value={info.fechaAntecedente}
                         onChange={handleInputChange}
                         className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900  text-center"
                       />
@@ -682,6 +722,7 @@ function Order() {
                         className="form-checkbox h-4 w-4 mt-1"
                         id="antecedenteTasadoPorValora"
                         name="antecedenteTasadoPorValora"
+                        checked={info.antecedenteTasadoPorValora}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -701,6 +742,7 @@ function Order() {
                         className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                         id="oficialBanco"
                         name="oficialBanco"
+                        value={info.oficialBanco}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -715,6 +757,7 @@ function Order() {
                         type="text"
                         id="sucursal"
                         name="sucursal"
+                        value={info.sucursal}
                         onChange={handleInputChange}
                         className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                       />
@@ -730,6 +773,7 @@ function Order() {
                         type="email"
                         id="correoOficial"
                         name="correoOficial"
+                        value={info.correoOficial}
                         onChange={handleInputChange}
                         className="col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                       />
@@ -745,6 +789,7 @@ function Order() {
                         type="number"
                         id="telefonoOficial"
                         name="telefonoOficial"
+                        value={info.telefonoOficial}
                         onChange={handleInputChange}
                         className="no-arrows col-span-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                       />

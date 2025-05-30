@@ -18,7 +18,7 @@ import {
 import { useSelector } from "react-redux";
 import orderService from "../../api/OrderService";
 import EmptyList from "../utils/EmptyList";
-import { ArrowForward, ArrowRight, Check, Delete, Person } from "@mui/icons-material";
+import { ArrowForward, ArrowRight, Check, Delete, Edit, Person } from "@mui/icons-material";
 import InspeccionService from "../../api/InspeccionService";
 
 const InspeccionesList = () => {
@@ -69,6 +69,27 @@ const InspeccionesList = () => {
             }}
           >
             <ArrowForward sx={{ fontSize: 18 }} />
+          </Button>
+        </a>
+      ),
+    },
+    {
+      accessorKey: 'editar',
+      header: 'Editar',
+      cell: ({ row }) => (
+        <a href={`/inspeccion/${row.original.id}`} style={{ textDecoration: 'none', color: 'white' }}>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: 'black',
+              color: 'white',
+              minWidth: '32px',
+              padding: '5px',
+              justifyContent: 'center',
+              '&:hover': { backgroundColor: '#14532d' },
+            }}
+          >
+            <Edit sx={{ fontSize: 18 }} />
           </Button>
         </a>
       ),
