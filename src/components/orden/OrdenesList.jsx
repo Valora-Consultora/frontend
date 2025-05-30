@@ -28,6 +28,7 @@ const OrdenesList = () => {
   const navigate = useNavigate();
 
   const [ordenes, setOrdenes] = useState([]);
+  const [bancos, setBancos] = useState([]);
 
   useEffect(() => {
     const fetchOrdenes = async () => {
@@ -46,7 +47,23 @@ const OrdenesList = () => {
     fetchOrdenes();
   }, []);
 
+  useEffect(() => {
+    const fetchBancos = async () => {
+      try {
+        const response = await orderService.getBancos();
+        setBancos(response);
+      } catch (error) {
+        console.error("Error al obtener los bancos:", error);
+      }
+    };
+    fetchBancos();
+  }, []);
+
   const columns = [
+    { accessorKey: 'banco', header: 'Banco', cell: ({ row }) => {
+      const banco = bancos.find(b => b.id === row.original.bancoId);
+      return banco ? banco.nombre : 'No asignado';
+    }},
     { accessorKey: 'calle', header: 'Calle' },
     { accessorKey: 'fechaCreacion', header: 'Fecha Creación' },
     { accessorKey: 'nombreContacto', header: 'Nombre del Contacto' },
