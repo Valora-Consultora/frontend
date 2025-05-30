@@ -155,12 +155,12 @@ const InformeBbva = () => {
     mailTasadorInformacionTasador: "",
 
     // Informe Negativo
-    noSeEmitioInformacionTasadorInfNegativo: false,
+    noSeEmitioInformacionTasadorInfNegativo: [],
     emitioElInformacionTasadorInfNegativo: "",
     motivosInformacionTasadorInfNegativo: "",
 
     // Síntesis cambios
-    noSeEmitioInformacionTasadorSintesisInfDefinitivo: false,
+    noSeEmitioInformacionTasadorSintesisInfDefinitivo: [],
     emitioElInformacionTasadorSintesisInfDefinitivo: "",
     descripcionInformacionTasadorSintesisInfDefinitivo: "",
 
@@ -311,27 +311,27 @@ const InformeBbva = () => {
 
     // Agua caliente
     tipoAguaCalienteDescripcion: "",
-    enCocinaDescripcionDetallada: false,
-    enBaniosDescripcionDetallada: false,
+    enCocinaDescripcionDetallada: [],
+    enBaniosDescripcionDetallada: [],
 
     // Instalación eléctrica
-    embutidaDescripcionDetallada: false,
-    exteriorDescripcionDetallada: false,
+    embutidaDescripcionDetallada: [],
+    exteriorDescripcionDetallada: [],
 
     // Otros
-    alarmaDescripcionDetallada: false,
-    gElectrogDescripcionDetallada: false,
-    cctvDescripcionDetallada: false,
-    portElecDescripcionDetallada: false,
+    alarmaDescripcionDetallada: [],
+    gElectrogDescripcionDetallada: [],
+    cctvDescripcionDetallada: [],
+    portElecDescripcionDetallada: [],
 
     // Climatización
-    estufaDescripcionDetallada: false,
+    estufaDescripcionDetallada: [],
     estufaUbicacionDescripcionDetallada: "",
-    splitsDescripcionDetallada: false,
+    splitsDescripcionDetallada: [],
     splitsUbicacionDescripcionDetallada: "",
-    centralDescripcionDetallada: false,
+    centralDescripcionDetallada: [],
     centralUbicacionDescripcionDetallada: "",
-    otrosDescripcionDetallada: false,
+    otrosDescripcionDetallada: [],
     otrosUbicacionDescripcionDetallada: "",
     panelesSolaresDescripcionDetallada: "",
     otrasInstalacionesDescripcionDetallada: "",
@@ -344,9 +344,9 @@ const InformeBbva = () => {
     otrasObservacionesSeccionLegalesDescripcion: "",
 
     // Sección F - Planos
-    documentacionClientePlanos: false,
-    relevamientoTasadorPlanos: false,
-    otrosPlanos: false,
+    documentacionClientePlanos: [],
+    relevamientoTasadorPlanos: [],
+    otrosPlanos: [],
     planosImagenesUrl: "",
 
     // Sección G - Fotos
@@ -356,14 +356,14 @@ const InformeBbva = () => {
     descripcionGeneralEntorno: "",
 
     // Construcciones
-    veinticincoContruccionesEntorno: false,
-    setentacincoContruccionesEntorno: false,
-    cienContruccionesEntorno: false,
+    veinticincoContruccionesEntorno: [],
+    setentacincoContruccionesEntorno: [],
+    cienContruccionesEntorno: [],
 
     // Crecimiento
-    continuoCrecimientoEntorno: false,
-    estableContruccionesEntorno: false,
-    nuloContruccionesEntorno: false,
+    continuoCrecimientoEntorno: [],
+    estableContruccionesEntorno: [],
+    nuloContruccionesEntorno: [],
 
     // Usos (%)
     viviendaUsosEntorno: "",
@@ -374,28 +374,28 @@ const InformeBbva = () => {
     // Equipamiento
     centrosEnsenanzaEntorno: "",
     centrosSaludEntorno: "",
-    suficienteDeportivoEntorno: false,
-    escasoNuloDeportivoEntorno: false,
-    suficienteEsparcimientoEntorno: false,
-    escasoNuloEsparcimientoEntorno: false,
-    suficienteZonasVerdesEntorno: false,
-    escasoNuloZonasVerdesEntorno: false,
-    suficienteEstacionamientoEntorno: false,
-    insuficienteNuloEstacionamientoEntorno: false,
+    suficienteDeportivoEntorno: [],
+    escasoNuloDeportivoEntorno: [],
+    suficienteEsparcimientoEntorno: [],
+    escasoNuloEsparcimientoEntorno: [],
+    suficienteZonasVerdesEntorno: [],
+    escasoNuloZonasVerdesEntorno: [],
+    suficienteEstacionamientoEntorno: [],
+    insuficienteNuloEstacionamientoEntorno: [],
 
     // Proximidad transporte
-    excelenteProximidadTransportePublicoConectividadEntorno: false,
-    buenaProximidadTransportePublicoConectividadEntorno: false,
-    regularProximidadTransportePublicoConectividadEntorno: false,
-    malaProximidadTransportePublicoConectividadEntorno: false,
+    excelenteProximidadTransportePublicoConectividadEntorno: [],
+    buenaProximidadTransportePublicoConectividadEntorno: [],
+    regularProximidadTransportePublicoConectividadEntorno: [],
+    malaProximidadTransportePublicoConectividadEntorno: [],
 
     // Seguridad
-    existeSeguridadEntorno: false,
-    noExisteSeguridadEntorno: false,
+    existeSeguridadEntorno: [],
+    noExisteSeguridadEntorno: [],
 
     // Situación general
-    favorableSituacionGeneralEntorno: false,
-    desfavorableSituacionGeneralEntorno: false,
+    favorableSituacionGeneralEntorno: [],
+    desfavorableSituacionGeneralEntorno: [],
 
     // Mercado inmobiliario
     descripcionGeneralMercadoInmobiliario: "",
@@ -713,23 +713,34 @@ const InformeBbva = () => {
   // Mantén tu función handleInputChange original
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
+
     if (type === "checkbox") {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: checked
-          ? [...prevData[name], value]
-          : prevData[name].filter((item) => item !== value),
-      }));
-    } else if (type === "file") {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: [...prevData[name], ...files],
-      }));
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
+      setFormData((prevData) => {
+        // Asegurarnos de que prevData[name] es un array
+        const currentValues = Array.isArray(prevData[name]) ? prevData[name] : [];
+
+        return {
+          ...prevData,
+          [name]: checked
+            ? [...currentValues, value]
+            : currentValues.filter((item) => item !== value),
+        };
       });
+    } else if (type === "file") {
+      setFormData((prevData) => {
+        // Asegurarnos de que prevData[name] es un array
+        const currentFiles = Array.isArray(prevData[name]) ? prevData[name] : [];
+
+        return {
+          ...prevData,
+          [name]: [...currentFiles, ...files],
+        };
+      });
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
     }
   };
 
@@ -1547,8 +1558,8 @@ const InformeBbva = () => {
                           }
                         }
                       ]}
-                      name="tipo"
-                      selectedValue={formData.tipo}
+                      name="tipoResumen"
+                      selectedValue={formData.tipoResumen}
                       onChange={handleInputChange}
                       onOptionChange={(relatedFields) => {
                         setFormData(prev => ({
@@ -1556,7 +1567,7 @@ const InformeBbva = () => {
                           ...relatedFields
                         }));
                       }}
-                      idPrefix="tipo"
+                      idPrefix="tipoResumen"
                       labelClassName="text-gray-700 text-sm"
                       radioClassName="form-radio h-4 w-4"
                       horizontal={true}
@@ -1698,7 +1709,7 @@ const InformeBbva = () => {
                 </div>
 
 
-                <div className="grid grid-cols-12 gap-4 items-center">
+                <div className="grid grid-cols-12 gap-4 ">
 
                   <div className="col-span-4 space-y-4">
                     <label className="block text-sm text-gray-700 font-bold mb-2">Régimen futuro:</label>
@@ -1846,7 +1857,7 @@ const InformeBbva = () => {
 
                 </div>
 
-                <div className="grid grid-cols-12 gap-4 items-center">
+                <div className="grid grid-cols-12 gap-4">
 
                   <div className="col-span-6 space-y-4">
                     <label className="block text-sm text-gray-700 font-bold mb-2">Tipología</label>
@@ -1885,7 +1896,7 @@ const InformeBbva = () => {
                         }
                       ]}
                       name="tipologia"
-                      selectedValue={formData.terreno}
+                      selectedValue={formData.tipologia}
                       onChange={handleInputChange}
                       onOptionChange={(relatedFields) => {
                         setFormData(prev => ({
@@ -1925,7 +1936,7 @@ const InformeBbva = () => {
                         },
                       ]}
                       name="construcciones"
-                      selectedValue={formData.terreno}
+                      selectedValue={formData.construcciones}
                       onChange={handleInputChange}
                       onOptionChange={(relatedFields) => {
                         setFormData(prev => ({
@@ -1942,87 +1953,92 @@ const InformeBbva = () => {
                 </div>
 
 
-                <div className="border p-4">
-                  <h4 className="text-xl text-green-900 text-center">Tipo de construcción</h4>
-                  <div className="grid grid-cols-12 gap-2">
-                    <div className="col-span-2 flex items-center">
+                <div className="col-span-12 space-y-4">
+                  <h4 className="text-xl text-green-900 text-center mb-3">Tipo de construcción</h4>
+                  <div className="p-3 rounded">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Grupo de radio buttons */}
+                      <div className="flex-grow">
+                        <RadioGroup
+                          options={[
+                            {
+                              id: "tradicional",
+                              value: "tradicional",
+                              label: "Tradicional",
+                              relatedFields: {
+                                tipoConstruccionTradicionalResumen: true,
+                                tipoConstruccionMaderaResumen: false,
+                                tipoConstruccionSteelFramingResumen: false,
+                                tipoConstruccionContenedorResumen: false
+                              }
+                            },
+                            {
+                              id: "madera",
+                              value: "madera",
+                              label: "Madera",
+                              relatedFields: {
+                                tipoConstruccionTradicionalResumen: false,
+                                tipoConstruccionMaderaResumen: true,
+                                tipoConstruccionSteelFramingResumen: false,
+                                tipoConstruccionContenedorResumen: false
+                              }
+                            },
+                            {
+                              id: "steelFraming",
+                              value: "steelFraming",
+                              label: "Steel Framing",
+                              relatedFields: {
+                                tipoConstruccionTradicionalResumen: false,
+                                tipoConstruccionMaderaResumen: false,
+                                tipoConstruccionSteelFramingResumen: true,
+                                tipoConstruccionContenedorResumen: false
+                              }
+                            },
+                            {
+                              id: "contenedor",
+                              value: "contenedor",
+                              label: "Contenedor",
+                              relatedFields: {
+                                tipoConstruccionTradicionalResumen: false,
+                                tipoConstruccionMaderaResumen: false,
+                                tipoConstruccionSteelFramingResumen: false,
+                                tipoConstruccionContenedorResumen: true
+                              }
+                            }
+                          ]}
+                          name="tipoConstruccion"
+                          selectedValue={formData.tipoConstruccion}
+                          onChange={handleInputChange}
+                          onOptionChange={(relatedFields) => {
+                            setFormData(prev => ({
+                              ...prev,
+                              ...relatedFields
+                            }));
+                          }}
+                          idPrefix="tipoConstruccion"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          radioClassName="form-radio h-4 w-4"
+                          horizontal={true}
+                        />
+                      </div>
 
-
-
-                      <RadioGroup
-                        options={[
-                          {
-                            id: "tradicional",
-                            value: "tradicional",
-                            label: "Tradicional",
-                            relatedFields: {
-                              tipoConstruccionTradicionalResumen: true,
-                              tipoConstruccionMaderaResumen: false,
-                              tipoConstruccionSteelFramingResumen: false,
-                              tipoConstruccionContenedorResumen: false
-                            }
-                          },
-                          {
-                            id: "madera",
-                            value: "madera",
-                            label: "Madera",
-                            relatedFields: {
-                              tipoConstruccionTradicionalResumen: false,
-                              tipoConstruccionMaderaResumen: true,
-                              tipoConstruccionSteelFramingResumen: false,
-                              tipoConstruccionContenedorResumen: false
-                            }
-                          },
-                          {
-                            id: "steelFraming",
-                            value: "steelFraming",
-                            label: "Steel Framing",
-                            relatedFields: {
-                              tipoConstruccionTradicionalResumen: false,
-                              tipoConstruccionMaderaResumen: false,
-                              tipoConstruccionSteelFramingResumen: true,
-                              tipoConstruccionContenedorResumen: false
-                            }
-                          },
-                          {
-                            id: "contenedor",
-                            value: "contenedor",
-                            label: "Contenedor",
-                            relatedFields: {
-                              tipoConstruccionTradicionalResumen: false,
-                              tipoConstruccionMaderaResumen: false,
-                              tipoConstruccionSteelFramingResumen: false,
-                              tipoConstruccionContenedorResumen: true
-                            }
-                          }
-                        ]}
-                        name="tipoConstruccion"
-                        selectedValue={formData.terreno}
-                        onChange={handleInputChange}
-                        onOptionChange={(relatedFields) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            ...relatedFields
-                          }));
-                        }}
-                        idPrefix="tipoConstruccion"
-                        labelClassName="p-2 text-gray-700 font-bold text-sm"
-                        radioClassName="form-radio h-4 w-4"
-                      />
-                    </div>
-                    <div className="col-span-4 flex text-left items-center">
-                      <label
-                        htmlFor="tipoConstruccionCombinadaOtrosResumen"
-                        className="p-3 text-sm text-gray-700 font-bold"
-                      >
-                        Combinada/Otros:
-                      </label>
-                      <input
-                        type="text"
-                        id="tipoConstruccionCombinadaOtrosResumen"
-                        name="tipoConstruccionCombinadaOtrosResumen"
-                        className="p-1 w-60 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                      />
+                      {/* Campo de texto */}
+                      <div className="flex items-center">
+                        <label
+                          htmlFor="tipoConstruccionCombinadaOtrosResumen"
+                          className="text-sm text-gray-700 font-bold mr-3 whitespace-nowrap"
+                        >
+                          Combinada/Otros:
+                        </label>
+                        <input
+                          type="text"
+                          id="tipoConstruccionCombinadaOtrosResumen"
+                          name="tipoConstruccionCombinadaOtrosResumen"
+                          value={formData.tipoConstruccionCombinadaOtrosResumen}
+                          onChange={handleInputChange}
+                          className="px-2 py-1 w-60 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2374,83 +2390,103 @@ const InformeBbva = () => {
 
 
               <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">SECCIÓN B- Información general</h4>
-                <h6 className="text-xl p-2 text-green-900 text-center">Información del Cliente</h6>
-                <div className="grid grid-cols-12 items-center">
-                  <label
-                    htmlFor="nombresInformacionGeneral"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
-                  >
-                    Nombre/s:
-                  </label>
-                  <input
-                    type="text"
-                    id="nombresInformacionGeneral"
-                    name="nombresInformacionGeneral"
-                    className="col-span-6 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                  <label
-                    htmlFor="cedulaInformacionGeneral"
-                    className="col-span-2 p-2 text-sm text-gray-700 font-bold"
-                  >
-                    Cédula/s de Identidad:
-                  </label>
-                  <input
-                    type="text"
-                    id="cedulaInformacionGeneral"
-                    name="cedulaInformacionGeneral"
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-                </div>
+                <div className="col-span-12 space-y-4 ">
+                  <h4 className="text-xl text-green-900">SECCIÓN B- Información general</h4>
 
-                <div className="grid grid-cols-12 items-center">
-                  <label
-                    htmlFor="telefonoInformacionGeneral"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
-                  >
-                    Teléfono:
-                  </label>
-                  <input
-                    type="number"
-                    id="telefonoInformacionGeneral"
-                    name="telefonoInformacionGeneral"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                  {/* Título de subsección */}
+                  <h6 className="text-xl p-2 text-green-900 text-center">Información del Cliente</h6>
 
-                  <label
-                    htmlFor="celularInformacionGeneral"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
-                  >
-                    Celular:
-                  </label>
-                  <input
-                    type="number"
-                    id="celularInformacionGeneral"
-                    name="celularInformacionGeneral"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                  {/* Primera fila */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <label
+                      htmlFor="nombresInformacionGeneral"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
+                    >
+                      Nombre/s:
+                    </label>
+                    <input
+                      type="text"
+                      id="nombresInformacionGeneral"
+                      name="nombresInformacionGeneral"
+                      value={formData.nombresInformacionGeneral || ""}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
 
-                  <label
-                    htmlFor="mailInformacionGeneral"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
-                  >
-                    Mail/s:
-                  </label>
-                  <input
-                    type="email"
-                    id="mailInformacionGeneral"
-                    name="mailInformacionGeneral"
-                    className="col-span-5 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                    <label
+                      htmlFor="cedulaInformacionGeneral"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
+                    >
+                      Cédula/s de Identidad:
+                    </label>
+                    <input
+                      type="text"
+                      id="cedulaInformacionGeneral"
+                      name="cedulaInformacionGeneral"
+                      value={formData.cedulaInformacionGeneral || ""}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+
+                  {/* Segunda fila - teléfono, celular y email */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <label
+                      htmlFor="telefonoInformacionGeneral"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
+                    >
+                      Teléfono:
+                    </label>
+                    <input
+                      type="tel"
+                      id="telefonoInformacionGeneral"
+                      name="telefonoInformacionGeneral"
+                      value={formData.telefonoInformacionGeneral || ""}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+
+                    <label
+                      htmlFor="celularInformacionGeneral"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
+                    >
+                      Celular:
+                    </label>
+                    <input
+                      type="tel"
+                      id="celularInformacionGeneral"
+                      name="celularInformacionGeneral"
+                      value={formData.celularInformacionGeneral || ""}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <label
+                      htmlFor="mailInformacionGeneral"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
+                    >
+                      Mail/s:
+                    </label>
+                    <input
+                      type="email"
+                      id="mailInformacionGeneral"
+                      name="mailInformacionGeneral"
+                      value={formData.mailInformacionGeneral || ""}
+                      onChange={handleInputChange}
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
 
                 </div>
 
                 <h6 className="text-xl p-2 text-green-900 text-center">Información Oficial de Cuentas</h6>
 
-                <div className="grid grid-cols-12 items-center">
+                <div className="grid grid-cols-12 gap-4 items-center">
                   <label
                     htmlFor="nombreInformacionOficialCuentas"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Nombre:
                   </label>
@@ -2458,11 +2494,11 @@ const InformeBbva = () => {
                     type="text"
                     id="nombreInformacionOficialCuentas"
                     name="nombreInformacionOficialCuentas"
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                   <label
                     htmlFor="sucursalInformacionOficialCuentas"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Sucursal:
                   </label>
@@ -2470,11 +2506,13 @@ const InformeBbva = () => {
                     type="text"
                     id="sucursalInformacionOficialCuentas"
                     name="sucursalInformacionOficialCuentas"
-                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
                   <label
                     htmlFor="telefonoInformacionOficialCuentas"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Teléfono:
                   </label>
@@ -2482,11 +2520,11 @@ const InformeBbva = () => {
                     type="text"
                     id="telefonoInformacionOficialCuentas"
                     name="telefonoInformacionOficialCuentas"
-                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                   <label
                     htmlFor="mailInformacionOficialCuentas"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Mail:
                   </label>
@@ -2494,16 +2532,16 @@ const InformeBbva = () => {
                     type="text"
                     id="mailInformacionOficialCuentas"
                     name="mailInformacionOficialCuentas"
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
 
                 <h6 className="text-xl p-2 text-green-900 text-center">Información del Tasador</h6>
 
-                <div className="grid grid-cols-12 items-center">
+                <div className="grid grid-cols-12 gap-4 items-center">
                   <label
                     htmlFor="nombreInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Nom. Firma:
                   </label>
@@ -2511,11 +2549,11 @@ const InformeBbva = () => {
                     type="text"
                     id="nombreInformacionTasador"
                     name="nombreInformacionTasador"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                   <label
                     htmlFor="direccionInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Dirección:
                   </label>
@@ -2523,11 +2561,15 @@ const InformeBbva = () => {
                     type="text"
                     id="direccionInformacionTasador"
                     name="direccionInformacionTasador"
-                    className="col-span-3 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+
                   <label
                     htmlFor="telefonoInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Teléfono:
                   </label>
@@ -2535,11 +2577,11 @@ const InformeBbva = () => {
                     type="number"
                     id="telefonoInformacionTasador"
                     name="telefonoInformacionTasador"
-                    className="col-span-1 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                   <label
                     htmlFor="representanteInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Representante:
                   </label>
@@ -2547,26 +2589,26 @@ const InformeBbva = () => {
                     type="text"
                     id="representanteInformacionTasador"
                     name="representanteInformacionTasador"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
 
-                <div className="grid grid-cols-12 items-center">
+                <div className="grid grid-cols-12 gap-4 items-center">
                   <label
                     htmlFor="nombreTasadorInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
-                    Nom. Tasa.:
+                    Nombre Tasador:
                   </label>
                   <input
                     type="text"
                     id="nombreTasadorInformacionTasador"
                     name="nombreTasadorInformacionTasador"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                   <label
                     htmlFor="profesionTasadorInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Profesión:
                   </label>
@@ -2574,23 +2616,27 @@ const InformeBbva = () => {
                     type="text"
                     id="profesionTasadorInformacionTasador"
                     name="profesionTasadorInformacionTasador"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+
                   <label
                     htmlFor="telefonoCelularTasadorInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
-                    Tel. y Cel.:
+                    Teléfono y Celular:
                   </label>
                   <input
                     type="text"
                     id="telefonoCelularTasadorInformacionTasador"
                     name="telefonoCelularTasadorInformacionTasador"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                   <label
                     htmlFor="mailTasadorInformacionTasador"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
                   >
                     Mail:
                   </label>
@@ -2598,123 +2644,116 @@ const InformeBbva = () => {
                     type="text"
                     id="mailTasadorInformacionTasador"
                     name="mailTasadorInformacionTasador"
-                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
 
                 <h6 className="text-lg p-2 text-green-900 text-center">Informe Negativo precedente</h6>
 
-                <div className="grid grid-cols-12 items-center ">
-
-                  <div className="col-span-2 flex items-center ">
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-2 flex items-center justify-start h-full">
                     <CheckboxGroup
                       options={[
                         {
-                          id: "noSeEmitioInformacionTasadorInfNegativo",
-                          desc: ""
+                          id: "noSeEmitio", // ID simple
+                          desc: "No se emitió" // Texto a mostrar
                         }
                       ]}
                       name="noSeEmitioInformacionTasadorInfNegativo"
-                      selectedValues={
-                        formData.noSeEmitioInformacionTasadorInfNegativo ?
-                          ["noSeEmitioInformacionTasadorInfNegativo"] : []
-                      }
-                      onChange={(e) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          noSeEmitioInformacionTasadorInfNegativo: e.target.checked
-                        }));
-                      }}
-                      idPrefix=""
-                      labelClassName="ml-2 text-gray-700 font-bold"
-                      checkboxClassName="appearance-none rounded-full border-2 border-gray-500 checked:bg-blue-500 ml-2 h-4 w-4"
+                      selectedValues={formData.noSeEmitioInformacionTasadorInfNegativo}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 font-bold"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
                     />
-                    <label className="ml-2 text-gray-700 font-bold text-sm">No se emitió</label>
                   </div>
-
 
                   <label
                     htmlFor="emitioElInformacionTasadorInfNegativo"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold "
+                    className="col-span-1 text-sm text-gray-700 font-bold text-right"
                   >
                     Emitido el:
                   </label>
-                  <input
-                    type="date"
-                    id="emitioElInformacionTasadorInfNegativo"
-                    name="emitioElInformacionTasadorInfNegativo"
-                    className="col-span-2 mr-2  px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
-
-                  <div className="col-span-7  ">
-                    <label
-                      htmlFor="descripcionInformacionTasadorSintesisInfDefinitivo"
-                      className="text-center w-full text-sm text-gray-700 font-bold "
-                    >
-                      Motivos
-                    </label>
+                  <div className="col-span-2">
                     <input
-                      component="textarea"
+                      type="date"
+                      id="emitioElInformacionTasadorInfNegativo"
+                      name="emitioElInformacionTasadorInfNegativo"
+                      value={formData.emitioElInformacionTasadorInfNegativo || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+                  <label
+                    htmlFor="motivosInformacionTasadorInfNegativo"
+                    className="col-span-1 text-sm text-gray-700 font-bold text-right"
+                  >
+                    Motivos:
+                  </label>
+                  <div className="col-span-6">
+                    <textarea
                       id="motivosInformacionTasadorInfNegativo"
                       name="motivosInformacionTasadorInfNegativo"
-                      className=" w-full h-12 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      value={formData.motivosInformacionTasadorInfNegativo || ""}
+                      onChange={handleInputChange}
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
                   </div>
                 </div>
 
 
                 <h6 className="text-lg p-2 text-green-900 text-center">Síntesis de cambios respecto a Informe Definitivo precedente</h6>
-                <div className="grid grid-cols-12 items-center ">
-                  <div className="col-span-2 flex items-center ">
-                    <label className="ml-2 text-gray-700 font-bold text-sm">No se emitió</label>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-2 flex items-center justify-start h-full">
                     <CheckboxGroup
                       options={[
                         {
-                          id: "noSeEmitioInformacionTasadorSintesisInfDefinitivo",
+                          id: "No se emitió",
                           desc: ""
                         }
                       ]}
                       name="noSeEmitioInformacionTasadorSintesisInfDefinitivo"
-                      selectedValues={
-                        formData.noSeEmitioInformacionTasadorSintesisInfDefinitivo ?
-                          ["noSeEmitioInformacionTasadorSintesisInfDefinitivo"] : []
-                      }
-                      onChange={(e) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          noSeEmitioInformacionTasadorSintesisInfDefinitivo: e.target.checked
-                        }));
-                      }}
-                      idPrefix=""
-                      labelClassName="ml-2 text-gray-700 font-bold"
-                      checkboxClassName="appearance-none rounded-full border-2 border-gray-500 checked:bg-blue-500 ml-2 h-4 w-4"
+                      selectedValues={formData.noSeEmitioInformacionTasadorSintesisInfDefinitivo}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 font-bold"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
                     />
                   </div>
+
+
                   <label
                     htmlFor="emitioElInformacionTasadorSintesisInfDefinitivo"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold "
+                    className="col-span-1 text-sm text-gray-700 font-bold text-right"
                   >
                     Emitido el:
                   </label>
-                  <input
-                    type="date"
-                    id="emitioElInformacionTasadorSintesisInfDefinitivo"
-                    name="emitioElInformacionTasadorSintesisInfDefinitivo"
-                    className="col-span-2 mr-2  px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                  <div className="col-span-2">
 
-                  <div className="col-span-7  ">
-                    <label
-                      htmlFor="descripcionInformacionTasadorSintesisInfDefinitivo"
-                      className="text-center w-full text-sm text-gray-700 font-bold "
-                    >
-                      Descripción
-                    </label>
                     <input
-                      component="textarea"
+                      type="date"
+                      id="emitioElInformacionTasadorSintesisInfDefinitivo"
+                      name="emitioElInformacionTasadorSintesisInfDefinitivo"
+                      className="w-full px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+
+                  <label
+                    htmlFor="descripcionInformacionTasadorSintesisInfDefinitivo"
+                    className="col-span-1 text-sm text-gray-700 font-bold text-right"
+                  >
+                    Descripción
+                  </label>
+                  <div className="col-span-6">
+
+                    <textarea
                       id="descripcionInformacionTasadorSintesisInfDefinitivo"
                       name="descripcionInformacionTasadorSintesisInfDefinitivo"
-                      className=" w-full h-12 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
                   </div>
                 </div>
@@ -2722,9 +2761,9 @@ const InformeBbva = () => {
               </div>
 
               <div className="col-span-12 space-y-4 border p-3 rounded">
-                <h4 className="text-xl text-green-900">SECCIÓN C-  Identificación y Ubicación </h4>
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-2 border text-center">
+                <h4 className="text-xl text-green-900">SECCIÓN C-  Identificación y Ubicación</h4>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-2 space-y-4">
                     <RadioGroup
                       options={[
                         {
@@ -2747,7 +2786,7 @@ const InformeBbva = () => {
                         }
                       ]}
                       name="ubicacionIdentificacion"
-                      selectedValue={formData.terreno}
+                      selectedValue={formData.ubicacionIdentificacion}
                       onChange={handleInputChange}
                       onOptionChange={(relatedFields) => {
                         setFormData(prev => ({
@@ -2756,12 +2795,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="ubicacionIdentificacion"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="text-gray-700 text-sm"
                       radioClassName="form-radio h-4 w-4"
+                      horizontal={true}
                     />
                   </div>
-                  <div className="col-span-2 border text-center">
-
+                  <div className="col-span-2 space-y-4">
                     <RadioGroup
                       options={[
                         {
@@ -2783,8 +2822,8 @@ const InformeBbva = () => {
                           }
                         }
                       ]}
-                      name="tipo"
-                      selectedValue={formData.terreno}
+                      name="tipoIdentificacionUbicacion"
+                      selectedValue={formData.tipoIdentificacionUbicacion}
                       onChange={handleInputChange}
                       onOptionChange={(relatedFields) => {
                         setFormData(prev => ({
@@ -2792,73 +2831,79 @@ const InformeBbva = () => {
                           ...relatedFields
                         }));
                       }}
-                      idPrefix="tipo"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      idPrefix="tipoIdentificacionUbicacion"
+                      labelClassName="text-gray-700 text-sm"
                       radioClassName="form-radio h-4 w-4"
+                      horizontal={true}
                     />
                   </div>
+
+
                   <div className="col-span-5">
-                    <div className='text-center'>
-                      <label
-                        htmlFor="ruralIdentificacionUbicacion"
-                        className=" text-sm p-2 text-gray-700 font-bold"
-                      >
-                        Rural:
-                      </label>
-                      <input
-                        type="number"
-                        id="ruralIdentificacionUbicacion"
-                        name="ruralIdentificacionUbicacion"
-                        className="p-1 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                      />
-                      <label
-                        htmlFor="padronIdentificacionUbicacion"
-                        className="text-sm p-2 text-gray-700 font-bold"
-                      >
-                        Padrón:
-                      </label>
-                      <input
-                        type="number"
-                        id="padronIdentificacionUbicacion"
-                        name="padronIdentificacionUbicacion"
-                        className="p-1 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                      />
-                      <label
-                        htmlFor="manzanaIdentificacionUbicacion"
-                        className=" text-sm p-2 text-gray-700 font-bold"
-                      >
-                        Manzana:
-                      </label>
-                      <input
-                        type="number"
-                        id="manzanaIdentificacionUbicacion"
-                        name="manzanaIdentificacionUbicacion"
-                        className="p-1 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                      />
-                    </div>
+                    <label
+                      htmlFor="ruralIdentificacionUbicacion"
+                      className=" text-sm text-gray-700 font-bold"
+                    >
+                      Rural:
+                    </label>
+                    <input
+                      type="number"
+                      id="ruralIdentificacionUbicacion"
+                      name="ruralIdentificacionUbicacion"
+                      className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+
+                    <label
+                      htmlFor="padronIdentificacionUbicacion"
+                      className=" text-sm text-gray-700 font-bold"
+                    >
+                      Padrón:
+                    </label>
+                    <input
+                      type="number"
+                      id="padronIdentificacionUbicacion"
+                      name="padronIdentificacionUbicacion"
+                      className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+
+                    <label
+                      htmlFor="manzanaIdentificacionUbicacion"
+                      className=" text-sm text-gray-700 font-bold"
+                    >
+                      Manzana:
+                    </label>
+                    <input
+                      type="number"
+                      id="manzanaIdentificacionUbicacion"
+                      name="manzanaIdentificacionUbicacion"
+                      className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+
                   </div>
-                  <div className="col-span-3">
-                    <div className=' text-center'>
-                      <label
-                        htmlFor="seccionJudicialCatastralIdentificacionUbicacion"
-                        className=" text-sm p-2 text-gray-700 font-bold"
-                      >
-                        Sección Judicial/Catastral:
-                      </label>
-                      <input
-                        type="text"
-                        id="seccionJudicialCatastralIdentificacionUbicacion"
-                        name="seccionJudicialCatastralIdentificacionUbicacion"
-                        className="p-1 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 gap-2 ">
+
                   <div className="col-span-3">
                     <label
+                      htmlFor="seccionJudicialCatastralIdentificacionUbicacion"
+                      className=" text-sm text-gray-700 font-bold"
+                    >
+                      Sec. Jud./Catast.:
+                    </label>
+                    <input
+                      type="text"
+                      id="seccionJudicialCatastralIdentificacionUbicacion"
+                      name="seccionJudicialCatastralIdentificacionUbicacion"
+                      className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-12 space-y-4 p-3">
+                  <div className="grid grid-cols-12 gap-4 items-center">
+
+
+                    <label
                       htmlFor="localidadParajeIdentificacionUbicacion"
-                      className="p-3 text-sm text-gray-700 font-bold"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
                     >
                       Localidad/Paraje:
                     </label>
@@ -2866,11 +2911,11 @@ const InformeBbva = () => {
                       type="text"
                       id="localidadParajeIdentificacionUbicacion"
                       name="localidadParajeIdentificacionUbicacion"
-                      className="p-1 w-40 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                     <label
                       htmlFor="departamentoIdentificacionUbicacion"
-                      className="p-3 text-sm text-gray-700 font-bold"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
                     >
                       Departamento:
                     </label>
@@ -2878,11 +2923,11 @@ const InformeBbva = () => {
                       type="text"
                       id="departamentoIdentificacionUbicacion"
                       name="departamentoIdentificacionUbicacion"
-                      className="p-1 w-40 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                     <label
                       htmlFor="calleModoAccesoIdentificacionUbicacion"
-                      className="p-3 text-sm text-gray-700 font-bold"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
                     >
                       Calle/Modo acceso:
                     </label>
@@ -2890,11 +2935,11 @@ const InformeBbva = () => {
                       type="text"
                       id="calleModoAccesoIdentificacionUbicacion"
                       name="calleModoAccesoIdentificacionUbicacion"
-                      className="p-1 w-40 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                     <label
                       htmlFor="nombreNroPuertaIdentificacionUbicacion"
-                      className="p-3 text-sm text-gray-700 font-bold"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
                     >
                       Nombre/Nro Puerta:
                     </label>
@@ -2902,11 +2947,11 @@ const InformeBbva = () => {
                       type="text"
                       id="nombreNroPuertaIdentificacionUbicacion"
                       name="nombreNroPuertaIdentificacionUbicacion"
-                      className="p-1 w-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                     <label
                       htmlFor="otrasReferenciasUbicacionIdentificacionUbicacion"
-                      className="p-3 text-sm text-gray-700 font-bold"
+                      className="col-span-2 text-sm text-gray-700 font-bold"
                     >
                       Otras referencias de ubicación:
                     </label>
@@ -2914,82 +2959,134 @@ const InformeBbva = () => {
                       type="text"
                       id="otrasReferenciasUbicacionIdentificacionUbicacion"
                       name="otrasReferenciasUbicacionIdentificacionUbicacion"
-                      className="p-1 w-96 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                   </div>
-                  <div className="col-span-1 text-center border rounded-md">
-                    <p className="text-base text-center font-bold text-green-900">Régimen futuro</p>
-                    <RadioGroup
-                      options={[
-                        {
-                          id: "comun",
-                          value: "comun",
-                          label: "Comun",
-                          relatedFields: {
-                            regimenFuturoComunIdentificacionUbicacion: true,
-                            regimenFuturoPropiedadHorizontalIdentificacionUbicacion: false,
-                            regimenFuturoUrbanizacionPHorizontalIdentificacionUbicacion: false
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-4 space-y-4">
+
+                      <label className="block text-sm text-gray-700 font-bold mb-2">Régimen futuro:</label>
+                      <RadioGroup
+                        options={[
+                          {
+                            id: "Comun",
+                            value: "comun",
+                            label: "Común",
+                            relatedFields: {
+                              regimenFuturoComunIdentificacionUbicacion: true,
+                              regimenFuturoPropiedadHorizontalIdentificacionUbicacion: false,
+                              regimenFuturoUrbanizacionPHorizontalIdentificacionUbicacion: false
+                            }
+                          },
+                          {
+                            id: "PropiedadHorizontal",
+                            value: "propiedadHorizontal",
+                            label: "P. Hor.",
+                            relatedFields: {
+                              regimenFuturoComunIdentificacionUbicacion: false,
+                              regimenFuturoPropiedadHorizontalIdentificacionUbicacion: true,
+                              regimenFuturoUrbanizacionPHorizontalIdentificacionUbicacion: false
+                            }
+                          },
+                          {
+                            id: "UrbanizacionPHorizontal",
+                            value: "UrbanizacionPHorizontal",
+                            label: "Urb. P.Hor.",
+                            relatedFields: {
+                              regimenFuturoComunIdentificacionUbicacion: false,
+                              regimenFuturoPropiedadHorizontalIdentificacionUbicacion: false,
+                              regimenFuturoUrbanizacionPHorizontalIdentificacionUbicacion: true
+                            }
                           }
-                        },
-                        {
-                          id: "propiedadHorizontal",
-                          value: "propiedadHorizontal",
-                          label: "Propiedad Horizontal",
-                          relatedFields: {
-                            regimenFuturoComunIdentificacionUbicacion: false,
-                            regimenFuturoPropiedadHorizontalIdentificacionUbicacion: true,
-                            regimenFuturoUrbanizacionPHorizontalIdentificacionUbicacion: false
-                          }
-                        },
-                        {
-                          id: "UrbanizacionPHorizontal",
-                          value: "UrbanizacionPHorizontal",
-                          label: "UrbanizacionPHorizontal",
-                          relatedFields: {
-                            regimenFuturoComunIdentificacionUbicacion: false,
-                            regimenFuturoPropiedadHorizontalIdentificacionUbicacion: false,
-                            regimenFuturoUrbanizacionPHorizontalIdentificacionUbicacion: true
-                          }
-                        }
-                      ]}
-                      name="regimen"
-                      selectedValue={formData.terreno}
-                      onChange={handleInputChange}
-                      onOptionChange={(relatedFields) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          ...relatedFields
-                        }));
-                      }}
-                      idPrefix="regimen"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
-                      radioClassName="form-radio h-4 w-4"
-                    />
+                        ]}
+                        name="regimenFuturo"
+                        selectedValue={formData.regimenFuturo}
+                        onChange={handleInputChange}
+                        onOptionChange={(relatedFields) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            ...relatedFields
+                          }));
+                        }}
+                        idPrefix="regimenFuturo"
+                        labelClassName="p-2 text-gray-700  text-sm"
+                        radioClassName="form-radio h-4 w-4"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">SECCIÓN D-Descripción del terreno</h4>
-                <h6 className="text-lg p-2 text-green-900 text-center">D.1-Características</h6>
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-2 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Superficie terreno (m²)</p>
-                    <input
-                      type="number"
-                      id="superficieTerrenoCaracteristicas"
-                      name="superficieTerrenoCaracteristicas"
-                      className="p-1 w-1/2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-2 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Estado</p>
+                <h6 className="text-lg text-green-900 text-center mb-4">D.1-Características</h6>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+
+                  <label
+                    htmlFor="superficieTerrenoCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Superficie terreno (m²):
+                  </label>
+
+                  <input
+                    type="number"
+                    id="superficieTerrenoCaracteristicas"
+                    name="superficieTerrenoCaracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="formaCaracteristicas"
+                    className="col-span-1 text-sm text-gray-700 font-bold"
+                  >
+                    Forma
+                  </label>
+                  <input
+                    type="text"
+                    id="formaCaracteristicas"
+                    name="formaCaracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="ubicacionManzanaCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Ubicación en la manzana
+                  </label>
+                  <input
+                    type="text"
+                    id="ubicacionManzanaCaracteristicas"
+                    name="ubicacionManzanaCaracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="orientacionCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Orientación
+                  </label>
+                  <input
+                    type="text"
+                    id="orientacionCaracteristicas"
+                    name="orientacionCaracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+
+                  <div className="col-span-2 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Estado:</label>
                     <RadioGroup
                       options={[
                         {
                           id: "baldioCaracteristicas",
                           value: "baldioCaracteristicas",
-                          label: "Baldio Caracteristicas",
+                          label: "Baldio",
                           relatedFields: {
                             baldioCaracteristicas: true,
                             edificadoCaracteristicas: false
@@ -2998,7 +3095,7 @@ const InformeBbva = () => {
                         {
                           id: "edificadoCaracteristicas",
                           value: "edificadoCaracteristicas",
-                          label: "Edificado Caracteristicas",
+                          label: "Edificado",
                           relatedFields: {
                             baldioCaracteristicas: false,
                             edificadoCaracteristicas: true
@@ -3006,7 +3103,7 @@ const InformeBbva = () => {
                         }
                       ]}
                       name="estado"
-                      selectedValue={formData.terreno}
+                      selectedValue={formData.estado || ""}
                       onChange={handleInputChange}
                       onOptionChange={(relatedFields) => {
                         setFormData(prev => ({
@@ -3015,121 +3112,121 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="estado"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
-                    />
-                  </div>
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Forma</p>
-                    <input
-                      type="text"
-                      id="formaCaracteristicas"
-                      name="formaCaracteristicas"
-                      className="p-1 w-1/2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Ubicación en la manzana</p>
-                    <input
-                      type="text"
-                      id="ubicacionManzanaCaracteristicas"
-                      name="ubicacionManzanaCaracteristicas"
-                      className="p-1 w-1/2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-2 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Orientación</p>
-                    <input
-                      type="text"
-                      id="orientacionCaracteristicas"
-                      name="orientacionCaracteristicas"
-                      className="p-1 w-1/2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                     />
                   </div>
                 </div>
 
                 <p className="text-lg p-2 text-green-900 text-center">Deslindes según plano de Mensura inscripto en DNC</p>
 
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-1 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Frente 1 (m)</p>
-                    <input
-                      type="number"
-                      id="frente1Caracteristicas"
-                      name="frente1Caracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-1 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Frente 2 (m)</p>
-                    <input
-                      type="number"
-                      id="frente2Caracteristicas"
-                      name="frente2Caracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-1 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Lateral 1 (m)</p>
-                    <input
-                      type="number"
-                      id="lateral1Caracteristicas"
-                      name="lateral1Caracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-1 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Lateral 2 (m)</p>
-                    <input
-                      type="number"
-                      id="lateral2Caracteristicas"
-                      name="lateral2Caracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-1 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Fondo (m)</p>
-                    <input
-                      type="number"
-                      id="fondoCaracteristicas"
-                      name="fondoCaracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-7 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Otros</p>
-                    <input
-                      type="text"
-                      id="otrosCaracteristicas"
-                      name="otrosCaracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="frente1Caracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Frente 1 (m)
+                  </label>
+                  <input
+                    type="number"
+                    id="frente1Caracteristicas"
+                    name="frente1Caracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="frente2Caracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Frente 2 (m)
+                  </label>
+                  <input
+                    type="number"
+                    id="frente2Caracteristicas"
+                    name="frente2Caracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+
+                  <label
+                    htmlFor="lateral1Caracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Lateral 1 (m)
+                  </label>
+                  <input
+                    type="number"
+                    id="lateral1Caracteristicas"
+                    name="lateral1Caracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="lateral2Caracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Lateral 2 (m)
+                  </label>
+                  <input
+                    type="number"
+                    id="lateral2Caracteristicas"
+                    name="lateral2Caracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="fondoCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >                      Fondo (m)
+                  </label>
+                  <input
+                    type="number"
+                    id="fondoCaracteristicas"
+                    name="fondoCaracteristicas"
+                    className="col-span-2 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+
+                </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="otrosCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  > Otros</label>
+                  <input
+                    type="text"
+                    id="otrosCaracteristicas"
+                    name="otrosCaracteristicas"
+                    className="col-span-10 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Topografía y altimetría</p>
-                    <input
-                      type="text"
-                      id="topografiaAltimetriaCaracteristicas"
-                      name="topografiaAltimetriaCaracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Orientación y vistas</p>
-                    <input
-                      type="text"
-                      id="orientacionVistasCaracteristicas"
-                      name="orientacionVistasCaracteristicas"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="topografiaAltimetriaCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Topografía y altimetría
+                  </label>
+                  <input
+                    type="text"
+                    id="topografiaAltimetriaCaracteristicas"
+                    name="topografiaAltimetriaCaracteristicas"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="orientacionVistasCaracteristicas"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Orientación y vistas
+                  </label>
+                  <input
+                    type="text"
+                    id="orientacionVistasCaracteristicas"
+                    name="orientacionVistasCaracteristicas"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                </div>
 
-                  <div className="col-span-2 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Evacuación pluviales</p>
+                <div className="grid grid-cols-12 gap-4 items-center">
 
+                  <div className="col-span-6 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Evacuación pluviales:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3161,14 +3258,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="evaluacionPlusvalia"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-
-                  <div className="col-span-2 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Probabilidad inundación</p>
-
+                  <div className="col-span-6 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Probabilidad inundación:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3200,14 +3295,16 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="probabilidadInundacion"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
 
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 ">
+
+
+                <div className="grid grid-cols-12 gap-4 items-center">
                   <div className="col-span-12 text-center">
                     <label
                       htmlFor="descripcionCaracteristicas"
@@ -3279,10 +3376,11 @@ const InformeBbva = () => {
                 <h6 className="text-base p-2 text-green-900 text-center">Vías de acceso y alumbrado</h6>
 
 
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Vías de acceso</p>
 
+                <div className="grid grid-cols-12 gap-4">
+
+                  <div className="col-span-3 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Vías de acceso:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3314,15 +3412,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="viasAcceso"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Estado vías de acceso</p>
-
-
+                  <div className="col-span-3 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Estado vías de acceso:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3366,16 +3461,52 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="estadoViasAcceso"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
 
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Alumbrado público</p>
+                  <div className="col-span-3 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Veredas:</label>
+                    <RadioGroup
+                      options={[
+                        {
+                          id: "existenVeredasCaracteristicas",
+                          value: "existenVeredasCaracteristicas",
+                          label: "Existen",
+                          relatedFields: {
+                            existenVeredasCaracteristicas: true,
+                            noExistenVeredasCaracteristicas: false
+                          }
+                        },
+                        {
+                          id: "noExistenVeredasCaracteristicas",
+                          value: "noExistenVeredasCaracteristicas",
+                          label: "No Existen",
+                          relatedFields: {
+                            existenVeredasCaracteristicas: false,
+                            noExistenVeredasCaracteristicas: true
+                          }
+                        }
+                      ]}
+                      name="veredas"
+                      selectedValue={formData.veredas}
+                      onChange={handleInputChange}
+                      onOptionChange={(relatedFields) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          ...relatedFields
+                        }));
+                      }}
+                      idPrefix="veredas"
+                      labelClassName="p-2 text-gray-700  text-sm"
+                      radioClassName="form-radio h-4 w-4"
+                    />
+                  </div>
 
 
-
+                  <div className="col-span-3 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Alumbrado público:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3419,19 +3550,19 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="alumbradoPublico"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
+
                 </div>
+
 
                 <h6 className="text-base p-2 text-green-900 text-center">Otros servicios e infraestructura</h6>
 
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Abastecimiento de agua</p>
-
-
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Abastecimiento de agua:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3475,12 +3606,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="abastecimientoAgua"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Desagües</p>
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Desagües:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3524,13 +3655,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="desagues"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Teléfono</p>
-
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Teléfono:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3562,16 +3692,16 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="telefono"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Electricidad</p>
 
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Electricidad:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3615,13 +3745,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="electricidad"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Gas</p>
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Gas:</label>
                     <RadioGroup
                       options={[
                         {
@@ -3665,52 +3794,67 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="gas"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
+                </div>
 
-                  <div className="col-span-4 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Otros</p>
-                    <input
-                      component="textarea"
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="otrosServiciosInfraestructura"
+                    className="col-span-1 text-sm text-gray-700 font-bold "
+                  >
+                    Otros:
+                  </label>
+                  <div className="col-span-11">
+                    <textarea
                       id="otrosServiciosInfraestructura"
                       name="otrosServiciosInfraestructura"
-                      className="p-2 w-full h-10 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      value={formData.otrosServiciosInfraestructura || ""}
+                      onChange={handleInputChange}
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
                   </div>
                 </div>
 
                 <h6 className="text-base p-2 text-green-900 text-center">D.3- Observaciones</h6>
 
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-12 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Observaciones de la SECCIÓN  para Legales BBVA</p>
-                    <input
-                      component="textarea"
-                      id="observacionesSeccionLegalesBbvaObservaciones"
-                      name="observacionesSeccionLegalesBbvaObservaciones"
-                      className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                    />
-                  </div>
-                  <div className="col-span-12 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Otras observaciones de la SECCIÓN</p>
-                    <input
-                      component="textarea"
-                      id="otrasObservacionesSeccionObservaciones"
-                      name="otrasObservacionesSeccionObservaciones"
-                      className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                    />
-                  </div>
+                <div className="p-4 flex flex-col items-center">
+                  <label
+                    htmlFor="observacionesSeccionLegalesBbvaObservaciones"
+                    className="p-3 text-sm text-gray-700 font-bold"
+                  >
+                    Observaciones de la SECCIÓN  para Legales BBVA
+                  </label>
+                  <input
+                    component="textarea"
+                    id="observacionesSeccionLegalesBbvaObservaciones"
+                    name="observacionesSeccionLegalesBbvaObservaciones"
+                    className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                  />
+                </div>
+                <div className="p-4 flex flex-col items-center">
+                  <label
+                    htmlFor="otrasObservacionesSeccionObservaciones"
+                    className="p-3 text-sm text-gray-700 font-bold"
+                  >Otras observaciones de la SECCIÓN
+                  </label>
+                  <input
+                    component="textarea"
+                    id="otrasObservacionesSeccionObservaciones"
+                    name="otrasObservacionesSeccionObservaciones"
+                    className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                  />
                 </div>
               </div>
 
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">SECCIÓN E- Descripción del inmueble</h4>
-                <h6 className="text-lg p-2 text-green-900 text-center">E.1 Aspectos generales</h6>
-                <div className="grid grid-cols-12 gap-2 ">
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Destino</p>
+                <h6 className="text-lg text-green-900 text-center mb-4">E.1 Aspectos generales</h6>
+                <div className="grid grid-cols-12 gap-4 ">
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Destino</label>
                     <RadioGroup
                       options={[
                         {
@@ -3754,14 +3898,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="destinoDescripcionInmueble"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Tipología</p>
-
-
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Tipología</label>
                     <RadioGroup
                       options={[
                         {
@@ -3805,13 +3947,12 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="tipologiaDescripcionInmueble"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Situación construcciones</p>
-
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Situación construcciones</label>
                     <RadioGroup
                       options={[
                         {
@@ -3843,23 +3984,31 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="situacionConstruccionesDescripcionInmueble"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
-                  <div className="col-span-3 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Niveles</p>
-                    <input
-                      component="textarea"
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="nivelesDescripcionInmueble"
+                    className="col-span-1 text-sm text-gray-700 font-bold "
+                  >
+                    Niveles
+                  </label>
+                  <div className="col-span-11">
+                    <textarea
                       id="nivelesDescripcionInmueble"
                       name="nivelesDescripcionInmueble"
-                      className="p-2 w-full h-10 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
                   </div>
                 </div>
+
                 <div className="grid grid-cols-12 gap-2">
-                  <div className="col-span-6 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Ubicación construcciones</p>
+                  <div className="col-span-6 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Ubicación construcciones</label>
                     <RadioGroup
                       options={[
                         {
@@ -3933,13 +4082,13 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="ubicacion"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
 
-                  <div className="col-span-6 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Agrupamiento de las construcciones</p>
+                  <div className="col-span-6 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Agrupamiento de las construcciones</label>
                     <RadioGroup
                       options={[
                         {
@@ -4013,31 +4162,42 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="agrupamiento"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
                 </div>
-                <div className="col-span-12 text-center">
-                  <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
-                  <input
-                    component="textarea"
-                    id="descripcionAspectosGenerales"
-                    name="descripcionAspectosGenerales"
-                    className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                  />
-                </div>
 
-                <div className="col-span-12 text-center">
-                  <p className="text-base text-center text-gray-700 font-bold">Luminosidad/Vistas</p>
-                  <input
-                    component="textarea"
-                    id="luminosidadVistasDescripcionInmueble"
-                    name="luminosidadVistasDescripcionInmueble"
-                    className="p-2 w-full h-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                  />
-                </div>
 
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12 text-center">
+                    <label
+                      htmlFor="descripcionAspectosGenerales"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >
+                      Descripción
+                    </label>
+                    <input
+                      id="descripcionAspectosGenerales"
+                      name="descripcionAspectosGenerales"
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+                  <div className="col-span-12 text-center">
+                    <label
+                      htmlFor="luminosidadVistasDescripcionInmueble"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >
+                      Luminosidad/Vistas
+                    </label>
+                    <input
+                      id="luminosidadVistasDescripcionInmueble"
+                      name="luminosidadVistasDescripcionInmueble"
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-12 gap-2 ">
                   <div className="col-span-12 text-center">
@@ -4141,8 +4301,10 @@ const InformeBbva = () => {
                 </div>
 
                 <div className="grid grid-cols-12 gap-2">
-                  <div className="col-span-12 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Categoría</p>
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">
+                      Categoría
+                    </label>
                     <RadioGroup
                       options={[
                         {
@@ -4300,25 +4462,34 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="categoria"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
                 </div>
 
-                <div className="col-span-12 text-center">
-                  <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
-                  <input
-                    component="textarea"
-                    id="descripcionDescripcionInmueble"
-                    name="descripcionDescripcionInmueble"
-                    className="p-2 w-full h-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                  />
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12 text-center">
+                    <label
+                      htmlFor="descripcionDescripcionInmueble"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >Descripción
+                    </label>
+                    <input
+                      id="descripcionDescripcionInmueble"
+                      name="descripcionDescripcionInmueble"
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2">
-                  <div className="col-span-12 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Estado conservación</p>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-4 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">
+                      Estado conservación
+                    </label>
                     <RadioGroup
                       options={[
                         {
@@ -4476,27 +4647,30 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="estadoConservacion"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
                 </div>
-                <div className="col-span-12 text-center">
-                  <p className="text-base text-center text-gray-700 font-bold">Descripción</p>
-                  <input
-                    component="textarea"
-                    id="descripcionEstadoConservacionDescripcionInmueble"
-                    name="descripcionEstadoConservacionDescripcionInmueble"
-                    className="p-2 w-full h-14 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                  />
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12 text-center">
+                    <label
+                      htmlFor="descripcionEstadoConservacionDescripcionInmueble"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >
+                      Descripción</label>
+                    <input
+                      id="descripcionEstadoConservacionDescripcionInmueble"
+                      name="descripcionEstadoConservacionDescripcionInmueble"
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-12 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Mantenimiento</p>
-                  </div>
-
-                  <div className="col-span-4 text-center">
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-3 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Mantenimiento</label>
                     <RadioGroup
                       options={[
                         {
@@ -4540,26 +4714,27 @@ const InformeBbva = () => {
                         }));
                       }}
                       idPrefix="mantenimiento"
-                      labelClassName="p-2 text-gray-700 font-bold text-sm"
+                      labelClassName="p-2 text-gray-700  text-sm"
                       radioClassName="form-radio h-4 w-4"
                     />
                   </div>
+                </div>
 
-                  <label
-                    htmlFor="descripcionMantenimientoDescripcionInmueble"
-                    className="col-span-1 p-2 text-sm text-gray-700 font-bold"
-                  >
-                    Descripción
-                  </label>
 
-                  <input
-                    type="text"
-                    id="descripcionMantenimientoDescripcionInmueble"
-                    name="descripcionMantenimientoDescripcionInmueble"
-                    value={formData.descripcionMantenimientoDescripcionInmueble || ""}
-                    onChange={handleInputChange}
-                    className="col-span-7 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                  />
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-12 text-center">
+                    <label
+                      htmlFor="descripcionMantenimientoDescripcionInmueble"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >
+                      Descripción</label>
+                    <input
+                      id="descripcionMantenimientoDescripcionInmueble"
+                      name="descripcionMantenimientoDescripcionInmueble"
+                      value={formData.descripcionMantenimientoDescripcionInmueble || ""}
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 pt-10">
@@ -5046,346 +5221,460 @@ const InformeBbva = () => {
                 </div>
 
 
-                <div className="grid grid-cols-5 gap-4 w-full">
-                  <div className="col-span-5 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Piscina</p>
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-3 space-y-4">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">
+                      Piscina
+                    </label>
+                    <RadioGroup
+                      options={[
+                        {
+                          id: "HArmado",
+                          value: "hArmadoPiscinaDescripcionDetallada",
+                          label: "H. Armado",
+                          relatedFields: {
+                            hArmadoPiscinaDescripcionDetallada: true,
+                            prefabricadaPiscinaDescripcionDetallada: false,
+                            terminacionPiscinaDescripcionDetallada: false,
+                            climatizacionPiscinaDescripcionDetallada: false,
+                            otrosPiscinaDescripcionDetallada: false
+                          }
+                        },
+                        {
+                          id: "Prefabricada",
+                          value: "prefabricadaPiscinaDescripcionDetallada",
+                          label: "Prefabricada",
+                          relatedFields: {
+                            hArmadoPiscinaDescripcionDetallada: false,
+                            prefabricadaPiscinaDescripcionDetallada: true,
+                            terminacionPiscinaDescripcionDetallada: false,
+                            climatizacionPiscinaDescripcionDetallada: false,
+                            otrosPiscinaDescripcionDetallada: false
+                          }
+                        },
+                        {
+                          id: "Terminacion",
+                          value: "terminacionPiscinaDescripcionDetallada",
+                          label: "Terminación",
+                          relatedFields: {
+                            hArmadoPiscinaDescripcionDetallada: false,
+                            prefabricadaPiscinaDescripcionDetallada: false,
+                            terminacionPiscinaDescripcionDetallada: true,
+                            climatizacionPiscinaDescripcionDetallada: false,
+                            otrosPiscinaDescripcionDetallada: false
+                          }
+                        },
+                        {
+                          id: "Climatizacion",
+                          value: "climatizacionPiscinaDescripcionDetallada",
+                          label: "Climatización",
+                          relatedFields: {
+                            hArmadoPiscinaDescripcionDetallada: false,
+                            prefabricadaPiscinaDescripcionDetallada: false,
+                            terminacionPiscinaDescripcionDetallada: false,
+                            climatizacionPiscinaDescripcionDetallada: true,
+                            otrosPiscinaDescripcionDetallada: false
+                          }
+                        },
+                        {
+                          id: "Otros",
+                          value: "otrosPiscinaDescripcionDetallada",
+                          label: "Otros",
+                          relatedFields: {
+                            hArmadoPiscinaDescripcionDetallada: false,
+                            prefabricadaPiscinaDescripcionDetallada: false,
+                            terminacionPiscinaDescripcionDetallada: false,
+                            climatizacionPiscinaDescripcionDetallada: false,
+                            otrosPiscinaDescripcionDetallada: true
+                          }
+                        }
+                      ]}
+                      name="piscinaDescripcionDetallada"
+                      selectedValue={formData.piscinaDescripcionDetallada}
+                      onChange={handleInputChange}
+                      onOptionChange={(relatedFields) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          ...relatedFields
+                        }));
+                      }}
+                      idPrefix="piscina"
+                      labelClassName="p-2 text-gray-700  text-sm"
+                      radioClassName="form-radio h-4 w-4"
+                    />
                   </div>
+                </div>
 
-                  <RadioGroup
-                    options={[
-                      {
-                        id: "HArmado",
-                        value: "hArmadoPiscinaDescripcionDetallada",
-                        label: "H. Armado",
-                        relatedFields: {
-                          hArmadoPiscinaDescripcionDetallada: true,
-                          prefabricadaPiscinaDescripcionDetallada: false,
-                          terminacionPiscinaDescripcionDetallada: false,
-                          climatizacionPiscinaDescripcionDetallada: false,
-                          otrosPiscinaDescripcionDetallada: false
-                        }
-                      },
-                      {
-                        id: "Prefabricada",
-                        value: "prefabricadaPiscinaDescripcionDetallada",
-                        label: "Prefabricada",
-                        relatedFields: {
-                          hArmadoPiscinaDescripcionDetallada: false,
-                          prefabricadaPiscinaDescripcionDetallada: true,
-                          terminacionPiscinaDescripcionDetallada: false,
-                          climatizacionPiscinaDescripcionDetallada: false,
-                          otrosPiscinaDescripcionDetallada: false
-                        }
-                      },
-                      {
-                        id: "Terminacion",
-                        value: "terminacionPiscinaDescripcionDetallada",
-                        label: "Terminación",
-                        relatedFields: {
-                          hArmadoPiscinaDescripcionDetallada: false,
-                          prefabricadaPiscinaDescripcionDetallada: false,
-                          terminacionPiscinaDescripcionDetallada: true,
-                          climatizacionPiscinaDescripcionDetallada: false,
-                          otrosPiscinaDescripcionDetallada: false
-                        }
-                      },
-                      {
-                        id: "Climatizacion",
-                        value: "climatizacionPiscinaDescripcionDetallada",
-                        label: "Climatización",
-                        relatedFields: {
-                          hArmadoPiscinaDescripcionDetallada: false,
-                          prefabricadaPiscinaDescripcionDetallada: false,
-                          terminacionPiscinaDescripcionDetallada: false,
-                          climatizacionPiscinaDescripcionDetallada: true,
-                          otrosPiscinaDescripcionDetallada: false
-                        }
-                      },
-                      {
-                        id: "Otros",
-                        value: "otrosPiscinaDescripcionDetallada",
-                        label: "Otros",
-                        relatedFields: {
-                          hArmadoPiscinaDescripcionDetallada: false,
-                          prefabricadaPiscinaDescripcionDetallada: false,
-                          terminacionPiscinaDescripcionDetallada: false,
-                          climatizacionPiscinaDescripcionDetallada: false,
-                          otrosPiscinaDescripcionDetallada: true
-                        }
-                      }
-                    ]}
-                    name="piscinaDescripcionDetallada"
-                    selectedValue={formData.piscinaDescripcionDetallada}
-                    onChange={handleInputChange}
-                    onOptionChange={(relatedFields) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        ...relatedFields
-                      }));
-                    }}
-                    idPrefix="piscina"
-                    labelClassName="p-2 text-gray-700 font-bold text-sm"
-                    radioClassName="form-radio h-4 w-4"
-                    itemClassName="flex flex-col items-center col-span-1"
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="aberturasDescripcionDetallada"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Aberturas:
+                  </label>
+                  <input
+                    type="text"
+                    id="aberturasDescripcionDetallada"
+                    name="aberturasDescripcionDetallada"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="proteccionAberturasDescripcionDetallada"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Protección aberturas:
+                  </label>
+                  <input
+                    type="text"
+                    id="proteccionAberturasDescripcionDetallada"
+                    name="proteccionAberturasDescripcionDetallada"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
                   />
                 </div>
 
-
-                <div className="grid grid-cols-4 gap-4 w-full pt-5">
-                  <div className="flex flex-col items-center col-span-1">
-                    <p className="text-base text-center text-gray-700 font-bold">Aberturas</p>
-                    <input
-                      type="text"
-                      id="aberturasDescripcionDetallada"
-                      name="aberturasDescripcionDetallada"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center col-span-1">
-                    <p className="text-base text-center text-gray-700 font-bold">Protección aberturas</p>
-                    <input
-                      type="text"
-                      id="proteccionAberturasDescripcionDetallada"
-                      name="proteccionAberturasDescripcionDetallada"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center col-span-1">
-                    <p className="text-base text-center text-gray-700 font-bold">Placares en dormitorios</p>
-                    <input
-                      type="text"
-                      id="placaresDormitoriosDescripcionDetallada"
-                      name="placaresDormitoriosDescripcionDetallada"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center col-span-1">
-                    <p className="text-base text-center text-gray-700 font-bold">Placares en cocina</p>
-                    <input
-                      type="text"
-                      id="placaresCocinaDescripcionDetallada"
-                      name="placaresCocinaDescripcionDetallada"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="placaresDormitoriosDescripcionDetallada"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Placares en dormitorios:
+                  </label>
+                  <input
+                    type="text"
+                    id="placaresDormitoriosDescripcionDetallada"
+                    name="placaresDormitoriosDescripcionDetallada"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
+                  <label
+                    htmlFor="placaresCocinaDescripcionDetallada"
+                    className="col-span-2 text-sm text-gray-700 font-bold"
+                  >
+                    Placares en cocina:
+                  </label>
+                  <input
+                    type="text"
+                    id="placaresCocinaDescripcionDetallada"
+                    name="placaresCocinaDescripcionDetallada"
+                    className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                  />
                 </div>
 
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="tipoAguaCalienteDescripcion"
+                    className="col-span-2 text-base text-gray-700 font-bold "
+                  >
+                    Agua caliente
+                  </label>
+                </div>
 
-                <div className="grid grid-cols-3 gap-6 col-span-12">
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-2 flex items-center justify-start h-full">
 
-                  <div className="border p-4 rounded-lg">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Agua caliente</h2>
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "enCocinaDescripcionDetallada", // ID simple
+                          desc: "En cocina" // Texto a mostrar
+                        }
+                      ]}
+                      name="enCocinaDescripcionDetallada"
+                      selectedValues={formData.enCocinaDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "enBaniosDescripcionDetallada", // ID simple
+                          desc: "En baños" // Texto a mostrar
+                        }
+                      ]}
+                      name="enBaniosDescripcionDetallada"
+                      selectedValues={formData.enBaniosDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
 
+                  <div className="col-span-8">
                     <input
-                      type="text"
                       id="tipoAguaCalienteDescripcion"
                       name="tipoAguaCalienteDescripcion"
-                      placeholder="Tipo"
-                      className="w-full p-2 border rounded-lg mb-2"
+                      placeholder='Tipo Agua Caliente'
+                      value={formData.tipoAguaCalienteDescripcion || ""}
+                      onChange={handleInputChange}
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
-
-
-                    <div className="flex items-center space-x-4 justify-center">
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
-                          name="enCocinaDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="enCocinaDescripcionDetallada">En cocina</label>
-                      </div>
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
-                          name="enBaniosDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="enBaniosDescripcionDetallada">En baños</label>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  <div className="border p-4 rounded-lg">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Instalación eléctrica</h2>
-                    <div className="flex items-center space-x-4 justify-center">
-
-                      <div className="flex items-center p-2">
-                        <input
-                          type="checkbox"
-                          name="embutidaDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="embutidaDescripcionDetallada">Embutida</label>
-                      </div>
-
-                      <div className="flex items-center p-2">
-                        <input
-                          type="checkbox"
-                          name="exteriorDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="exteriorDescripcionDetallada">Exterior</label>
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  <div className="border p-4 rounded-lg">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Otros</h2>
-                    <div className="flex items-center justify-center">
-
-                      <div className="flex items-center p-2">
-                        <input
-                          type="checkbox"
-                          name="alarmaDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="alarmaDescripcionDetallada">Alarma</label>
-                      </div>
-
-                      <div className="flex items-center p-2">
-                        <input
-                          type="checkbox"
-                          name="gElectrogDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="gElectrogDescripcionDetallada">G.electrog</label>
-                      </div>
-
-                      <div className="flex items-center p-2">
-                        <input
-                          type="checkbox"
-                          name="cctvDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="cctvDescripcionDetallada">CCTV</label>
-                      </div>
-
-                      <div className="flex items-center p-2">
-                        <input
-                          type="checkbox"
-                          name="portElecDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="portElecDescripcionDetallada">Port.elec.</label>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div className="grid gap-6 col-span-12">
-                  <div className="border p-4 rounded-lg">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Climatización</h2>
-                    <div className="grid grid-cols-5 items-center mb-2">
-                      <div className="col-span-1 flex">
-                        <input
-                          type="checkbox"
-                          id="estufaDescripcionDetallada"
-                          name="estufaDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="estufaDescripcionDetallada" >Estufa</label>
-                      </div>
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          id="estufaUbicacionDescripcionDetallada"
-                          name="estufaUbicacionDescripcionDetallada"
-                          placeholder="Ubicación Estufa"
-                          className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-5 items-center mb-2">
-                      <div className="col-span-1 flex">
-                        <input
-                          type="checkbox"
-                          id="splitsDescripcionDetallada"
-                          name="splitsDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="splitsDescripcionDetallada" >Splits</label>
-                      </div>
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          id="splitsUbicacionDescripcionDetallada"
-                          name="splitsUbicacionDescripcionDetallada"
-                          placeholder="Ubicación Splits"
-                          className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-5 items-center mb-2">
-                      <div className="col-span-1 flex">
-                        <input
-                          type="checkbox"
-                          id="centralDescripcionDetallada"
-                          name="centralDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="centralDescripcionDetallada" >Central</label>
-                      </div>
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          id="centralUbicacionDescripcionDetallada"
-                          name="centralUbicacionDescripcionDetallada"
-                          placeholder="Ubicación Central"
-                          className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-5 items-center mb-2">
-                      <div className="col-span-1 flex">
-                        <input
-                          type="checkbox"
-                          id="otrosDescripcionDetallada"
-                          name="otrosDescripcionDetallada"
-                          className="mr-2"
-                        />
-                        <label htmlFor="otrosDescripcionDetallada" >Otros</label>
-                      </div>
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          id="otrosUbicacionDescripcionDetallada"
-                          name="otrosUbicacionDescripcionDetallada"
-                          placeholder="Ubicación Otros"
-                          className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-5 items-center mb-2">
-                      <div className="col-span-1 mr-1">
-                        <input
-                          type="text"
-                          id="panelesSolaresDescripcionDetallada"
-                          name="panelesSolaresDescripcionDetallada"
-                          placeholder="Alimentación Paneles Solares "
-                          className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
-                        />
-                      </div>
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          id="otrasInstalacionesDescripcionDetallada"
-                          name="otrasInstalacionesDescripcionDetallada"
-                          placeholder="Otras instalaciones"
-                          className="w-3/4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-900"
-                        />
-                      </div>
-                    </div>
                   </div>
                 </div>
 
 
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="tipoAguaCalienteDescripcion"
+                    className="col-span-2 text-base text-gray-700  font-bold"
+                  >
+                    Instalación eléctrica
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-2 flex items-center justify-start h-full">
+
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "embutidaDescripcionDetallada",
+                          desc: "Embutida"
+                        }
+                      ]}
+                      name="embutidaDescripcionDetallada"
+                      selectedValues={formData.embutidaDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "exteriorDescripcionDetallada", // ID simple
+                          desc: "Exterior" // Texto a mostrar
+                        }
+                      ]}
+                      name="exteriorDescripcionDetallada"
+                      selectedValues={formData.exteriorDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                </div>
+
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <label
+                    htmlFor="otrosDescripcion"
+                    className="col-span-2 text-base text-gray-700 font-bold "
+                  >
+                    Otros
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-2 flex items-center justify-start h-full">
+
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "alarmaDescripcionDetallada",
+                          desc: "Alarma"
+                        }
+                      ]}
+                      name="alarmaDescripcionDetallada"
+                      selectedValues={formData.alarmaDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "gElectrogDescripcionDetallada", // ID simple
+                          desc: "G.electrog" // Texto a mostrar
+                        }
+                      ]}
+                      name="gElectrogDescripcionDetallada"
+                      selectedValues={formData.gElectrogDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "cctvDescripcionDetallada", // ID simple
+                          desc: "CCTV" // Texto a mostrar
+                        }
+                      ]}
+                      name="cctvDescripcionDetallada"
+                      selectedValues={formData.cctvDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "portElecDescripcionDetallada",
+                          desc: "Port.elec."
+                        }
+                      ]}
+                      name="portElecDescripcionDetallada"
+                      selectedValues={formData.portElecDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700 "
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                </div>
+
+                <h2 className="mb-2 text-base  text-gray-700 font-bold">Climatización</h2>
+                <div className="grid grid-cols-12 items-center mb-2">
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "estufaDescripcionDetallada",
+                          desc: "Estufa"
+                        }
+                      ]}
+                      name="estufaDescripcionDetallada"
+                      selectedValues={formData.estufaDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+
+                  <div className="col-span-10">
+                    <input
+                      type="text"
+                      id="estufaUbicacionDescripcionDetallada"
+                      name="estufaUbicacionDescripcionDetallada"
+                      placeholder="Ubicación Estufa"
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-12 items-center mb-2">
+
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "splitsDescripcionDetallada",
+                          desc: "Splits"
+                        }
+                      ]}
+                      name="splitsDescripcionDetallada"
+                      selectedValues={formData.splitsDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-10">
+                    <input
+                      type="text"
+                      id="splitsUbicacionDescripcionDetallada"
+                      name="splitsUbicacionDescripcionDetallada"
+                      placeholder="Ubicación Splits"
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-12 items-center mb-2">
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "centralDescripcionDetallada",
+                          desc: "Central"
+                        }
+                      ]}
+                      name="centralDescripcionDetallada"
+                      selectedValues={formData.centralDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-10">
+                    <input
+                      type="text"
+                      id="centralUbicacionDescripcionDetallada"
+                      name="centralUbicacionDescripcionDetallada"
+                      placeholder="Ubicación Central"
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-12 items-center mb-2">
+                  <div className="col-span-2 flex items-center justify-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "otrosDescripcionDetallada",
+                          desc: "Otros"
+                        }
+                      ]}
+                      name="otrosDescripcionDetallada"
+                      selectedValues={formData.otrosDescripcionDetallada}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-10">
+                    <input
+                      type="text"
+                      id="otrosUbicacionDescripcionDetallada"
+                      name="otrosUbicacionDescripcionDetallada"
+                      placeholder="Ubicación Otros"
+                      className="w-full h-8 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                    />
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-12 gap-2 pt-10">
                   <div className="col-span-12 text-center">
@@ -5549,59 +5838,48 @@ const InformeBbva = () => {
                 </div>
 
 
-                <div className="col-span-12 flex flex-col  space-y-4 p-3 ">
-                  <div className="grid grid-cols-12 gap-4 ">
-                    <div className="col-span-12 text-center">
-                      <label
-                        htmlFor="otrasCaracteristicasDescripcion"
-                        className="p-3 text-sm text-gray-700 font-bold "
-                      >
-                        Otras características:
-                      </label>
-                      <input
-                        component="textarea"
-                        id="otrasCaracteristicasDescripcion"
-                        name="otrasCaracteristicasDescripcion"
-                        className="p-6 w-full h-16 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                      />
-                    </div>
-                  </div>
+                <div className="col-span-12 text-center">
+                  <label
+                    htmlFor="otrasCaracteristicasDescripcion"
+                    className="p-3 text-sm text-gray-700 font-bold"
+                  >
+                    Otras características:
+                  </label>
+                  <input
+                    id="otrasCaracteristicasDescripcion"
+                    name="otrasCaracteristicasDescripcion"
+                    className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                  />
                 </div>
 
+                <h4 className="text-xl text-green-900 text-center">E.3 Observaciones</h4>
 
-                <div className="col-span-12 flex flex-col  space-y-4 p-3 rounded">
-                  <h4 className="text-xl text-green-900 text-center">E.3 Observaciones</h4>
-                  <div className="grid grid-cols-12 gap-4 ">
-                    <div className="col-span-12 text-center">
+                <div className="col-span-12 text-center">
+                  <label
+                    htmlFor="observacionesSeccionLegalesDescripcion"
+                    className="p-3 text-sm text-gray-700 font-bold"
+                  >
+                    Observaciones de la SECCIÓN  para Legales BBVA:
+                  </label>
+                  <input
+                    id="observacionesSeccionLegalesDescripcion"
+                    name="observacionesSeccionLegalesDescripcion"
+                    className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                  />
+                </div>
 
-                      <label
-                        htmlFor="observacionesSeccionLegalesDescripcion"
-                        className="p-3 text-sm text-gray-700 font-bold "
-                      >
-                        Observaciones de la SECCIÓN  para Legales BBVA
-                      </label>
-                      <input
-                        component="textarea"
-                        id="observacionesSeccionLegalesDescripcion"
-                        name="observacionesSeccionLegalesDescripcion"
-                        className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                      />
-
-                      <label
-                        htmlFor="otrasObservacionesSeccionLegalesDescripcion"
-                        className="p-3 text-sm text-gray-700 font-bold "
-                      >
-                        Otras observaciones de la SECCIÓN
-                      </label>
-                      <input
-                        component="textarea"
-                        id="otrasObservacionesSeccionLegalesDescripcion"
-                        name="otrasObservacionesSeccionLegalesDescripcion"
-                        className="p-6 w-full h-16 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
-                      />
-
-                    </div>
-                  </div>
+                <div className="col-span-12 text-center">
+                  <label
+                    htmlFor="otrasObservacionesSeccionLegalesDescripcion"
+                    className="p-3 text-sm text-gray-700 font-bold"
+                  >
+                    Otras observaciones de la SECCIÓN:
+                  </label>
+                  <input
+                    id="otrasObservacionesSeccionLegalesDescripcion"
+                    name="otrasObservacionesSeccionLegalesDescripcion"
+                    className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                  />
                 </div>
               </div>
 
@@ -5609,91 +5887,126 @@ const InformeBbva = () => {
 
               <div className="col-span-12 space-y-4 border p-3 rounded">
                 <h4 className="text-xl text-green-900">SECCIÓN F - Planos</h4>
-                <div className="grid grid-cols-12 gap-2">
-                  <div className="col-span-3"></div>
-                  <div className="col-span-6 text-center">
-                    <p className="text-base text-center text-gray-700 font-bold">Fuente</p>
-                    <div className="flex items-center space-x-4 justify-center">
-                      <div className="flex items-center p-2">
-                        <input type="checkbox" name="documentacionClientePlanos" className="mr-2" />
-                        <label htmlFor="documentacionClientePlanos">Documentación Cliente</label>
-                      </div>
-                      <div className="flex items-center p-2">
-                        <input type="checkbox" name="relevamientoTasadorPlanos" className="mr-2" />
-                        <label htmlFor="relevamientoTasadorPlanos">Relevamiento Tasador</label>
-                      </div>
-                      <div className="flex items-center p-2">
-                        <input type="checkbox" name="otrosPlanos" className="mr-2" />
-                        <label htmlFor="otrosPlanos">Otros</label>
-                      </div>
-                    </div>
+                <p className="text-base text-center text-gray-700 font-bold">Fuente</p>
+                <div className="grid grid-cols-3 gap-4 ">
+                  <div className="col-span-1 items-end h-full ml-auto">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "documentacionClientePlanos",
+                          desc: "Documentación Cliente"
+                        }
+                      ]}
+                      name="documentacionClientePlanos"
+                      selectedValues={formData.documentacionClientePlanos}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-1 m-auto items-center h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "relevamientoTasadorPlanos",
+                          desc: "Relevamiento Tasador"
+                        }
+                      ]}
+                      name="relevamientoTasadorPlanos"
+                      selectedValues={formData.relevamientoTasadorPlanos}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                  <div className="col-span-1  items-start h-full">
+                    <CheckboxGroup
+                      options={[
+                        {
+                          id: "otrosPlanos",
+                          desc: "Otros"
+                        }
+                      ]}
+                      name="otrosPlanos"
+                      selectedValues={formData.otrosPlanos}
+                      onChange={handleInputChange}
+                      idPrefix="inf_neg_"
+                      labelClassName="ml-2 text-sm text-gray-700"
+                      checkboxClassName="form-checkbox h-4 w-4"
+                      itemClassName=""
+                      wrapperClassName="h-full"
+                    />
+                  </div>
+                </div>
 
-                    {/* 🔥 Carga de imágenes */}
-                    <div className="flex flex-col items-center">
-                      <div className="bg-gray-50 p-4 rounded-md mb-2">
-                        <label className="block p-2 text-center text-base text-gray-700 font-bold mb-2">
-                          Subir Imágenes de Planos
-                        </label>
+                <div className="flex flex-col items-center">
+                  <div className="bg-gray-50 p-4 rounded-md mb-2">
+                    <label className="block p-2 text-center text-base text-gray-700 font-bold mb-2">
+                      Subir Imágenes de Planos
+                    </label>
 
-                        <input
-                          type="hidden"
-                          name="planosImagenesUrl"
-                          value={formData.planosImagenesUrl || ""}
-                        />
+                    <input
+                      type="hidden"
+                      name="planosImagenesUrl"
+                      value={formData.planosImagenesUrl || ""}
+                    />
 
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 rounded file:border-0 file:text-sm file:font-semibold file:bg-green-900 file:text-white hover:file:bg-green-700"
-                          onChange={handleFileSelect}
-                        />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 rounded file:border-0 file:text-sm file:font-semibold file:bg-green-900 file:text-white hover:file:bg-green-700"
+                      onChange={handleFileSelect}
+                    />
 
-                        {/* Vista previa de imágenes de planos con opción de eliminar */}
-                        {(formData.planosImagenesUrl || previewImages.length > 0) && (
-                          <div className="grid grid-cols-4 gap-4 mt-2">
-                            {/* Imágenes ya guardadas en la BD */}
-                            {formData.planosImagenesUrl &&
-                              formData.planosImagenesUrl
-                                .split(";")
-                                .filter(url => url && url.trim() !== "")
-                                .map((src, index) => (
-                                  <div key={`bd-${index}`} className="relative">
-                                    <img
-                                      src={`http://localhost:8080${src.trim()}`}
-                                      alt={`planos-${index}`}
-                                      className="w-full h-auto rounded-md object-cover"
-                                    />
-                                    <button
-                                      type="button"
-                                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                                      onClick={() => handleRemoveStoredImage("planosImagenesUrl", index)}
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                ))
-                            }
-
-                            {/* Imágenes recién subidas pero aún no guardadas */}
-                            {previewImages.map((image, index) => (
-                              <div key={index} className="relative">
-                                <img src={image} alt={`preview-${index}`} className="w-full h-auto rounded-md object-cover" />
+                    {/* Vista previa de imágenes de planos con opción de eliminar */}
+                    {(formData.planosImagenesUrl || previewImages.length > 0) && (
+                      <div className="grid grid-cols-4 gap-4 mt-2">
+                        {/* Imágenes ya guardadas en la BD */}
+                        {formData.planosImagenesUrl &&
+                          formData.planosImagenesUrl
+                            .split(";")
+                            .filter(url => url && url.trim() !== "")
+                            .map((src, index) => (
+                              <div key={`bd-${index}`} className="relative">
+                                <img
+                                  src={`http://localhost:8080${src.trim()}`}
+                                  alt={`planos-${index}`}
+                                  className="w-full h-auto rounded-md object-cover"
+                                />
                                 <button
                                   type="button"
                                   className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                                  onClick={() => handleRemoveImage(index)}
+                                  onClick={() => handleRemoveStoredImage("planosImagenesUrl", index)}
                                 >
                                   ×
                                 </button>
                               </div>
-                            ))}
+                            ))
+                        }
+
+                        {/* Imágenes recién subidas pero aún no guardadas */}
+                        {previewImages.map((image, index) => (
+                          <div key={index} className="relative">
+                            <img src={image} alt={`preview-${index}`} className="w-full h-auto rounded-md object-cover" />
+                            <button
+                              type="button"
+                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              ×
+                            </button>
                           </div>
-                        )}
+                        ))}
                       </div>
-                    </div>
+                    )}
                   </div>
-                  <div className="col-span-3"></div>
                 </div>
               </div>
 
@@ -5782,391 +6095,579 @@ const InformeBbva = () => {
                   <div className="col-span-12 text-center">
                     <p className="text-base text-center text-gray-700 font-bold">H.1 Entorno</p>
 
-                    <p className="text-base text-center text-gray-700 font-bold">Descripción general </p>
+
+                    <label
+                      htmlFor="descripcionGeneralEntorno"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >
+                      Descripción general:
+                    </label>
                     <input
-                      component="textarea"
                       id="descripcionGeneralEntorno"
                       name="descripcionGeneralEntorno"
-                      className="p-2 w-full h-20 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
-
                   </div>
 
-                  <div className="border p-4 rounded-lg col-span-4">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Construcciones</h2>
-
-                    <div className="flex items-center space-x-4 justify-center">
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
+                  <div className="col-span-12 space-y-4 p-3 rounded">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Construcciones</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "veinticincoContruccionesEntorno",
+                              desc: "0% - 25%"
+                            }
+                          ]}
                           name="veinticincoContruccionesEntorno"
-                          className="mr-2"
+                          selectedValues={formData.veinticincoContruccionesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="veinticincoContruccionesEntorno">0-25%</label>
                       </div>
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "setentacincoContruccionesEntorno",
+                              desc: "25% - 75%"
+                            }
+                          ]}
                           name="setentacincoContruccionesEntorno"
-                          className="mr-2"
+                          selectedValues={formData.setentacincoContruccionesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="setentacincoContruccionesEntorno">25-75%</label>
                       </div>
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "cienContruccionesEntorno",
+                              desc: "75% - 100%"
+                            }
+                          ]}
                           name="cienContruccionesEntorno"
-                          className="mr-2"
+                          selectedValues={formData.cienContruccionesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="cienContruccionesEntorno">75-100%</label>
                       </div>
 
                     </div>
                   </div>
 
-                  <div className="border p-4 rounded-lg col-span-4">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Crecimiento</h2>
-
-                    <div className="flex items-center space-x-4 justify-center">
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
+                  <div className="col-span-12 space-y-4 p-3 rounded">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Crecimiento</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "continuoCrecimientoEntorno",
+                              desc: "Continuo"
+                            }
+                          ]}
                           name="continuoCrecimientoEntorno"
-                          className="mr-2"
+                          selectedValues={formData.continuoCrecimientoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="continuoCrecimientoEntorno">Continuo</label>
                       </div>
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "estableContruccionesEntorno",
+                              desc: "Estable"
+                            }
+                          ]}
                           name="estableContruccionesEntorno"
-                          className="mr-2"
+                          selectedValues={formData.estableContruccionesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="estableContruccionesEntorno">Estable</label>
                       </div>
-
-                      <div className="flex items-center p-3">
-                        <input
-                          type="checkbox"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "nuloContruccionesEntorno",
+                              desc: "Nulo"
+                            }
+                          ]}
                           name="nuloContruccionesEntorno"
-                          className="mr-2"
+                          selectedValues={formData.nuloContruccionesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="nuloContruccionesEntorno">Nulo</label>
-                      </div>
-
-                    </div>
-                  </div>
-                  <div className="border p-4 rounded-lg col-span-4">
-                    <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Usos (%)</h2>
-                    <div className="grid grid-cols-4 gap-4">
-                      <div>
-                        <label htmlFor="viviendaUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Vivienda</label>
-                        <input type="number" name="viviendaUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
-                      </div>
-                      <div>
-                        <label htmlFor="comercioUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Comercio</label>
-                        <input type="number" name="comercioUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
-                      </div>
-                      <div>
-                        <label htmlFor="industriaUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Industria</label>
-                        <input type="number" name="industriaUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
-                      </div>
-                      <div>
-                        <label htmlFor="otrosUsosEntorno" className="block text-sm font-medium text-gray-700 text-center">Otros</label>
-                        <input type="number" name="otrosUsosEntorno" className="w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900" />
                       </div>
                     </div>
                   </div>
+                  <div className="col-span-12 space-y-4 p-3 rounded">
+                    <label className="block text-sm text-gray-700 font-bold mb-2">Usos (%)</label>
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      <label
+                        htmlFor="viviendaUsosEntorno"
+                        className=" text-sm text-gray-700 font-bold"
+                      >
+                        Vivienda:
+                      </label>
+                      <input
+                        type="number"
+                        id="viviendaUsosEntorno"
+                        name="viviendaUsosEntorno"
+                        className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                      <label
+                        htmlFor="comercioUsosEntorno"
+                        className=" text-sm text-gray-700 font-bold"
+                      >
+                        Comercio:
+                      </label>
+                      <input
+                        type="number"
+                        id="comercioUsosEntorno"
+                        name="comercioUsosEntorno"
+                        className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                      <label
+                        htmlFor="industriaUsosEntorno"
+                        className=" text-sm text-gray-700 font-bold"
+                      >
+                        Industria:
+                      </label>
+                      <input
+                        type="number"
+                        id="industriaUsosEntorno"
+                        name="industriaUsosEntorno"
+                        className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                      <label
+                        htmlFor="otrosUsosEntorno"
+                        className=" text-sm text-gray-700 font-bold"
+                      >
+                        Otros:
+                      </label>
+                      <input
+                        type="number"
+                        id="otrosUsosEntorno"
+                        name="otrosUsosEntorno"
+                        className="ml-2 w-20 text-center border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
+                  </div>
 
-                  <div className="col-span-12 text-center">
+                  <div className="col-span-12 space-y-4 p-3 rounded">
                     <p className="text-base text-center text-gray-700 font-bold">Equipamiento, conectividad  y servicios</p>
+                    <div className="grid grid-cols-12 gap-4 items-center">
+
+                      <label
+                        htmlFor="centrosEnsenanzaEntorno"
+                        className="col-span-2 text-sm text-gray-700 font-bold"
+                      >
+                        Centros enseñanza:
+                      </label>
+                      <input
+                        type="text"
+                        id="centrosEnsenanzaEntorno"
+                        name="centrosEnsenanzaEntorno"
+                        value={formData.centrosEnsenanzaEntorno || ""}
+                        onChange={handleInputChange}
+                        className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                      <label
+                        htmlFor="centrosSaludEntorno"
+                        className="col-span-2 text-sm text-gray-700 font-bold"
+                      >
+                        Centros salud:
+                      </label>
+                      <input
+                        type="text"
+                        id="centrosSaludEntorno"
+                        name="centrosSaludEntorno"
+                        value={formData.centrosSaludEntorno || ""}
+                        onChange={handleInputChange}
+                        className="col-span-4 px-2 py-1 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
+                      />
+                    </div>
                   </div>
 
-                  <div className="p-4 rounded-lg col-span-3">
-                    <p className="text-base text-center text-gray-700 font-bold">Centros enseñanza</p>
-                    <input
-                      type="text"
-                      id="centrosEnsenanzaEntorno"
-                      name="centrosEnsenanzaEntorno"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-
-                  <div className="p-4 rounded-lg col-span-3">
-                    <p className="text-base text-center text-gray-700 font-bold">Centros salud</p>
-                    <input
-                      type="text"
-                      id="centrosSaludEntorno"
-                      name="centrosSaludEntorno"
-                      className="p-1 w-full border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900"
-                    />
-                  </div>
-
-                  <div className="p-4 rounded-lg col-span-2">
-                    <p className="text-base text-center text-gray-700 font-bold">Deportivo</p>
-
-                    <div className="grid grid-cols-2 gap-1">
-                      <div className="flex items-center space-x-2 mr-2">
-                        <input
-                          type="checkbox"
-                          id="suficienteDeportivoEntorno"
+                  <div className="col-span-6 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Deportivo:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "suficienteDeportivoEntorno",
+                              desc: "Suficiente"
+                            }
+                          ]}
                           name="suficienteDeportivoEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.suficienteDeportivoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="suficienteDeportivoEntorno" className="text-sm font-medium text-gray-700">
-                          Suficiente
-                        </label>
                       </div>
-
-                      <div className="flex items-center space-x-2 ml-2">
-                        <input
-                          type="checkbox"
-                          id="escasoNuloDeportivoEntorno"
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "escasoNuloDeportivoEntorno",
+                              desc: "Escaso / nulo"
+                            }
+                          ]}
                           name="escasoNuloDeportivoEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.escasoNuloDeportivoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="escasoNuloDeportivoEntorno" className="text-sm font-medium text-gray-700">
-                          Escaso/Nulo
-                        </label>
                       </div>
-
                     </div>
                   </div>
-
-                  <div className="p-4 rounded-lg col-span-2">
-                    <p className="text-base text-center text-gray-700 font-bold">Esparcimiento</p>
-
-                    <div className="grid grid-cols-2 ">
-                      <div className="flex items-center space-x-2 mr-2">
-                        <input
-                          type="checkbox"
-                          id="suficienteEsparcimientoEntorno"
+                  <div className="col-span-6 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Esparcimiento:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "suficienteEsparcimientoEntorno",
+                              desc: "Suficiente"
+                            }
+                          ]}
                           name="suficienteEsparcimientoEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.suficienteEsparcimientoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="suficienteEsparcimientoEntorno" className="text-sm font-medium text-gray-700">
-                          Suficiente
-                        </label>
                       </div>
-
-                      <div className="flex items-center space-x-2 ml-2">
-                        <input
-                          type="checkbox"
-                          id="escasoNuloEsparcimientoEntorno"
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "escasoNuloEsparcimientoEntorno",
+                              desc: "Escaso / Nulo"
+                            }
+                          ]}
                           name="escasoNuloEsparcimientoEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.escasoNuloEsparcimientoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="escasoNuloEsparcimientoEntorno" className="text-sm font-medium text-gray-700">
-                          Escaso/Nulo
-                        </label>
                       </div>
-
                     </div>
                   </div>
-
-                  <div className="p-4 rounded-lg col-span-2">
-                    <p className="text-base text-center text-gray-700 font-bold">Zonas verdes</p>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center space-x-2 mr-2">
-                        <input
-                          type="checkbox"
-                          id="suficienteZonasVerdesEntorno"
+                  <div className="col-span-6 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Zonas verdes:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "suficienteZonasVerdesEntorno",
+                              desc: "Suficiente"
+                            }
+                          ]}
                           name="suficienteZonasVerdesEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.suficienteZonasVerdesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="suficienteZonasVerdesEntorno" className="text-sm font-medium text-gray-700">
-                          Suficiente
-                        </label>
                       </div>
-
-                      <div className="flex items-center space-x-2 ml-2">
-                        <input
-                          type="checkbox"
-                          id="escasoNuloZonasVerdesEntorno"
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "escasoNuloZonasVerdesEntorno",
+                              desc: "Escaso / Nulo"
+                            }
+                          ]}
                           name="escasoNuloZonasVerdesEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.escasoNuloZonasVerdesEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="escasoNuloZonasVerdesEntorno" className="text-sm font-medium text-gray-700">
-                          Escaso/Nulo
-                        </label>
                       </div>
-
                     </div>
                   </div>
-
-                  <div className="p-4 rounded-lg col-span-2">
-                    <p className="text-base text-center text-gray-700 font-bold">Estacionamiento</p>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center space-x-2 mr-2">
-                        <input
-                          type="checkbox"
-                          id="suficienteEstacionamientoEntorno"
+                  <div className="col-span-6 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Zonas verdes:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "suficienteEstacionamientoEntorno",
+                              desc: "Suficiente"
+                            }
+                          ]}
                           name="suficienteEstacionamientoEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.suficienteEstacionamientoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="suficienteEstacionamientoEntorno" className="text-sm font-medium text-gray-700">
-                          Suficiente
-                        </label>
                       </div>
-
-                      <div className="flex items-center space-x-2 ml-2">
-                        <input
-                          type="checkbox"
-                          id="insuficienteNuloEstacionamientoEntorno"
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "insuficienteNuloEstacionamientoEntorno",
+                              desc: "Escaso / Nulo"
+                            }
+                          ]}
                           name="insuficienteNuloEstacionamientoEntorno"
-                          className="w-4 h-4 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.insuficienteNuloEstacionamientoEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="insuficienteNuloEstacionamientoEntorno" className="text-sm font-medium text-gray-700">
-                          Insuficiente
-                        </label>
                       </div>
-
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-lg col-span-6">
-                    <p className="text-base text-center text-gray-700 font-bold">
-                      Proximidad transporte público/conectividad
-                    </p>
-
-                    <div className="grid grid-cols-4 ">
-                      <div className="ml-6 w-full flex items-center justify-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="excelenteProximidadTransportePublicoConectividadEntorno"
+                  <div className="col-span-12 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Proximidad transporte público/conectividad:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "excelenteProximidadTransportePublicoConectividadEntorno",
+                              desc: "Excelente"
+                            }
+                          ]}
                           name="excelenteProximidadTransportePublicoConectividadEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.excelenteProximidadTransportePublicoConectividadEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="excelenteProximidadTransportePublicoConectividadEntorno"
-                          className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                          Excelente
-                        </label>
                       </div>
-
-                      <div className="ml-6 w-full flex items-center justify-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="buenaProximidadTransportePublicoConectividadEntorno"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "buenaProximidadTransportePublicoConectividadEntorno",
+                              desc: "Buena"
+                            }
+                          ]}
                           name="buenaProximidadTransportePublicoConectividadEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.buenaProximidadTransportePublicoConectividadEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="buenaProximidadTransportePublicoConectividadEntorno"
-                          className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                          Buena
-                        </label>
                       </div>
-
-                      <div className="ml-6 w-full flex items-center justify-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="regularProximidadTransportePublicoConectividadEntorno"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "regularProximidadTransportePublicoConectividadEntorno",
+                              desc: "Regular"
+                            }
+                          ]}
                           name="regularProximidadTransportePublicoConectividadEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.regularProximidadTransportePublicoConectividadEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="regularProximidadTransportePublicoConectividadEntorno"
-                          className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                          Regular
-                        </label>
                       </div>
-
-                      <div className="w-full flex items-center justify-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="malaProximidadTransportePublicoConectividadEntorno"
+                      <div className="col-span-2 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "malaProximidadTransportePublicoConectividadEntorno",
+                              desc: "Mala"
+                            }
+                          ]}
                           name="malaProximidadTransportePublicoConectividadEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.malaProximidadTransportePublicoConectividadEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="malaProximidadTransportePublicoConectividadEntorno"
-                          className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                          Mala
-                        </label>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-lg col-span-2">
-                    <p className="text-base text-center text-gray-700 font-bold">Seguridad</p>
-
-                    <div className="grid grid-cols-2 gap-1">
-                      <div className="flex items-center space-x-2 ">
-                        <input
-                          type="checkbox"
-                          id="existeSeguridadEntorno"
+                  <div className="col-span-6 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Seguridad:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "existeSeguridadEntorno",
+                              desc: "Existe"
+                            }
+                          ]}
                           name="existeSeguridadEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.existeSeguridadEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="existeSeguridadEntorno" className="text-sm font-medium text-gray-700">
-                          Existe
-                        </label>
                       </div>
-
-                      <div className="flex items-center space-x-2 ">
-                        <input
-                          type="checkbox"
-                          id="noExisteSeguridadEntorno"
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "noExisteSeguridadEntorno",
+                              desc: "No Existe"
+                            }
+                          ]}
                           name="noExisteSeguridadEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.noExisteSeguridadEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="noExisteSeguridadEntorno" className="text-sm font-medium text-gray-700">
-                          No Existe
-                        </label>
                       </div>
-
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-lg col-span-2">
-                    <p className="text-base text-center text-gray-700 font-bold">Situación general</p>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center space-x-2 ">
-                        <input
-                          type="checkbox"
-                          id="favorableSituacionGeneralEntorno"
+                  <div className="col-span-6 space-y-4 p-3 rounded ">
+                    <label className="text-base text-gray-700 font-bold">Situación general:</label>
+                    <div className="grid grid-cols-12 gap-4 ">
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "favorableSituacionGeneralEntorno",
+                              desc: "Favorable"
+                            }
+                          ]}
                           name="favorableSituacionGeneralEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.favorableSituacionGeneralEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="favorableSituacionGeneralEntorno" className="text-sm font-medium text-gray-700">
-                          Favorable
-                        </label>
                       </div>
-
-                      <div className="flex items-center space-x-2 ">
-                        <input
-                          type="checkbox"
-                          id="desfavorableSituacionGeneralEntorno"
+                      <div className="col-span-3 flex items-center justify-start h-full">
+                        <CheckboxGroup
+                          options={[
+                            {
+                              id: "desfavorableSituacionGeneralEntorno",
+                              desc: "Desfavorable"
+                            }
+                          ]}
                           name="desfavorableSituacionGeneralEntorno"
-                          className="w-3 h-3 border-gray-300 focus:ring-green-900"
+                          selectedValues={formData.desfavorableSituacionGeneralEntorno}
+                          onChange={handleInputChange}
+                          idPrefix="inf_neg_"
+                          labelClassName="ml-2 text-sm text-gray-700"
+                          checkboxClassName="form-checkbox h-4 w-4"
+                          itemClassName=""
+                          wrapperClassName="h-full"
                         />
-                        <label htmlFor="desfavorableSituacionGeneralEntorno" className="text-sm font-medium text-gray-700">
-                          Desfavorable
-                        </label>
                       </div>
-
                     </div>
                   </div>
+
+
 
                   <div className="col-span-12 text-center">
                     <p className="text-base text-center text-gray-700 font-bold">H.2 Mercado inmobiliario</p>
-                    <p className="text-base text-center text-gray-700 font-bold">Descripción general </p>
+                    <label
+                      htmlFor="descripcionGeneralMercadoInmobiliario"
+                      className="p-3 text-sm text-gray-700 font-bold"
+                    >
+                      Descripción general:
+                    </label>
                     <input
-                      component="textarea"
                       id="descripcionGeneralMercadoInmobiliario"
                       name="descripcionGeneralMercadoInmobiliario"
-                      className="p-2 w-full h-16 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
+                      className="p-6 w-full h-32 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-900 resize-none"
                     />
+                  </div>
+
+                  <div className="col-span-12 text-center">
                     <p className="text-base text-center text-gray-700 font-bold">Situación del Mercado</p>
                   </div>
 
-
                   <div className="p-4 rounded-lg col-span-4">
+
                     <h2 className="mb-2 text-base text-center text-gray-700 font-bold">Oferta</h2>
 
                     <div className="flex items-center space-x-4 justify-center">
@@ -7000,8 +7501,8 @@ const InformeBbva = () => {
               </button>
             </div>
           </div>
-        </form>
-      </div>
+        </form >
+      </div >
       <ItemObraCivilModal
         isOpen={isModalOpen}
         onRequestClose={handleCloseModal}
@@ -7041,7 +7542,7 @@ const InformeBbva = () => {
         onSave={handleSaveItemActualizacionDescripcion}
         onUpdate={handleItemUpdate}
       />
-    </div>
+    </div >
 
   );
 
